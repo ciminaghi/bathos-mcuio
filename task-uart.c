@@ -1,5 +1,5 @@
-#include "bathos.h"
-#include "hw.h"
+#include <bathos/bathos.h>
+#include <arch/hw.h>
 
 static void *uart_out(void *arg)
 {

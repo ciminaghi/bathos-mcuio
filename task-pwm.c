@@ -1,5 +1,5 @@
-#include "bathos.h"
-#include "hw.h"
+#include <bathos/bathos.h>
+#include <arch/hw.h>
 
 #define HALF 1.05946309435929526455 /* exp(2, 1/12) */
 #define TONE (HALF*HALF)

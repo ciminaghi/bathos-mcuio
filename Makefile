@@ -28,8 +28,8 @@ LDFLAGS = -T $(LDS)
 TSRC = $(wildcard task-*.c)
 TOBJ = $(TSRC:.c=.o)
 
-# Temporary
-CFLAGS += -I.
+# Generic flags
+CFLAGS += -Iinclude -I$(ADIR)
 
 # Our target
 bathos.bin: bathos
