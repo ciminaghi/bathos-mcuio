@@ -27,7 +27,7 @@ TOBJ = $(TSRC:.c=.o)
 
 # Generic flags
 CFLAGS  += -Iinclude -I$(ADIR)
-CFLAGS  += -g -Wall -ffreestanding -O2
+CFLAGS  += -g -Wall -ffreestanding -Os
 ASFLAGS += -g -Wall
 
 # Our target
@@ -35,7 +35,7 @@ bathos.bin: bathos
 	$(OBJCOPY) -O binary $^ $@
 
 bathos: main.o $(AOBJ) $(TOBJ)
-	$(LD) $(LDFLAGS) $^ -o $@
+	$(LD) $^ $(LDFLAGS) -o $@
 
 clean:
 	rm -f bathos.bin bathos *.o *~
