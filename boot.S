@@ -1,12 +1,12 @@
 .section .boot, "ax"
 
-.global _thos_start
+.global _bathos_start
 .extern __bss_start
 .extern __bss_end
-.extern thos_setup
-.extern thos_main
+.extern bathos_setup
+.extern bathos_main
 
-_thos_start:
+_bathos_start:
 /* set the stack pointer */
 	mov r0, pc
 	sub r0, #12
@@ -23,6 +23,6 @@ _thos_start:
 	add r1, #4
 	b 0b
 
-1:	bl thos_setup
-	bl thos_main
+1:	bl bathos_setup
+	bl bathos_main
 	b 1b

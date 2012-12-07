@@ -1,4 +1,4 @@
-#include "thos.h"
+#include "bathos.h"
 #include "hw.h"
 
 #define HALF 1.05946309435929526455 /* exp(2, 1/12) */
@@ -78,7 +78,7 @@ static void *pwm(void *arg)
 
 }
 
-static struct thos_task __task t_pwm = {
+static struct bathos_task __task t_pwm = {
 	.name = "pwm", .period = HZ / 10,
 	.init = pwm_init, .job = pwm,
 	.release = 5

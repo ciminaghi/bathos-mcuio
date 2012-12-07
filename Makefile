@@ -14,18 +14,18 @@ CFLAGS  = -march=armv7-m -mthumb -g -Wall -ffreestanding -O2
 ASFLAGS = -march=armv7-m -mthumb -g -Wall
 
 # Use our own linker script
-LDFLAGS = -T thos.lds
+LDFLAGS = -T bathos.lds
 
 # Task source files and objects
 TSRC = $(wildcard task-*.c)
 TOBJ = $(TSRC:.c=.o)
 
 # Our target
-thos.bin: thos
+bathos.bin: bathos
 	$(OBJCOPY) -O binary $^ $@
 
-thos: boot.o io.o main.o $(TOBJ)
+bathos: boot.o io.o main.o $(TOBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
 
 clean:
-	rm -f thos.bin thos *.o *~
+	rm -f bathos.bin bathos *.o *~

@@ -1,4 +1,4 @@
-#include "thos.h"
+#include "bathos.h"
 #include "hw.h"
 
 static int led_init(void *unused)
@@ -26,7 +26,7 @@ static void *led(void *arg)
 	return (void *)(state + 1);
 }
 
-static struct thos_task __task t_led = {
+static struct bathos_task __task t_led = {
 	.name = "leds", .period = HZ / 5,
 	.init = led_init, .job = led,
 	.release = 10

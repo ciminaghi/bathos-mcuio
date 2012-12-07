@@ -1,7 +1,7 @@
-#include "thos.h"
+#include "bathos.h"
 #include "hw.h"
 
-int thos_setup(void)
+int bathos_setup(void)
 {
 	regs[REG_AHBCLKCTRL] |= REG_AHBCLKCTRL_CT32B1;
 
