@@ -1,8 +1,8 @@
-# Architecture choice
+# Default architecture. We have "lpc1343" and "lpc2104" (look for arch-*)
 ARCH ?= lpc1343
 
-# Task choice
-TSRC ?= task-uart.c task-led.c task-pwm.c
+# Task choice. Follow the -y convention, to allow use of $(CONFIG_STH) 
+TASK-y ?= task-uart.o arch/task-led.o arch/task-pwm.o
 
 # Cross compiling:
 AS              = $(CROSS_COMPILE)as
@@ -24,8 +24,11 @@ LDS   = $(ADIR)/bathos.lds
 # Use our own linker script
 LDFLAGS = -T $(LDS)
 
-# Task object files
-TOBJ = $(TSRC:.c=.o)
+# Task object files. All objects are placed in tasks/ but the source may
+# live in tasks-$(ARCH), to allow similar but different implementations
+TOBJ := $(patsubst %, tasks/%, $(TASK-y))
+TOBJ := $(patsubst tasks/arch/%, tasks-$(ARCH)/%, $(TOBJ))
+VPATH := tasks-$(ARCH)
 
 # Generic flags
 CFLAGS  += -Iinclude -I$(ADIR)
