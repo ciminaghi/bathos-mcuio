@@ -1,6 +1,9 @@
 # Architecture choice
 ARCH ?= lpc1343
 
+# Task choice
+TSRC ?= task-uart.c task-led.c task-pwm.c
+
 # Cross compiling:
 AS              = $(CROSS_COMPILE)as
 LD              = $(CROSS_COMPILE)ld
@@ -21,8 +24,7 @@ LDS   = $(ADIR)/bathos.lds
 # Use our own linker script
 LDFLAGS = -T $(LDS)
 
-# Task source files and objects
-TSRC = $(wildcard task-*.c)
+# Task object files
 TOBJ = $(TSRC:.c=.o)
 
 # Generic flags
