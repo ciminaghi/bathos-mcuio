@@ -5,7 +5,9 @@
 .extern __bss_end
 .extern bathos_setup
 .extern bathos_main
+.global raise /* raise is called by libgcc on division by 0 */
 
+raise:
 _bathos_start:
 /* set the stack pointer */
 	mov r0, pc
