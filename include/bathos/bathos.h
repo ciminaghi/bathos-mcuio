@@ -3,7 +3,7 @@ extern int bathos_main(void);
 extern int bathos_setup(void);
 
 extern void putc(int c);
-extern void puts(char *s);
+extern int puts(const char *s);
 
 extern volatile unsigned long jiffies;
 
