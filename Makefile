@@ -21,6 +21,10 @@ include $(ADIR)/Makefile
 AOBJ  = $(ADIR)/boot.o $(ADIR)/io.o
 LDS   = $(ADIR)/bathos.lds
 
+# Lib objects and flags
+LOBJ = pp_printf/printf.o pp_printf/vsprintf-xint.o
+CFLAGS  += -Ipp_printf -DCONFIG_PRINT_BUFSIZE=256
+
 # Use our own linker script
 LDFLAGS = -T $(LDS)
 
@@ -42,7 +46,7 @@ ASFLAGS += -g -Wall
 bathos.bin: bathos
 	$(OBJCOPY) -O binary $^ $@
 
-bathos: main.o $(AOBJ) $(TOBJ)
+bathos: main.o $(AOBJ) $(TOBJ) $(LOBJ)
 	$(LD) $^ $(LDFLAGS) -o $@
 
 clean:
