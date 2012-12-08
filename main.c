@@ -6,10 +6,10 @@ int bathos_main(void)
 	struct bathos_task *p;
 	unsigned long now;
 
-	puts("Hello, Bathos is speaking\n");
+	pp_printf("Hello, Bathos is speaking (built on %s)\n", __DATE__);
 
 	for (p = __task_begin; p < __task_end; p++) {
-		puts("Task: "); puts(p->name); putc('\n');
+		pp_printf("Task: %s\n", p->name);
 		if (p->init) p->init(p->arg);
 	}
 

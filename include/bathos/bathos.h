@@ -1,3 +1,4 @@
+#include <pp-printf.h>
 
 extern int bathos_main(void);
 extern int bathos_setup(void);
