@@ -1,5 +1,5 @@
 *~
 *.o
-bathos
-bathos.bin
+/bathos
+/bathos.bin
 
