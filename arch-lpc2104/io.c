@@ -1,7 +1,7 @@
-#include "thos.h"
-#include "hw.h"
+#include <bathos/bathos.h>
+#include <arch/hw.h>
 
-int thos_setup(void)
+int bathos_setup(void)
 {
 	/* enable timer 0, and count at HZ Hz (currently 100) */
 	regs[REG_T0TCR] = 1;

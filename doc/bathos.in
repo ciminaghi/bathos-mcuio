@@ -39,13 +39,18 @@
 @finalout
 
 @titlepage
-@title THOS
+@title BA-THOS (Born Again THOS)
+@subtitle A Spin-off of the Two Hour Operating System (Version @value{release})
 @subtitle @value{update-month}
-@subtitle Two Hour Operating System (Version @value{release})
 
 @author Alessandro Rubini (@code{rubini@@gnudd.com})
 @end titlepage
 @headings single
+
+@c ##########################################################################
+@iftex
+@contents
+@end iftex
 
 @c ##########################################################################
 @node Top, Laying out the Makefile, (dir), (dir)
@@ -53,8 +58,46 @@
 
 This document accompanies source code for a simple operating system
 for micro-controllers.  The OS uses cooperative multitasking and
-handles a few different tasks (but you can easily add more). The
-target CPU is the LPC1343 (Cortex-M3). The board I  used
+handles a few different tasks (but you can easily add more).
+
+@c ##########################################################################
+@node Bathos and Thos
+@chapter Bathos and Thos
+
+Bathos is a spin-off of Thos, the Two-Hour Operating System.
+For that reason, the first
+chapters of this manual describe how to write the whole OS in
+two hours.  However, Bathos is more than Thos, so later chapters
+change completely the code layout, to achieve a more portable
+and flexible design, and add @i{printf}, some drivers and other stuff.
+This without changing the basic design ideas of Thos.
+
+@c ==========================================================================
+@node Introduction to Bathos
+@section Introduction to Bathos
+
+After showing the Thos project to my students,
+several of them actually made real projects with it, and I found
+myself playing with Thos as well.  So finally I decided to continue
+development, adding a real @i{printf} implementation (which I had
+around anyways), and some device drivers. The basic idea is still to
+keep the code as simple as possible and avoid interrupts. However, you
+can achieve real stuff with it.
+
+This document is unchanged in its first part, which remains the ``two
+hour'' idea.  Everything from @ref{Bathos Code Layout} onwards is
+material I added later.  In order to look at the ``2-hour'' code, as
+described in the initial chapters of this document, you should check
+out commit @t{c41a2fd} or tag @t{V2012-12}, which is the commit before
+Thos becomes Bathos -- the first step is a massive rename. The current
+@i{git} repository is rooted on the complete history of Thos.
+
+@c ==========================================================================
+@node Introduction to Thos
+@section Introduction to Thos
+
+The
+target CPU for Thos is the LPC1343 (Cortex-M3). The board I  used
 is the one sold by Olimex for 15 EUR. but I had to add a level converter
 for the serial port.  Actually, any board will work, but you, as a reader,
 are not actually expected to run the code because of lack of hardware,
@@ -95,20 +138,6 @@ I'm somehow shy of the suboptimal choices now that I put it all in
 writing, but I still want this material to be explained while being
 typed live in a single lesson.
 
-@menu
-* Laying out the Makefile::     
-* The Linker Script::           
-* The Assembly Code::           
-* Loading the Binary::          
-* Serial Output::               
-* The Jiffies Variable::        
-* The Task Model::              
-* GPIO Output::                 
-* The Buzzer::                  
-* Thos on ARM-7::               
-* The Future of Thos::          
-@end menu
-
 @c ##########################################################################
 @node Laying out the Makefile
 @chapter Laying out the Makefile
@@ -117,12 +146,6 @@ As a first step in setting up a new package, we'll set up a @i{Makefile},
 taking care of compilation of our sources, which are both C and assembly files.
 We'll use a simple @i{Makefile} (as simple as possible, as usual), so
 there is no support for dependencies or such stuff.
-
-@menu
-* Cross-Compilation::           
-* CFLAGS::                      
-* A First Build::               
-@end menu
 
 @c ==========================================================================
 @node Cross-Compilation
@@ -229,12 +252,6 @@ where the code is introduced.
 To perform the final link step, we actually need a @i{linker script}.
 In other words, we must tell the linker how to lay out the memory
 map for the program.
-
-@menu
-* Spelling the Object Format::  
-* Placing Sections in Memory::  
-* Using the Script::            
-@end menu
 
 @c ==========================================================================
 @node Spelling the Object Format
@@ -359,12 +376,6 @@ which confirms the linker script is being used:
 When the system begins running at power-on, there is no pre-built
 context at all.  The only thing you can count on is the initial execution
 address, and you can place your assembly instructions there.
-
-@menu
-* Naming an ELF Section::       
-* Actual ASM code::             
-* Compiling boot.S::            
-@end menu
 
 @c ==========================================================================
 @node Naming an ELF Section
@@ -559,12 +570,6 @@ With a ``working'' binary in our hands, it's now high time to write it
 to the final hardware.  The preferred way to do that is using the
 serial protocol offered by the internal ROM in the CPU.
 
-@menu
-* Pin-strapping::               
-* Creating a Binary File::      
-* UART Programming::            
-@end menu
-
 @c ==========================================================================
 @node Pin-strapping
 @section Pin-strapping
@@ -643,16 +648,6 @@ programming, is that the serial port has already been configured for
 115200 baud.  Thus, the first snippet of real code in the OS will be
 some output function.  Let's write a simple @i{putc} and @i{puts},
 both in the @code{io.c} file.
-
-@menu
-* puts::                        
-* An I/O Model::                
-* Defining Registers::          
-* putc::                        
-* The regs Array::              
-* Header and more CFLAGS::      
-* Testing puts::                
-@end menu
 
 @c ==========================================================================
 @node puts
@@ -845,14 +840,6 @@ our assembly code restarts the system after calling @i{thos_main}.
 The system is now equipped with serial output, which is a great first
 step. We now need a way to handle timing.
 
-@menu
-* The Timer Tick::              
-* Power-on the Timer::          
-* The HZ Macro and thos_setup::  
-* Defining jiffies::            
-* Using Our Time Facility::     
-@end menu
-
 @c ==========================================================================
 @node The Timer Tick
 @section The Timer Tick
@@ -993,16 +980,6 @@ wouldn't fit in the available time, let's use cooperative multi-asking:
 each @i{task} is implemented by time-based @i{jobs} (the names being
 used here are common the real-time world).  A job is simply a function
 that returns when done.
-
-@menu
-* Defining a Task Structure::   
-* Stuffing Tasks in an ELF Section::  
-* Using Wildcards in Makefile::  
-* Three Simple Tasks::          
-* Writing the Scheduler::       
-* Task-set Initialisation::     
-* Running the Task Set::        
-@end menu
 
 @c ==========================================================================
 @node Defining a Task Structure
@@ -1348,13 +1325,6 @@ limit in the written document. Thus, I'd like to introduce a new task,
 one that plays a tune on a buzzer. The new task is not adding anything
 to the OS core, it's just a new task in the set.
 
-@menu
-* Buzzer Hardware::             
-* Defining the Tune::           
-* Defining the Notes::          
-* The PWM Task::                
-@end menu
-
 @c ==========================================================================
 @node Buzzer Hardware
 @section Buzzer Hardware
@@ -1579,6 +1549,54 @@ themselves programmers until they wrote their own editor; in this
 millennium writing an OS is easier than writing an editor, so you have
 no excuse -- even if writing an HTTP server is still easier, if you can
 count on a working TCP implementation.
+
+@c ##########################################################################
+@node Bathos Code Layout
+@chapter Bathos Code Layout
+
+In order to add more features and be able to achieve real tasks with
+the simple thing described so far, we need a different code layout.
+An operating system cannot really be replicated with minor differences
+for each and every board or CPU flavour it is ported to.
+
+For this reason, the transition from Thos to Bathos is marked by a
+complete reshuffling of source code.  As I write this, both LPC1343
+and LPC2104 are supported with very little code duplication.  Adding
+a new ARM CPU should be straightforward.
+
+The layout can be summarised in the following few points:
+
+@itemize @bullet
+
+@item The architecture is selected by a @i{make} variable: @t{ARCH=}.
+
+@item The tasks to be compiled-in are selected by another @i{make} variable:
+@t{TASK-y=} (by using the @t{-y} convention we can use configuration
+variable like @t{CONFIG_XXX}, which allows easy integration of
+Kconfig).
+
+@item Most @i{make} variables are built incrementally.
+
+@item The defaults provided by @i{Makefile} build the same code
+as the last Thos did.
+
+@item Bathos-specific headers live in @i{include/bathos} and
+are referenced as @t{<bathos/xxx.h>} by source files.
+
+@item Architecture-specific files live in a directory called @t{arch-sth}.
+Such files are @t{boot.S}, @t{io.c} @t{bathos.lds} and a @t{Makefile}
+that specifies specific settings, like special @t{CFLAGS}. See
+available files to get some example.
+
+@item Portable tasks live in @t{tasks/}
+
+@item Architecture-specific tasks live in @t{tasks-sth} (for the
+architecture @t{sth}). For example, the LED and PWM tasks in the
+two Thos ports rely on specific bit numbers
+
+@item Other subdirectories, like @t{lib/}, have the usual meaning.
+
+@end itemize
 
 @c ##########################################################################
 @iftex

@@ -1,5 +1,5 @@
-#include "thos.h"
-#include "hw.h"
+#include <bathos/bathos.h>
+#include <arch/hw.h>
 
 static int led_init(void *unused)
 {
@@ -16,7 +16,7 @@ static void *led(void *arg)
 	return (void *)++i;
 }
 
-static struct thos_task __task t_led = {
+static struct bathos_task __task t_led = {
 	.name = "leds", .period = HZ / 2,
 	.init = led_init, .job = led,
 	.release = 10

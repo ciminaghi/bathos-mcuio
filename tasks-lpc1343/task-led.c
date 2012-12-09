@@ -1,5 +1,5 @@
-#include "bathos.h"
-#include "hw.h"
+#include <bathos/bathos.h>
+#include <arch/hw.h>
 
 static int led_init(void *unused)
 {
