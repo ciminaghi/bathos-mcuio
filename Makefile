@@ -15,6 +15,8 @@ STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
+all: bathos.bin
+
 # Files that depend on the architecture
 ADIR = arch-$(ARCH)
 include $(ADIR)/Makefile
@@ -28,8 +30,12 @@ CFLAGS  += -Ipp_printf -DCONFIG_PRINT_BUFSIZE=256
 # Use our own linker script
 LDFLAGS = -T $(LDS)
 
-# As the system goes larger, we need libgcc to resolv missing symbols
+# Each architecture can have specific drivers
+LDFLAGS += $(LIBARCH)
+
+# As the system goes larger, we need libgcc to resolve missing symbols
 LDFLAGS += $(shell $(CC) --print-libgcc-file-name)
+
 
 # Task object files. All objects are placed in tasks/ but the source may
 # live in tasks-$(ARCH), to allow similar but different implementations
@@ -46,7 +52,7 @@ ASFLAGS += -g -Wall
 bathos.bin: bathos
 	$(OBJCOPY) -O binary $^ $@
 
-bathos: main.o $(AOBJ) $(TOBJ) $(LOBJ)
+bathos: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH)
 	$(LD) $^ $(LDFLAGS) -o $@
 
 clean:
