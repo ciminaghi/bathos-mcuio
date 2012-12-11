@@ -1,10 +1,8 @@
 #include <stdint.h>
-
-extern volatile uint32_t regs[];
+#include <bathos/io.h>
 
 #define THOS_QUARTZ		(14745600 / 4) /* Periph clock = quartz / 4 */
 #define HZ			100
-
 
 /* uart */
 #define REG_U0THR		(0xe000c000 / 4)
