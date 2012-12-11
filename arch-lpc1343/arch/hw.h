@@ -12,9 +12,23 @@
 
 /* clock control */
 #define REG_AHBCLKCTRL		(0x40048080 / 4)
+#define REG_AHBCLKCTRL_SYS	(1 << 0)
+#define REG_AHBCLKCTRL_ROM	(1 << 1)
+#define REG_AHBCLKCTRL_RAM	(1 << 2)
+#define REG_AHBCLKCTRL_FLASHR	(1 << 3)
+#define REG_AHBCLKCTRL_FLASHA	(1 << 4)
+#define REG_AHBCLKCTRL_I2C	(1 << 5)
+#define REG_AHBCLKCTRL_GPIO	(1 << 6)
+#define REG_AHBCLKCTRL_CT16B0	(1 << 7)
+#define REG_AHBCLKCTRL_CT16B1	(1 << 8)
 #define REG_AHBCLKCTRL_CT32B0	(1 << 9)
 #define REG_AHBCLKCTRL_CT32B1	(1 << 10)
-#define REG_AHBCLKCTRL_GPIO	(1 << 6)
+#define REG_AHBCLKCTRL_SSP	(1 << 11)
+#define REG_AHBCLKCTRL_UART	(1 << 12)
+#define REG_AHBCLKCTRL_ADC	(1 << 13)
+#define REG_AHBCLKCTRL_USBREG	(1 << 14)
+#define REG_AHBCLKCTRL_WDT	(1 << 15)
+#define REG_AHBCLKCTRL_IOCON	(1 << 16)
 
 /* counter 0 */
 #define REG_TMR32B0TCR		(0x40014004 / 4)
