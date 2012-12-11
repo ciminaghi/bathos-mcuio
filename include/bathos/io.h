@@ -4,4 +4,14 @@
 
 extern volatile uint32_t regs[];
 
+/* Some files use the readl/writel I/O model */
+static inline uint32_t readl(unsigned long reg)
+{
+	return regs[reg / 4];
+}
+static inline void writel(uint32_t val, unsigned long reg)
+{
+	regs[reg / 4] = val;
+}
+
 #endif /* __IO_H__ */
