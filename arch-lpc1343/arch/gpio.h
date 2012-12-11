@@ -1,6 +1,6 @@
 #ifndef __LPC13_GPIO_H__
 #define __LPC13_GPIO_H__
-#include "types.h"
+#include <bathos/types.h>
 
 /* We have 32 gpio bits per "port", this is hardwired */
 #define GPIO_NR(port, bit)	((port) * 32 + (bit))

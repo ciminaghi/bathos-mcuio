@@ -1,8 +1,9 @@
-#include "types.h"
-#include "io.h"
+#include <bathos/types.h>
+#include <bathos/io.h>
+#include <arch/hw.h>
 
 #define __LPC13_GPIO_INTERNALS__
-#include "gpio.h"
+#include <arch/gpio.h>
 
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
