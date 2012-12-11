@@ -1,29 +1,31 @@
 #include <bathos/bathos.h>
+#include <arch/gpio.h>
 #include <arch/hw.h>
 
 static int led_init(void *unused)
 {
-	regs[REG_AHBCLKCTRL] |= REG_AHBCLKCTRL_GPIO;
-	regs[REG_GPIO3DIR] |= 0xf;
+	gpio_init();
+	/* all bits 1 == led off */
+	gpio_dir_af(GPIO_NR(3, 0), 1, 1, 0);
+	gpio_dir_af(GPIO_NR(3, 1), 1, 1, 0);
+	gpio_dir_af(GPIO_NR(3, 2), 1, 1, 0);
+	gpio_dir_af(GPIO_NR(3, 3), 1, 1, 0);
 	return 0;
 }
 
 static void *led(void *arg)
 {
-	int value, state = (int)arg;
+	int state = (int)arg;
 
+	if (state < 4)
+		gpio_set(GPIO_NR(3, state), 1); /* off */
+	state++;
 	if (state > 4)
 		state = 0;
-	switch (state) {
-	case 4:
-		value = 0; /* all off */
-		break;
-	default:
-		value = 1 << state;
-		break;
-	}
-	regs[REG_GPIO3DAT] =  0xf & ~value;
-	return (void *)(state + 1);
+	if (state > 3)
+		return (void *)state;
+	gpio_set(GPIO_NR(3, state), 0); /* on */
+	return (void *)state;
 }
 
 static struct bathos_task __task t_led = {
