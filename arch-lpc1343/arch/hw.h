@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <bathos/io.h>
 
-#define THOS_QUARTZ		(12 * 1000 * 1000)
+#define CPU_FREQ		(12 * 1000 * 1000)
 #define HZ			100
 
 

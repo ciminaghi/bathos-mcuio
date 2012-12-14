@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <bathos/io.h>
 
-#define THOS_QUARTZ		(14745600 / 4) /* Periph clock = quartz / 4 */
+#define CPU_FREQ		(14745600 / 4) /* Periph clock = quartz / 4 */
 #define HZ			100
 
 /* uart */

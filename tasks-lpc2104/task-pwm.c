@@ -20,7 +20,7 @@ struct note {
 	int period;
 };
 
-#define PWM_FREQ THOS_QUARTZ /* Input frequency to all peripherals */
+#define PWM_FREQ CPU_FREQ /* Input frequency to all peripherals */
 
 struct note table[] = {
 	{'f', (PWM_FREQ/F) + 0.5},

@@ -7,9 +7,9 @@
 
 int bathos_setup(void)
 {
-	/* enable timer 0, and count at HZ Hz (currently 100) */
+	/* enable timer 0, and count at HZ Hz */
 	regs[REG_T0TCR] = 1;
-	regs[REG_T0PR] = (THOS_QUARTZ / HZ) -1;
+	regs[REG_T0PR] = (CPU_FREQ / HZ) - 1;
 	regs[REG_T0TCR] = 3;
 	regs[REG_T0TCR] = 1;
 	return 0;

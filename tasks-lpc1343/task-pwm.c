@@ -20,7 +20,7 @@ struct note {
 	int period;
 };
 
-#define PWM_FREQ (THOS_QUARTZ / 4) /* we make a 4-cycles-long pwm */
+#define PWM_FREQ (CPU_FREQ / 4) /* we make a 4-cycles-long pwm */
 
 struct note table[] = {
 	{'f', (PWM_FREQ/F) + 0.5},

@@ -11,7 +11,7 @@ int bathos_setup(void)
 
 	/* enable timer 1, and count at HZ Hz (currently 100) */
 	regs[REG_TMR32B1TCR] = 1;
-	regs[REG_TMR32B1PR] = (THOS_QUARTZ / HZ) - 1;
+	regs[REG_TMR32B1PR] = (CPU_FREQ / HZ) - 1;
 	return 0;
 }
 
