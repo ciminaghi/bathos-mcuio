@@ -15,6 +15,7 @@ SECTIONS
 	.rodata : { *(.rodata) }
 	.data : { *(.data) }
 
+	. = ALIGN(16);
 	__task_begin = .;
 	.task : {*(.task) }
 	__task_end = .;
