@@ -1,3 +1,5 @@
+#ifndef __LPC2104_HW_H__
+#define __LPC2104_HW_H__
 #include <stdint.h>
 #include <bathos/io.h>
 
@@ -31,3 +33,5 @@
 #define REG_PWMMCR		(0xe0014014 / 4)
 #define REG_PWMPCR		(0xe001404c / 4)
 #define REG_PWMLER		(0xe0014050 / 4)
+
+#endif /* __LPC2104_HW_H__ */

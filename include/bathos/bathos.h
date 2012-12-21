@@ -1,3 +1,5 @@
+#ifndef __BATHOS_H__
+#define __BATHOS_H__
 #include <stdarg.h>
 
 /* These 4 are actually pp_printf and friends */
@@ -33,3 +35,5 @@ struct bathos_task {
 #define __task __attribute__((section(".task"),__used__))
 
 extern struct bathos_task __task_begin[], __task_end[];
+
+#endif /* __BATHOS_H__ */

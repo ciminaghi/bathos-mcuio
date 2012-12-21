@@ -1,3 +1,5 @@
+#ifndef __LPC1343_HW_H__
+#define __LPC1343_HW_H__
 #include <stdint.h>
 #include <bathos/io.h>
 
@@ -49,3 +51,5 @@
 /* gpio port 3 */
 #define REG_GPIO3DAT		(0x50033ffc / 4)
 #define REG_GPIO3DIR		(0x50038000 / 4)
+
+#endif /* __LPC1343_HW_H__ */
