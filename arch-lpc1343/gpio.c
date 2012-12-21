@@ -33,12 +33,11 @@ static u16 gpio_weird[] = {
 /*
  * What follows is the public interface.
  * Note that only gpio_dir_af() checks the gpio is valid. Other
- * functions are meant to call often and only after setting the mode.
+ * functions are expected to be called often and only after setting the mode.
  */
-extern void gpio_init(void)
+void gpio_init(void)
 {
-	u32 reg = readl(0x40048080); /* AHBCLKCTRL */
-	writel(reg | 0x1040, 0x40048080);
+	regs[REG_AHBCLKCTRL] |= REG_AHBCLKCTRL_GPIO | REG_AHBCLKCTRL_IOCON;
 }
 
 void gpio_dir(int gpio, int output, int value)
@@ -59,7 +58,6 @@ void gpio_dir(int gpio, int output, int value)
 	if (output)
 		gpio_set(gpio, value);
 }
-
 
 int gpio_dir_af(int gpio, int output, int value, int afnum)
 {
@@ -107,4 +105,3 @@ void gpio_set(int gpio, int value)
 {
 	__gpio_set(gpio, value << GPIO_BIT(gpio));
 }
-
