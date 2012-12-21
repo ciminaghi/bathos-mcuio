@@ -1,3 +1,4 @@
+#include <stdarg.h>
 
 /* These 4 are actually pp_printf and friends */
 extern int printf(const char *fmt, ...)
