@@ -5,6 +5,7 @@
 #ifndef __BATHOS_H__
 #define __BATHOS_H__
 #include <stdarg.h>
+#include <arch/bathos-arch.h>
 
 /* These 4 are actually pp_printf and friends */
 extern int printf(const char *fmt, ...)
@@ -25,8 +26,17 @@ extern int bathos_setup(void);
 extern void putc(int c);
 extern int puts(const char *s);
 
-extern volatile unsigned long jiffies;
+/*
+ * The architecture may define __get_jiffies if the hardware doesn't
+ * provide a single 32-bit increasing counter at some address
+ */
+#ifdef __get_jiffies
+#  define jiffies __get_jiffies()
+#else
+  extern volatile unsigned long jiffies;
+#endif
 
+/* And finally the task definition */
 struct bathos_task {
 	char *name;
 	void *(*job)(void *);
