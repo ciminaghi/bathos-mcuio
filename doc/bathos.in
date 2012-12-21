@@ -1598,13 +1598,54 @@ two Thos ports rely on specific bit numbers
 
 @end itemize
 
+This set of changes is marked in @i{git} history as the merge of a
+branch called ``file-layout''. In general, every set of changes is
+marked in the commit history in the same way, where the final commit
+before the merge is documentation for the new feature set.  This is
+done help my readers in seeing how change sets are grouped; however,
+it may happen that some details are fixed or added later; in that case
+I won't back-port the commit to the original branch, in order not to
+change past history. Such later fixes or small features are not
+developed as a separate branch which is then merge.
+
 @c ##########################################################################
-@iftex
-@contents
-@end iftex
+@node Printf Function
+@chapter Printf Function
+
+The first feature added to Bathos is a real @i{printf} function.  But
+printing a number in ASCII requires a series of divisions; when
+hardware lacks division circuitry, the compiler may choose to make a
+function call, when it is cheaper than running inline code.  For
+example, on ARM7, dividing by 10 turns into a call to
+@t{__aeabi_idiv}.  Converting a number to a string, thus, requires
+@i{libgcc} if you compile for the 2104 architecture.  Even though the
+problem doesn't happen on the Cortex, linking @t{libgcc.a} has no side
+effects if you have no external symbols, so Bathos links in @t{libgcc}
+in the top-level Makefile.
+
+The directory @i{pp_printf} includes a copy of the @i{Poor
+Programmer's printf}, that I wrote a few years ago and pushed to
+@i{gitorious} in 2012 after cleaning up and documenting a little.
+See the commit log for details.
+
+This implementation of @i{printf} relies on @i{puts}, as described
+earlier (in Thos), and comes in 4 flavours, differing in features
+supported and code size.  The full-featured one I picked from
+@i{U-Boot}, and it actually comes from an older Linux kernel; the
+smaller implementations are my own hacks, removing or replacing code
+from the full one. See @t{pp_printf/README} for details.
+
+The flavour I selected to compile for Thos is the @i{xint} one, which only
+supports hex and integers. It's a good compromise between features
+and space. It is used in @i{main.c} to simplify a hairy
+line, but it is mainly is a tool that can be used by later code.
+
+Finally, the linker script uses @t{PROVIDE()} to offer a @i{printf}
+name as an alias for @i{pp_printf}. I might have used the preprocessor
+instead, but I prefer to leave the @i{pp-printf} package unchanged.
 
 @bye
 @c  LocalWords:  thos Olimex README rubini gnudd Alessandro titlepage texinfo
 @c  LocalWords:  iftex smallexample linux CFLAGS LDFLAGS ASFLAGS rodata objdump
 @c  LocalWords:  GPIO LocalWords objcopy putc THRE microcontroller regs readl
-@c  LocalWords:  writel init struct Arduino HTTP
+@c  LocalWords:  writel init struct Arduino HTTP printf

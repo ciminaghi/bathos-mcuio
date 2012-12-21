@@ -21,8 +21,15 @@ include $(ADIR)/Makefile
 AOBJ  = $(ADIR)/boot.o $(ADIR)/io.o
 LDS   = $(ADIR)/bathos.lds
 
+# Lib objects and flags
+LOBJ = pp_printf/printf.o pp_printf/vsprintf-xint.o
+CFLAGS  += -Ipp_printf -DCONFIG_PRINT_BUFSIZE=256
+
 # Use our own linker script
 LDFLAGS = -T $(LDS)
+
+# As the system goes larger, we need libgcc to resolv missing symbols
+LDFLAGS += $(shell $(CC) --print-libgcc-file-name)
 
 # Task object files. All objects are placed in tasks/ but the source may
 # live in tasks-$(ARCH), to allow similar but different implementations
@@ -39,7 +46,7 @@ ASFLAGS += -g -Wall
 bathos.bin: bathos
 	$(OBJCOPY) -O binary $^ $@
 
-bathos: main.o $(AOBJ) $(TOBJ)
+bathos: main.o $(AOBJ) $(TOBJ) $(LOBJ)
 	$(LD) $^ $(LDFLAGS) -o $@
 
 clean:
