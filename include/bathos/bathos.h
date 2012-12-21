@@ -1,5 +1,17 @@
-#include <pp-printf.h>
 
+/* These 4 are actually pp_printf and friends */
+extern int printf(const char *fmt, ...)
+        __attribute__((format(printf,1,2)));
+
+extern int sprintf(char *s, const char *fmt, ...)
+        __attribute__((format(printf,2,3)));
+
+extern int vprintf(const char *fmt, va_list args);
+
+extern int vsprintf(char *buf, const char *, va_list)
+        __attribute__ ((format (printf, 2, 0)));
+
+/* Other misc bathos stuff */
 extern int bathos_main(void);
 extern int bathos_setup(void);
 
