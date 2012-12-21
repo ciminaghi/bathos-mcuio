@@ -1,18 +1,24 @@
 #include <bathos/bathos.h>
 #include <arch/hw.h>
+#include <arch/gpio.h>
 
+/* use gpio 19, 20, 21 */
 static int led_init(void *unused)
 {
-	regs[REG_IODIR] |= 7 << 19; /* gpio 19, 20, 21 */
+	gpio_init();
+	gpio_dir_af(19, 1, 0, 0);
+	gpio_dir_af(20, 1, 0, 0);
+	gpio_dir_af(21, 1, 0, 0);
 	return 0;
 }
 
 static void *led(void *arg)
 {
 	int i = (int)arg & 7;
+	int j, bit;
 
-	regs[REG_IOSET] = i << 19;
-	regs[REG_IOCLR] = (i^7) << 19;
+	for (j = 1, bit = 19; bit <= 21; j <<= 1, bit++)
+		gpio_set(bit, (i & j));
 	return (void *)++i;
 }
 

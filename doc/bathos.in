@@ -1644,6 +1644,170 @@ Finally, the linker script uses @t{PROVIDE()} to offer a @i{printf}
 name as an alias for @i{pp_printf}. I might have used the preprocessor
 instead, but I prefer to leave the @i{pp-printf} package unchanged.
 
+@c ##########################################################################
+@node GPIO Support
+@chapter GPIO Support
+
+Bathos offers a simple GPIO abstraction. The code for LPC1343 comes
+from another project of mine, while code for LPC2104 (which is
+much simpler) has been written anew for Bathos. 
+
+@c ==========================================================================
+@node The GPIO API
+@section The GPIO API
+
+This is the programming interface I'm using for GPIO. The code
+lives partly in @i{gpio.h} and partly in @i{gpio.c}. Each architecture
+has its own files, if it support GPIO, but the API is the same.
+
+The LED tasks have been modified to use this API.
+
+@table @code
+@item GPIO_NR(port, bit);
+@itemx GPIO_PORT(nr);
+@itemx GPIO_BIT(nr);
+	These macros convert from port+bit to number and back. They
+	are not expected to be used often, but they may be useful.
+        The port number runs from 0 to the number of device ports, and
+        the bit number runs from 0 to 31 (or to 11, or other values,
+        according to the specific hardware design.
+
+@item void gpio_init(void);
+	Initialization is needed on some architectures, because
+        the GPIO and pin-connect clocks
+        of the chip may need to be powered for the following functions to work.
+        Even though here initialization of the UART is already doing
+        the required setup in some cases,
+        it's in general good practice to have an
+        init function and call it before using the module.
+
+@item int gpio_dir_af(int gpio, int output, int value, int afnum);
+@itemx int gpio_dir(int gpio, int output, int value);
+	The former function sets the alternate function for a bit, and it
+	configures it as input or output.
+	The latter function only changes the direction (this is useful
+	since changing the mode is much more costly in term of machine
+	instructions. The @i{value} argument is needed to change the
+	GPIO output bit while changing the mode. Some devices allow
+        to set the output value first, and some require to set it
+        after switching the mode; each implementation is responsible
+        to do the right thing, which is invisible to the user.
+
+@item int gpio_get(int gpio);
+@itemx u32 __gpio_get(int gpio);
+	The functions return the current input value. The former
+        return 0 or 1, while the latter returns 0 or non-0. As usual
+	in several context, the double underscore means the function is
+        ``internal'' or ``lower level''.
+
+@item void gpio_set(int gpio, int value);
+@item void __gpio_set(int gpio, u32 value);
+	The functions set an output bit. The former receives 0 or 1,
+        while the latter receives 0 or the bit value -- i.e., the same
+        value that is returned by @i{__gpio_get}, to save a few
+        instructions in some common situations, 
+@end table
+
+@c ==========================================================================
+@node Design Choices behind GPIO
+@section Design Choices behind GPIO
+
+The GPIO pins in the 1343 are especially strange.  The GPIO
+abstraction is designed to hide those peculiarities, and make the
+interface as portable as possible.  This section describes the choices
+I made for the LPC 1343 (the LPC 2104 is much simpler and no brain is
+needed to make its GPIO interface). The uninterested reader may
+skip the whole section.
+
+The choices described here are not the only way to abstract GPIO,
+and you may agree or disagree with what I did.
+
+For perfomance, the @i{gpio} argument is
+checked for correctness only in the configuration function, which is
+expected to be executed at least once before using the bit, and possibly
+only once in the life of your program.
+
+As a prerequisite, the code introduces the standard functions
+@i{readl} and @i{writel}. This is a different I/O abstraction
+than the @t{regs} array used in Thos and Bathos, but this
+file comes from another project, and I retained the code that
+was already debugged there. @i{readl}/@i{writel} is not worse
+than @t{regs}, it's just a different way to achieve the same
+technical effect.  Similarly, the code uses a few types that
+are not standard but very handy, the most important being @code{u32}.
+
+@subsubheading GPIO Numbering
+
+Most other processors I work with have their GPIO pins divided in
+``ports'', each port being 32 bits wide.  Both ports and bits are
+counted starting from 0 -- sometimes ports start from A and use
+alphabetic letters.
+
+In the operating systems I use daily, gpio numbers are just
+numbers, whether or not the hardware docs talk about ports or not.  So
+there bit 10 of port 2 is GPIO 74 (2 * 32 + 10), irrespective of how
+hardware is.  Here I use the same approach; it eases development of
+generic device drivers, like a bit-banged I2C driver based on two GPIO
+pins.
+
+As a practical result, on the LPC1343 (which has 12 bits per port)
+we can use GPIO 0 through 11, 32 through 43 and
+so on.  Macros to convert to and from port-and-bit are provided
+nonetheless, as they are hardware-independent conversions.
+
+@subsubheading Alternate Functions
+
+Most processors have alternate functions, and GPIO is usually function
+0. Here we have up to 7 ``alternate functions'' and one GPIO function.
+Then the 1343 has other features (like hysteresis) that I'm not supporting
+by now.
+
+The LPC13 device is set up strangely, in that the PIO function is not
+always function 0 -- sometimes it is function 1.  But, for the sake
+of portability, we need function 0 to always represent PIO.
+
+For example, a generic LED or key driver (or bit-bang I2C or whatever)
+needs to configure its own bits as PIO, irrespective of what the host
+hardware is (most likely, the bit numbers come from a data structure,
+so the driver ignores how to configure them).  For this reason,
+@code{AF0} is always the PIO function. I define bit masks in order for
+the GPIO code to swap AF0 with AF1 for those bits where this is
+needed.
+
+@subsubheading Accessing Configuration Registers
+
+Even though the GPIO configuration registers are all alike, their
+placement in the memory map is absolutely random for the 1343.  Here the
+need is describing this placement in the smallest possible space.
+
+Please note that configuration registers are used rarely, because
+the PIO operations (including switching the direction of one bit)
+are performed on different registers.
+
+To keep the code as small as possible, I define an array of offsets,
+one per GPIO bit, stating where the relevant register lives in the
+associated memory area.  Such offsets are 8 bits long, and are
+the index of the register, so they are shifted by two bits before
+being added to the base register. This saves storage space
+in exchange for some calculation, but as said pins are configured
+usually once for the whole uptime of the system.
+
+In my experience, people looking at documentation are used to look for
+relevant symbolic names in the headers, grepping for the hex
+address. For this reason, my header prefers compile-time calculation
+to build the offsets starting from the complete hex number.  Moreover,
+this saves users from checking and rechecking the table when looking
+for other bugs.
+
+@subsubheading Changing several bits at the same time
+
+Although the LPC13 allows to atomically change an arbitrary
+set of bits as long as they are part of the same port, I offer
+no support for this at API level -- I plan to add it later, but
+it's not there yet.
+
+
+
 @bye
 @c  LocalWords:  thos Olimex README rubini gnudd Alessandro titlepage texinfo
 @c  LocalWords:  iftex smallexample linux CFLAGS LDFLAGS ASFLAGS rodata objdump
