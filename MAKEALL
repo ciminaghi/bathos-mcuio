@@ -1,0 +1,30 @@
+#!/bin/sh
+# This trivially compiles all known-good configurations
+
+# You can set env variables for the cross-compiler used for each architecture
+DEFAULT_CROSS_COMPILE="/opt/arm-2011.03/bin/arm-none-eabi-"
+
+PREFIX_lpc2104=${PREFIX_lpc2104:-$DEFAULT_CROSS_COMPILE}
+PREFIX_lpc1343=${PREFIX_lpc1343:-$DEFAULT_CROSS_COMPILE}
+
+build_one () {
+    make -s clean
+    echo "####################"
+    echo "Build for " "$1"
+    echo "Cross compilier is \"$CROSS_COMPILE\""
+    make -s -k $2
+    test -f bathos.bin || echo "## Failed" >& 2
+    test -f bathos && size bathos
+}
+
+for var in ARCH; do
+    unset $var
+done
+
+
+for a in lpc2104 lpc1343; do
+    export ARCH=$a
+    ARCH_=""
+    eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
+    build_one $a
+done
