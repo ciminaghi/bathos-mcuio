@@ -1,3 +1,7 @@
+/*
+ * GPIO interface for LPC-1343
+ * Alessandro Rubini, 2011-2012GNU GPL2 or later
+ */
 #include <bathos/types.h>
 #include <bathos/io.h>
 #include <arch/hw.h>

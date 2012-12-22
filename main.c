@@ -1,3 +1,7 @@
+/*
+ * Main function: a welcome message and a simple scheduler
+ * Alessandro Rubini, 2009 GNU GPL2 or later
+ */
 #include <bathos/bathos.h>
 #include <arch/hw.h>
 

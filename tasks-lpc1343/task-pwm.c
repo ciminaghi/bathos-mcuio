@@ -1,3 +1,7 @@
+/*
+ * A task that plays a tune on the buzzer
+ * Alessandro Rubini, 2009 GNU GPL2 or later
+ */
 #include <bathos/bathos.h>
 #include <arch/hw.h>
 

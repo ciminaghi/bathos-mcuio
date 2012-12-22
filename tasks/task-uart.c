@@ -1,3 +1,7 @@
+/*
+ * A set of tasks that print timely messages to the serial port
+ * Alessandro Rubini, 2009 GNU GPL2 or later
+ */
 #include <bathos/bathos.h>
 #include <arch/hw.h>
 

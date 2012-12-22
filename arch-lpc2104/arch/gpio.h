@@ -1,3 +1,7 @@
+/*
+ * GPIO interface for LPC-2104
+ * Alessandro Rubini, 2012 GNU GPL2 or later
+ */
 #ifndef __LPC21_GPIO_H__
 #define __LPC21_GPIO_H__
 #include <bathos/types.h>

@@ -1,3 +1,7 @@
+/*
+ * Trivial program to fix the checksum, needed for LPC1343
+ * Alessandro Rubini, 2010 GNU GPL2 or later
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,3 +1,7 @@
+/*
+ * Our I/O abstraction(s)
+ * Alessandro Rubini, 2009-2012 GNU GPL2 or later
+ */
 #ifndef __IO_H__
 #define __IO_H__
 /* Our I/O model is based on the regs array */

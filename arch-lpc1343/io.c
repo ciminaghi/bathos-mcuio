@@ -1,3 +1,7 @@
+/*
+ * Arch-dependent initialization and I/O functions
+ * Alessandro Rubini, 2012 GNU GPL2 or later
+ */
 #include <bathos/bathos.h>
 #include <arch/hw.h>
 

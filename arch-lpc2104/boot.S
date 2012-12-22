@@ -1,3 +1,7 @@
+/*
+ * Boot code, ram-only
+ * Alessandro Rubini, 2009-2012 GNU GPL2 or later
+ */
 .section .boot, "ax"
 
 .global _bathos_start

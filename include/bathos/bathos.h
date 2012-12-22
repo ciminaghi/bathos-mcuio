@@ -1,3 +1,7 @@
+/*
+ * Main header for Bathos
+ *  Alessandro Rubini, 2009-2012 GNU GPL2 or later
+ */
 #ifndef __BATHOS_H__
 #define __BATHOS_H__
 #include <stdarg.h>

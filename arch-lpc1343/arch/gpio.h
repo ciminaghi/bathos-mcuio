@@ -1,3 +1,7 @@
+/*
+ * GPIO interface for LPC-1343
+ * Alessandro Rubini, 2011-2012GNU GPL2 or later
+ */
 #ifndef __LPC13_GPIO_H__
 #define __LPC13_GPIO_H__
 #include <bathos/types.h>

@@ -1,3 +1,7 @@
+/*
+ * A trivial task that flashes three leds
+ * Alessandro Rubini, 2009 GNU GPL2 or later
+ */
 #include <bathos/bathos.h>
 #include <arch/gpio.h>
 #include <arch/hw.h>

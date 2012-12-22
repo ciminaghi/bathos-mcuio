@@ -1,3 +1,7 @@
+/*
+ * Hardware registers we use, defined for use in the regs[] abstraction
+ * Alessandro Rubini, 2009-2012 GNU GPL2 or later
+ */
 #ifndef __LPC2104_HW_H__
 #define __LPC2104_HW_H__
 #include <stdint.h>
