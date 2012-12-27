@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# if we run from arch-versatile, cd .. once
+if [ -x bathos ]; then
+    true
+else
+    cd ..
+fi
+
+# check whether bathos is there
+if [ -x bathos ]; then
+    true
+else
+    echo "$0: Can't find a compiled bathos in . nor .." >& 2
+    exit 1
+fi
+
+# qemu: use telnet as serial port (stdio doesn't always work, don't know why)
+qemu-system-arm -m 64 -M versatilepb -kernel /dev/null -nographic -S -s \
+    -monitor tcp::1201 \
+    -serial  tcp::1200,server &
+qemu=$!
+
+# run gdb in background
+sh -c "sleep 2; arm-linux-gdb -x arch-versatile/commands.gdb -batch" &
+gdb=$!
+
+killexit () {
+    kill $gdb
+    kill $qemu
+}
+trap killexit INT
+
+
+echo "Connecting to the serial port; kill netcat to terminate"
+echo ""
+sleep 1; netcat localhost 1200
+
