@@ -32,4 +32,5 @@ int bathos_main(void)
 		t->arg = t->job(t->arg);
 		t->release += t->period;
 	}
+	return 0;
 }
