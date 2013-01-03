@@ -6,25 +6,33 @@ DEFAULT_CROSS_COMPILE="/opt/arm-2011.03/bin/arm-none-eabi-"
 
 PREFIX_lpc2104=${PREFIX_lpc2104:-$DEFAULT_CROSS_COMPILE}
 PREFIX_lpc1343=${PREFIX_lpc1343:-$DEFAULT_CROSS_COMPILE}
+PREFIX_versatile=${PREFIX_versatile:-$DEFAULT_CROSS_COMPILE}
+PREFIX_atmega=${PREFIX_atmega:-avr-}
+
+# Each arch can build a different set of tasks. The two lpc are the default
+TASK_lpc2104="task-uart.o arch/task-led.o arch/task-pwm.o"
+TASK_lpc1343="task-uart.o arch/task-led.o arch/task-pwm.o"
+TASK_versatile="task-uart.o"
+TASK_atmega="task-uart.o"
 
 build_one () {
     make -s clean
     echo "####################"
     echo "Build for " "$1"
     echo "Cross compilier is \"$CROSS_COMPILE\""
-    make -s -k $2
+    make -s -k TASK-y="$TASK_y"
     test -f bathos.bin || echo "## Failed" >& 2
     test -f bathos && size bathos
 }
 
-for var in ARCH; do
+for var in ARCH TASK_y; do
     unset $var
 done
 
 
-for a in lpc2104 lpc1343; do
+for a in lpc2104 lpc1343 versatile atmega; do
     export ARCH=$a
-    ARCH_=""
     eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
+    eval export TASK_y="\${TASK_$(echo $ARCH | sed 's/-/_/g')}"
     build_one $a
 done
