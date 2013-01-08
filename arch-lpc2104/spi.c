@@ -1,14 +1,14 @@
-#include <ssw/kernel.h>
-#include <ssw/malloc.h>
-#include <ssw/types.h>
-#include <ssw/module.h>
-#include <ssw/spi.h>
-#include <ssw/gpio.h>
-#include <ssw/io.h>
-#include <ssw/delay.h>
-#include <ssw/debug.h>
-#include <hw/lpc2xxx.h>
-#include <mach/spi.h>
+/*
+ * SPI interface for LPC-2104
+ * Alessandro Rubini, 2012 GNU GPL2 or later
+ */
+#include <bathos/bathos.h>
+#include <bathos/types.h>
+#include <bathos/delay.h>
+#include <arch/spi.h>
+#include <arch/gpio.h>
+#include <bathos/io.h>
+#include <arch/hw.h>
 
 #ifndef DEBUG_SPI
 #define DEBUG_SPI 0
@@ -16,24 +16,15 @@
 
 #define SPI_CS_DELAY 10
 
-struct spi_dev {
-	const	struct spi_cfg *cfg;
-	int	current_freq;
-};
-
-struct spi_dev *lpc2xxx_spi_create(const struct spi_cfg *cfg)
+struct spi_dev *spi_create(struct spi_dev *dev)
 {
-	struct spi_dev *dev;
+	const struct spi_cfg *cfg = dev->cfg;
 	u32 spcr;
 	int i;
 
 	if (DEBUG_SPI)
-		printk("%s: gpio is %i\n", __func__, cfg->gpio_cs);
+		printf("%s: gpio is %i\n", __func__, cfg->gpio_cs);
 
-	dev = malloc(sizeof(*dev));
-	if (!dev) return dev;
-
-	dev->cfg = cfg;
 	dev->current_freq = 0;
 
 	if (cfg->devn > 0) /* SPI1 on 2103 is not supported */
@@ -43,40 +34,41 @@ struct spi_dev *lpc2xxx_spi_create(const struct spi_cfg *cfg)
 
 	/* Configure the GPIO pins (pins 4..7 AF1) */
 	for (i = 4; i < 8; i++)
-		gpio_dir_af(i, SSW_GPIO_IN, SSW_GPIO_AF_1);
+		gpio_dir_af(i, 0, 0, 1);
 
 	/* Configure the CS GPIO */
 	gpio_set(cfg->gpio_cs, 1);
-	gpio_dir_af(cfg->gpio_cs, SSW_GPIO_OUT, SSW_GPIO_AF_GPIO);
+	gpio_dir_af(cfg->gpio_cs, 1, 1, 0);
 
 	/* No interrupts and MSB-first */
 	spcr = (cfg->phase << 3) | (cfg->pol << 4) | (1<<5 /* master */);
-	SPI_SPCR = spcr;
+	regs[REG_SPCR] = spcr;
 
 	/* FIXME: frequency support is missing */
-	SPI_SPCCR = 128; /* 8 is the minimum, start slow (FIXME) */
+	regs[REG_SPCCR] = 128; /* 8 is the minimum, start slow (FIXME) */
 
 	/* Clear any pending "complete flag" */
-	i = SPI_SPSR; i = SPI_SPDR;
+	i = regs[REG_SPSR]; i = regs[REG_SPDR];
 
 	return dev;
 }
 
-void lpc2xxx_spi_destroy(struct spi_dev *dev)
+void spi_destroy(struct spi_dev *dev)
 {
 	int i;
 
 	/* De-configure the GPIO pins (pins 4..7 AF1) */
 	for (i = 4; i < 8; i++)
-		gpio_dir_af(i, 0, 1);
+		gpio_dir_af(i, 0, 0, 1);
 
-	free(dev);
+	dev->cfg = NULL;
+	dev->current_freq = 0;
 }
 
 /* Local functions to simplify xfer code */
 static void __spi_wait_busy(void)
 {
-	while( !(SPI_SPSR & 0x80))
+	while( !(regs[REG_SPSR] & 0x80))
 		/* FIXME: timeout */;
 }
 
@@ -85,7 +77,7 @@ static void __spi_cs(struct spi_dev *dev, int value)
 	gpio_set(dev->cfg->gpio_cs, value);
 }
 
-int lpc2xxx_spi_xfer(struct spi_dev *dev,
+int spi_xfer(struct spi_dev *dev,
 		     enum spi_flags flags,
 		     const struct spi_ibuf *ibuf,
 		     const struct spi_obuf *obuf)
@@ -105,7 +97,7 @@ int lpc2xxx_spi_xfer(struct spi_dev *dev,
 
 
 	if (DEBUG_SPI)
-		printk("%s: %s", __func__, flags & SPI_F_NOINIT ? "--" : "cs");
+		printf("%s: %s", __func__, flags & SPI_F_NOINIT ? "--" : "cs");
 
 	if ( !(flags & SPI_F_NOINIT) ) {
 		udelay(SPI_CS_DELAY);
@@ -113,17 +105,17 @@ int lpc2xxx_spi_xfer(struct spi_dev *dev,
 		udelay(SPI_CS_DELAY);
 	}
 	for (i = 0; i < len; i++) {
-		SPI_SPDR = obuf ? obuf->buf[i] : 0xff;
+		regs[REG_SPDR] = obuf ? obuf->buf[i] : 0xff;
 		__spi_wait_busy();
-		val = SPI_SPDR;
+		val = regs[REG_SPDR];
 		if (DEBUG_SPI)
-			printk(" %02x(%02x)", obuf->buf[i], val);
+			printf(" %02x(%02x)", obuf->buf[i], val);
 		if (ibuf)
 			ibuf->buf[i] = val;
 	}
 
 	if (DEBUG_SPI)
-		printk(" %s\n", flags & SPI_F_NOFINI ? "--" : "cs");
+		printf(" %s\n", flags & SPI_F_NOFINI ? "--" : "cs");
 
 	if ( !(flags & SPI_F_NOFINI) ) {
 		udelay(SPI_CS_DELAY);
@@ -132,5 +124,3 @@ int lpc2xxx_spi_xfer(struct spi_dev *dev,
 	}
 	return 0;
 }
-
-module_provide(spi_21xxx);
