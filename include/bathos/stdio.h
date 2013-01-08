@@ -2,6 +2,10 @@
 #define __BATHOS_STDIO_H__
 #include <stdarg.h>
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 /* These 4 are actually pp_printf and friends */
 extern int printf(const char *fmt, ...)
         __attribute__((format(printf,1,2)));
