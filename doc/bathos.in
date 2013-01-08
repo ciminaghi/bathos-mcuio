@@ -33,14 +33,15 @@
 
 @setchapternewpage off
 
-@set update-month December 2012
-@set release v2012-12
+@set update-month January 2013
+@c @set release v2012-12
 
 @finalout
 
 @titlepage
 @title BA-THOS (Born Again THOS)
-@subtitle A Spin-off of the Two Hour Operating System (Version @value{release})
+@c  A Spin-off of the Two Hour Operating System (Version @value{release})
+@subtitle A Spin-off of the Two Hour Operating System
 @subtitle @value{update-month}
 
 @author Alessandro Rubini (@code{rubini@@gnudd.com})
@@ -1503,20 +1504,8 @@ Thos, unless there were bugs to fix (like a I fixed a major typo in
 original code after release 2011-04, and a student fixed some typos
 and submitted a patch).
 
-My plans, back then, were to port to the ATmega8 processor,
-in one of the ``Arduino'' forms.  Unfortunately,
-writing bare-metal code for Arduino is more
-difficult than writing for LPC-family ARM, because the code can only
-live in Flash memory, and the UART must be set up by the OS: there is
-no ROM configuring it for us.  I had @code{boot.S}
-and UART working, but I stopped, for lack of time, while porting the
-@i{jiffies} abstraction. This port may happen in the future, but it's
-not currently at the top of my list of things to do.
-
-Another plan is porting to a device that is emulated by @i{Qemu},
-so you don't need real hardware to see the code running. This will happen,
-sooner or later (or I can accept patches for that).
-
+Back then I planned to port tot the Arduino (something which finally
+happened, after I started Bathos.
 But what actually happened is that I added some features and
 functionalities, that doesn't fit in the 2 hours at all, much less
 than the PWM task described earlier.  The material is libraries
@@ -1561,8 +1550,8 @@ for each and every board or CPU flavour it is ported to.
 
 For this reason, the transition from Thos to Bathos is marked by a
 complete reshuffling of source code.  As I write this, both LPC1343
-and LPC2104 are supported with very little code duplication.  Adding
-a new ARM CPU should be straightforward.
+and LPC2104 are supported with very little code duplication, and
+a few more architectures are being added.
 
 The layout can be summarised in the following few points:
 
@@ -1607,6 +1596,57 @@ it may happen that some details are fixed or added later; in that case
 I won't back-port the commit to the original branch, in order not to
 change past history. Such later fixes or small features are not
 developed as a separate branch which is then merge.
+
+@c ##########################################################################
+@node Supported Architectures 
+@chapter Supported Architectures
+
+The current version of Bathos supports the following architectures.
+You can choose what architecture to compile for by setting the @t{ARCH}
+variable, either in the environment or on the command line of @i{make}
+-- as described in @ref{Bathos Code Layout}.
+
+@table @code
+
+@item ARCH=lpc1343
+
+	This is the default, if no @t{ARCH=} is specified. It compiles
+        the original Thos code for the respective hardware device
+        (see @ref{Introduction to Thos}).  The port includes all the
+        tasks described earlier.
+
+@item ARCH=lpc2104
+
+	Compile for the ARM-7 processor, LPC2104 (or 2105 or 2106).
+        This architecture carries hardware support for the @i{Christmas Tree}
+        (see @ref{Thos on ARM-7}). The port includes all the tasks
+
+@item ARCH=versatile
+
+	The @i{Versatile} board is on of the evaluation boards released
+        by ARM Ltd. It is supported by @i{Qemu}, and allows to run
+        the code without the need for real hardware.  The executable
+        script @t{arch-versatile/run-bathos} can be used to actually run
+        the operating system.  The port only supports the serial
+        tasks, so please compile with ``@t{TASK-y=task-uart.o}''.
+
+@item ARCH=atmega
+
+	This is a port to the Arduino board. I run it on the ATmega8
+        implementation of the AVR architecture. Unfortunately, there
+        are quite some differences between the various implementations,
+        so most likely this won't work on other flavours (like the ATmega328
+        that features a different size for the interrupt vectors). The
+        port uses timer interrupts to increment @i{jiffies}, and the
+        code must be flashed to the micro-controller, that doesn't allow
+        running from RAM. The port only supports the serial
+        tasks, so please compile with ``@t{TASK-y=task-uart.o}''.
+
+@end table
+
+In the future I'll add more architectures, as well as Kconfig support
+with default configs.  Also, I plan to support the ATmega328 without
+introducing a new architecture for it.
 
 @c ##########################################################################
 @node Printf Function
