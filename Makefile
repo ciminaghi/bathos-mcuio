@@ -36,6 +36,9 @@ LDFLAGS += -T $(LDS)
 # Each architecture can have specific drivers
 LDFLAGS += $(LIBARCH)
 
+# We have a library too, let its Makefile do it all
+include lib/Makefile
+
 # As the system goes larger, we need libgcc to resolve missing symbols
 LDFLAGS += $(shell $(CC) --print-libgcc-file-name)
 
@@ -55,7 +58,7 @@ ASFLAGS += -g -Wall
 bathos.bin: bathos
 	$(OBJCOPY) -O binary $^ $@
 
-bathos: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH)
+bathos: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 	$(LD) $^ $(LDFLAGS) -o $@
 
 clean:
