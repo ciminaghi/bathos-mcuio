@@ -1,2 +1,3 @@
 
-# Nothing special for Versatile support
+# The default task list is very limited...
+TASK-y ?= task-uart.o

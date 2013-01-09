@@ -1,7 +1,14 @@
-# Default architecture. We have "lpc1343" and "lpc2104" (look for arch-*)
+# Default architecture. We have several of them (look for arch-*)
 ARCH ?= lpc1343
 
-# Task choice. Follow the -y convention, to allow use of $(CONFIG_STH) 
+# First: the target. After that, we can include the arch Makefile
+all: bathos.bin
+
+ADIR = arch-$(ARCH)
+include $(ADIR)/Makefile
+
+# Task choice. This follows the -y convention, to allow use of $(CONFIG_STH) 
+# The arch may have its choice, or you can override on the command line
 TASK-y ?= task-uart.o arch/task-led.o arch/task-pwm.o
 
 # Cross compiling:
@@ -15,11 +22,7 @@ STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
-all: bathos.bin
-
 # Files that depend on the architecture
-ADIR = arch-$(ARCH)
-include $(ADIR)/Makefile
 AOBJ  = $(ADIR)/boot.o $(ADIR)/io.o
 LDS   = $(ADIR)/bathos.lds
 

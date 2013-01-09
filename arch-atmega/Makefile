@@ -5,6 +5,8 @@ BATHOS_MCU ?= atmega8 m8
 # Similary, the user can set TTY= when running "make load"
 TTY ?= /dev/ttyUSB0
 
+# By default, we only have the uart tasks
+TASK-y ?= task-uart.o
 
 # Following stuff is calculated, no further customization expected
 
