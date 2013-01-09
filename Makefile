@@ -57,4 +57,4 @@ bathos: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH)
 
 clean:
 	rm -f bathos.bin bathos *.o *~
-	find . -name '*.o' -o -name '*~' | xargs rm -f
+	find . -name '*.o' -o -name '*~' -o -name '*.a' | xargs rm -f
