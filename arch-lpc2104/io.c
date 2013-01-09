@@ -23,10 +23,3 @@ void putc(int c)
 		;
 	regs[REG_U0THR] = c;
 }
-
-int puts(const char *s)
-{
-	while (*s)
-		putc (*s++);
-	return 0;
-}

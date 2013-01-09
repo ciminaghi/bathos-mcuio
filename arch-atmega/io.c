@@ -36,10 +36,3 @@ void putc(int c)
 		;
 	regs[REG_UDR] = c;
 }
-
-int puts(const char *s)
-{
-	while (*s)
-		putc (*s++);
-	return 0;
-}

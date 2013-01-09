@@ -4,8 +4,12 @@
  */
 #ifndef __BATHOS_H__
 #define __BATHOS_H__
-#include <stdarg.h>
-#include <arch/bathos-arch.h>
+
+/*
+ * stdio-related stuff is related to bathos/stdio.h, but users are not
+ * expected to include it (because it sounds very ugly)
+ */
+#include <bathos/stdio.h>
 
 /* Ever-needed definitions */
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
@@ -15,24 +19,9 @@
 	(type *)( (char *)__mptr - offsetof(type,member) );})
 
 
-/* These 4 are actually pp_printf and friends */
-extern int printf(const char *fmt, ...)
-        __attribute__((format(printf,1,2)));
-
-extern int sprintf(char *s, const char *fmt, ...)
-        __attribute__((format(printf,2,3)));
-
-extern int vprintf(const char *fmt, va_list args);
-
-extern int vsprintf(char *buf, const char *, va_list)
-        __attribute__ ((format (printf, 2, 0)));
-
 /* Other misc bathos stuff */
 extern int bathos_main(void);
 extern int bathos_setup(void);
-
-extern void putc(int c);
-extern int puts(const char *s);
 
 /* And finally the task definition */
 struct bathos_task {

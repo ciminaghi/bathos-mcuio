@@ -27,10 +27,3 @@ void putc(int c)
 		;
 	regs[REG_UART01x_DR] = c;
 }
-
-int puts(const char *s)
-{
-	while (*s)
-		putc (*s++);
-	return 0;
-}
