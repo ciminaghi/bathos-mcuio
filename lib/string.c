@@ -7,6 +7,7 @@
  * Released according to the GNU GPL version 2
  */
 #include <bathos/string.h>
+#include <stdint.h>
 
 char *strcpy(char * d, char *s)
 {
@@ -37,11 +38,11 @@ int strnlen(char *s, int count)
 
 void *memcpy(void *d, void *s, int count)
 {
-	unsigned long *dl = (unsigned long *)d, *sl = (unsigned long *)s;
+	intptr_t *dl = (intptr_t *)d, *sl = (intptr_t *)s;
 	char *d8, *s8;
 
 	/* while all data is aligned (common case), copy a word at a time */
-	if ( (((unsigned long)d | (unsigned long)s) & (sizeof(*dl) - 1)) == 0) {
+	if ( (((intptr_t)d | (intptr_t)s) & (sizeof(*dl) - 1)) == 0) {
 		while (count >= sizeof(*dl)) {
 			*dl++ = *sl++;
 			count -= sizeof(*dl);
@@ -58,13 +59,13 @@ void *memcpy(void *d, void *s, int count)
 
 void * memset(void *s, int c, int count)
 {
-	unsigned long *sl = (unsigned long *) s;
+	intptr_t *sl = (intptr_t *)s;
 	unsigned long cl = 0;
 	char *s8;
 	int i;
 
 	/* do it one word at a time (32 bits or 64 bits) while possible */
-	if ( ((unsigned long)s & (sizeof(*sl) - 1)) == 0) {
+	if ( ((intptr_t)s & (sizeof(*sl) - 1)) == 0) {
 		for (i = 0; i < sizeof(*sl); i++) {
 			cl <<= 8;
 			cl |= c & 0xff;
