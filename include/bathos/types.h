@@ -14,6 +14,4 @@ typedef int32_t s32;
 typedef int16_t s16;
 typedef int8_t s8;
 
-#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
-
 #endif /* __TYPES_H__ */

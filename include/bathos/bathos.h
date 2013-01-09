@@ -7,6 +7,14 @@
 #include <stdarg.h>
 #include <arch/bathos-arch.h>
 
+/* Ever-needed definitions */
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#define container_of(ptr, type, member) ({			\
+	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
+	(type *)( (char *)__mptr - offsetof(type,member) );})
+
+
 /* These 4 are actually pp_printf and friends */
 extern int printf(const char *fmt, ...)
         __attribute__((format(printf,1,2)));
