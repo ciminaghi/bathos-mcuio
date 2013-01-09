@@ -1,7 +1,5 @@
 #include <stdint.h>
 
-extern volatile uint8_t regs[];
-
 #define THOS_QUARTZ		(16UL * 1000 * 1000)
 #define HZ			(THOS_QUARTZ / 256 / 256) /* 244 (+.140625) */
 

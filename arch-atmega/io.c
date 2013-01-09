@@ -1,4 +1,5 @@
 #include <bathos/bathos.h>
+#include <bathos/io.h>
 #include <arch/hw.h>
 
 int bathos_setup(void)
