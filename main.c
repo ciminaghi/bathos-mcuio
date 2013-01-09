@@ -3,6 +3,7 @@
  * Alessandro Rubini, 2009 GNU GPL2 or later
  */
 #include <bathos/bathos.h>
+#include <bathos/jiffies.h>
 #include <arch/hw.h>
 
 int bathos_main(void)
@@ -27,7 +28,7 @@ int bathos_main(void)
 		for (t = p = __task_begin; p < __task_end; p++)
 			if (p->release < t->release)
 				t = p;
-		while ((signed)(t->release - jiffies) > 0)
+		while (time_before(jiffies, t->release))
 			;
 		t->arg = t->job(t->arg);
 		t->release += t->period;

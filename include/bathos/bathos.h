@@ -26,16 +26,6 @@ extern int bathos_setup(void);
 extern void putc(int c);
 extern int puts(const char *s);
 
-/*
- * The architecture may define __get_jiffies if the hardware doesn't
- * provide a single 32-bit increasing counter at some address
- */
-#ifdef __get_jiffies
-#  define jiffies __get_jiffies()
-#else
-  extern volatile unsigned long jiffies;
-#endif
-
 /* And finally the task definition */
 struct bathos_task {
 	char *name;
