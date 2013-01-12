@@ -46,4 +46,4 @@ static inline void __gpio_set(int gpio, u32 value)
 		regs[REG_IOCLR] = 1 << gpio;
 }
 
-#endif /* __LPC13_GPIO_H__ */
+#endif /* __LPC21_GPIO_H__ */
