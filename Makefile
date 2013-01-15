@@ -28,7 +28,7 @@ LOBJ = pp_printf/printf.o pp_printf/vsprintf-xint.o
 CFLAGS  += -Ipp_printf -DCONFIG_PRINT_BUFSIZE=256
 
 # Use our own linker script
-LDFLAGS = -T $(LDS)
+LDFLAGS += -T $(LDS)
 
 # Each architecture can have specific drivers
 LDFLAGS += $(LIBARCH)
