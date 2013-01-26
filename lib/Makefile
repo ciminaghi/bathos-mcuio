@@ -1,9 +1,6 @@
 
 # Library Makefile: just add the objects and names
 
-
-lib/libthos.a:  $(LIB_OBJS)
-
 LIBBATHOS = lib/libbathos.a
 LIB_OBJS += lib/string.o
 LIB_OBJS += lib/stdio.o
