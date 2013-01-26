@@ -2,26 +2,16 @@
  * enc28j60 driver for ssw, Alessandro Rubini 2010, GNu GPL V2
  * Based on previous work by Guido Socher, who based his own on Pascal Stang's
  */
-#include <ssw/kernel.h>
-#include <ssw/malloc.h>
-#include <ssw/delay.h>
-#include <ssw/debug.h>
-#include <ssw/spi.h>
-#include <ssw/enc28j60.h>
-#include <hw/enc28j60.h>
+#include <bathos/bathos.h>
+#include <bathos/delay.h>
+#include <bathos/enc28j60.h>
+#include <bathos/delay.h>
+#include <bathos/spi.h>
+#include "enc28j60.h"
 
 #ifndef DEBUG_ENC28
 #define DEBUG_ENC28 0
 #endif
-
-struct enc28_dev {
-	const struct enc28_cfg	*cfg;
-	struct spi_dev		*spi_dev;
-	u16	bank;
-	u16	txptr;
-	u16	rxptr;
-	u16	nextpkt;
-};
 
 /* wr_op and rd_op do not set the bank, assuming it is already set */
 static int __enc28_wr_op(struct enc28_dev *dev, int op, int addr, int datum)
@@ -79,10 +69,10 @@ static int enc28_wr(struct enc28_dev *dev, int addr, int datum)
 	if (DEBUG_ENC28) {
 		check = enc28_rd(dev, addr);
 		if (check != (datum & 0xff))
-			printk("\tERROR: read %02x, written %02x\n",
+			printf("\tERROR: read %02x, written %02x\n",
 			       check, datum & 0xff);
 		else
-			printk("\tOK: read %02x, written %02x\n",
+			printf("\tOK: read %02x, written %02x\n",
 			       check, datum & 0xff);
 	}
 	return ret;
@@ -159,7 +149,7 @@ static int enc28_init(struct enc28_dev *dev)
 			for (i = 0; i < 0x20; i++) {
 				reg = (b << 5) | i;
 				val = enc28_rd(dev, reg);
-				printk("RESET: 0x%02x = 0x%02x\n", reg, val);
+				printf("RESET: 0x%02x = 0x%02x\n", reg, val);
 				if (reg == 0 && val != 0xfa)
 					return -1; /* EIO */
 				if (reg == 1 && val != 0x05)
@@ -267,15 +257,15 @@ static int enc28_init(struct enc28_dev *dev)
 
 		for (i = 0; i < 0x18; i++) {
 			j = enc28_rd(dev, i);
-			printk("check: %02x = %02x\n", i, j);
+			printf("check: %02x = %02x\n", i, j);
 		}
 		i = enc28_rd(dev, ENC28_MAADR5);
 		if (i != dev->cfg->macaddr[0])
-			printk("ERROR wrote %02x read %02x\n",
+			printf("ERROR wrote %02x read %02x\n",
 			       dev->cfg->macaddr[0], i);
 		i = enc28_rd(dev, ENC28_MAADR4);
 		if (i != dev->cfg->macaddr[1])
-			printk("ERROR wrote %02x read %02x\n",
+			printf("ERROR wrote %02x read %02x\n",
 			       dev->cfg->macaddr[1], i);
 	}
 
@@ -283,31 +273,27 @@ static int enc28_init(struct enc28_dev *dev)
 }
 
 /* Public create and destroy functions */
-struct enc28_dev *enc28_create(const struct enc28_cfg *cfg)
+struct enc28_dev *enc28_create(struct enc28_dev *dev)
 {
-	struct enc28_dev *dev;
+	struct spi_dev *sdev;
 
-	dev = malloc(sizeof(*dev));
 	if (!dev) return dev;
-	dev->spi_dev = spi_create(cfg->spi_cfg);
-	if (!dev->spi_dev)
-		goto out_free;
-	dev->cfg = cfg;
+	sdev = spi_create(dev->spi_dev);
+	if (!sdev)
+		return NULL;
+	/* dev->cfg already set */
 	if (enc28_init(dev) < 0)
 		goto out_destroy;
 	return dev;
 
 out_destroy:
-	spi_destroy(dev->spi_dev);
-out_free:
-	free(dev);
+	spi_destroy(sdev);
 	return NULL;
 }
 
 void enc28_destroy(struct enc28_dev *dev)
 {
 	spi_destroy(dev->spi_dev);
-	free(dev);
 }
 
 /* Public packet send and receive functions */
