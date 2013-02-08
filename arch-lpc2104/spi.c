@@ -5,7 +5,7 @@
 #include <bathos/bathos.h>
 #include <bathos/types.h>
 #include <bathos/delay.h>
-#include <arch/spi.h>
+#include <bathos/spi.h>
 #include <arch/gpio.h>
 #include <bathos/io.h>
 #include <arch/hw.h>
