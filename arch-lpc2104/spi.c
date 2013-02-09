@@ -109,7 +109,7 @@ int spi_xfer(struct spi_dev *dev,
 		__spi_wait_busy();
 		val = regs[REG_SPDR];
 		if (DEBUG_SPI)
-			printf(" %02x(%02x)", obuf->buf[i], val);
+			printf(" %02x(%02x)", obuf ? obuf->buf[i] : 0xff, val);
 		if (ibuf)
 			ibuf->buf[i] = val;
 	}
