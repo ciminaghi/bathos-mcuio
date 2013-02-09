@@ -7,7 +7,6 @@
 
 /* The ENC28 device instance is configured like this */
 struct enc28_cfg {
-	const struct spi_cfg *spi_cfg;
 	u8 ipaddr[4];
 	u8 macaddr[6]; /* ETH_ALEN */
 };
