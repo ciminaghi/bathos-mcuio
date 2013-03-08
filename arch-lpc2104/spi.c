@@ -45,7 +45,7 @@ struct spi_dev *spi_create(struct spi_dev *dev)
 	regs[REG_SPCR] = spcr;
 
 	/* FIXME: frequency support is missing */
-	regs[REG_SPCCR] = 128; /* 8 is the minimum, start slow (FIXME) */
+	regs[REG_SPCCR] = 16; /* 8 is the minimum, start slow (FIXME) */
 
 	/* Clear any pending "complete flag" */
 	i = regs[REG_SPSR]; i = regs[REG_SPDR];
