@@ -5,6 +5,7 @@ LIBBATHOS = lib/libbathos.a
 LIB_OBJS += lib/string.o
 LIB_OBJS += lib/stdio.o
 LIB_OBJS += lib/ctype.o
+LIB_OBJS += lib/setup.o
 
 $(LIBBATHOS): $(LIB_OBJS)
 	$(AR) r $@ $(LIB_OBJS)
