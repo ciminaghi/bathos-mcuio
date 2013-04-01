@@ -2,22 +2,23 @@
 #define __BATHOS_DELAY_H__
 #include <arch/delay.h>
 
-#ifndef HAS_ARCH_UDELAY
-
-static inline void __arch_udelay(int usec)
-{
-	volatile int i = usec * 10;
-
-	while (i--)
-		;
-}
-
-#endif
+#ifdef HAS_ARCH_UDELAY
 
 static inline void udelay(int usec)
 {
 	__arch_udelay(usec);
 }
+
+#else
+
+extern void generic_udelay(int usec);
+
+static inline void udelay(int usec)
+{
+	generic_udelay(usec);
+}
+
+#endif
 
 static inline void mdelay(int m)
 {
