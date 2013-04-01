@@ -3,9 +3,10 @@
  * Alessandro Rubini, 2012 GNU GPL2 or later
  */
 #include <bathos/bathos.h>
+#include <bathos/init.h>
 #include <arch/hw.h>
 
-int bathos_setup(void)
+int timer_setup(void)
 {
 	/* First configure as 32-bit, but keep it disabled */
 	regs[REG_TIMER_CTRL] = TIMER_CTRL_32BIT | TIMER_CTRL_DIV16 \
@@ -18,6 +19,7 @@ int bathos_setup(void)
 		| TIMER_CTRL_PERIODIC | TIMER_CTRL_ENABLE;
 	return 0;
 }
+core_initcall(timer_setup);
 
 void putc(int c)
 {
