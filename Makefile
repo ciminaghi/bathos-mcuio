@@ -43,7 +43,7 @@ include drivers/Makefile
 include lib/Makefile
 
 # As the system goes larger, we need libgcc to resolve missing symbols
-LDFLAGS += $(shell $(CC) --print-libgcc-file-name)
+LDFLAGS += $(shell $(CC) $(CFLAGS) --print-libgcc-file-name)
 
 
 # Task object files. All objects are placed in tasks/ but the source may
