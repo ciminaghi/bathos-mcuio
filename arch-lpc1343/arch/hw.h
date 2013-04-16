@@ -12,9 +12,22 @@
 
 
 /* uart */
-#define REG_U0THR		(0x40008000 / 4)
+#define REG_U0THR		(0x40008000 / 4) /* write */
+#define REG_U0RBR		(0x40008000 / 4) /* read */
+#define REG_U0IER		(0x40008004 / 4)
+#define REG_U0IIR		(0x40008008 / 4) /* read */
+#define REG_U0FCR		(0x40008008 / 4) /* write */
+#define REG_U0LCR		(0x4000800c / 4)
 #define REG_U0LSR		(0x40008014 / 4)
 #define REG_U0LSR_THRE		0x20
+
+#define REG_U0DLL		(0x40008000 / 4) /* when DLAB=1 */
+#define REG_U0DLM		(0x40008004 / 4) /* when DLAB=1 */
+#define REG_U0FDR		(0x40008028 / 4) /* fractional divider */
+
+/* Clock dividers */
+#define REG_UARTCLKDIV		(0x40048098 / 4)
+
 
 /* clock control */
 #define REG_AHBCLKCTRL		(0x40048080 / 4)
