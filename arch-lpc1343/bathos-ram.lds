@@ -44,7 +44,7 @@ SECTIONS
 		. = ALIGN(16);
 		__bss_end = .;
 	}
-	/DISCARD/ : { *(.text.romboot); *(.vectors); }
+	/DISCARD/ : { *(.text.romboot); *(.vectors); *(.init0); }
 }
 
 PROVIDE(printf = pp_printf);
