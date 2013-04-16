@@ -30,12 +30,13 @@ SECTIONS
 		initcall_end = .;
 	}
 
-	.data : { *(.data) }
-
-	. = ALIGN(16);
-	__task_begin = .;
-	.task : {*(.task) }
-	__task_end = .;
+	.data : {
+		*(.data);
+		. = ALIGN(16);
+		__task_begin = .;
+		*(.task);
+		__task_end = .;
+	}
 
 	.bss : {
 		. = ALIGN(16);
