@@ -33,7 +33,7 @@
 
 @setchapternewpage off
 
-@set update-month January 2013
+@set update-month April 2013
 @c @set release v2012-12
 
 @finalout
@@ -1868,9 +1868,133 @@ set of bits as long as they are part of the same port, I offer
 no support for this at API level -- I plan to add it later, but
 it's not there yet.
 
+@c ##########################################################################
+@node SPI Support
+@chapter SPI Support
+
+SPI, ``Serial Peripheral Interface'' is a simple synchronous bus, used
+by a number of peripherals: ADC and DAC devices, display controllers,
+simple network adapters and so on. In its most common form it is made
+up of 4 wires: clock, chip select and two data lines: MOSI (master out
+slave in) and MISO (master in slave out).  You can connect more than
+one peripheral to the same bus: each device has a personal CS line,
+while the other three are shared.
+
+SPI code in Bathos is, again, derived from a previous project. It is
+currently only supported for the LPC2104 architecture, because that is
+what I needed. A port to LPC1343 is ongoing, and Atmega should follow.
+
+In theory you can make a bit-banged SPI controller, based on GPIO pins,
+but in practice SPI is usually devoted to fast peripherals and thus is
+driven by hardware controllers.  There is currently no support for
+bit-banged SPI controllers in Bathos.
+
+@c ==========================================================================
+@node The SPI API
+@section The SPI API
+
+The abstraction being used is based on a few data structures and a
+few functions. The data structures are ``configuration'', ``device''
+and the data buffers:
+
+@table @code
+
+@item struct spi_cfg
+
+	The configuration structure defines which GPIO pin is used
+        as chip-select for this device, the frequency (currently unused),
+        polarity and phase (see SPI documentation) and the ``controller''
+        index, that can be used to select among several devices in the
+        microcontrollers that include more than one such controller.
+
+@item struct spi_dev
+
+	The device includes a pointer to the current configuration and
+        other fields, that are private to the implementation.
+
+@item struct spi_ibuf
+@itemx struct spi_obuf
+
+	The input and output buffers are made up of a length and an
+        array of bytes. The output buffer differs by hosting a @t{const}
+        array (so it can remain in flash memory, when the task is so
+        designed).
+
+@end table
+
+Bathos offers the following functions to deal with SPI:
+
+@table @code
+
+@item struct spi_dev *spi_create(struct spi_dev *dev);
+@itemx void spi_destroy(struct spi_dev *dev);
+
+	A device must be created before being used. Creation, however,
+        doesn't involve any allocation as we have no @t{malloc} in Bathos,
+        as a design choice to avoid run-time memory shortage.  The caller
+        must pass a pointer to its own static copy of @t{spi_dev}, which
+        is returned back after initialization.  The @t{destroy} function
+        is provided for symmetry, but typical use cases don't involve
+        calling it.
+
+@item int spi_xfer(dev, flags, ibuf, obuf);
+
+	Perform an SPI transfer. Either @t{ibuf} or @t{obuf} can be NULL,
+        it the caller is only interested in one of the two directions.
+        By passing flags, the caller can avoid activating or releasing
+        the chip select pin, or both; this allows supporting longer
+        transfers without producing edges on the chip select, which is
+        requested by some devices that use it as a reset or low-power
+        signal.
+
+@item  int spi_read(dev, flags, ibuf);
+@itemx int spi_write(dev, flags, ouf);
+
+       The two functions are shortcuts that call @t{spi_xfer}
+       with a NULL pointer for the unused buffer.  Developers are encouraged
+       to use them to make the code more readable, according ot the use case.
+
+@item int spi_raw_read(dev, flags, len, uint8_t *buf);
+@itemx int spi_raw_write(dev, flags, len, uint8_t *buf);
+
+      Read or write a raw buffer, without relying on @t{struct spi_ibuf}
+      or @t{struct spi_obuf}.  They should be used according to the
+      use case.
+
+@end table
+
+Please note that the 4 read and write functions are implemented as
+@t{static inline}, and thus are platform-independent.  The device
+driver for the target architecture only implements @t{spi_xfer}.
+
+@c ==========================================================================
+@node SPI Sample Tasks
+@section SPI Sample Tasks
+
+Bathos includes a few tasks that act on SPI devices:
+
+@table @code
+
+@item task-spi
+
+	This is the first, simple SPI demonstration task. It drives an
+        AD7888 8-channel ADC, reporting the conversions as 8 hex numbers
+	using @i{printf}. I uses GPIO9 as chip select pin, you may need
+        to change it according to your personal configuration.
+
+@item task-enc28
+
+	This task sends and receives network frames using the EN28J60
+        integrated circuit.  It relies on @t{drivers/enc28j60.c}, which
+        in turn relies on the SPI API.  It exists mainly for demonstration
+        purposes, but if you manage to run it you know your network
+        is working and can build on it.
+
+@end table
 
 
 @bye
+
 @c  LocalWords:  thos Olimex README rubini gnudd Alessandro titlepage texinfo
 @c  LocalWords:  iftex smallexample linux CFLAGS LDFLAGS ASFLAGS rodata objdump
 @c  LocalWords:  GPIO LocalWords objcopy putc THRE microcontroller regs readl

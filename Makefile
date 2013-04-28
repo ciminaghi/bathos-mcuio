@@ -36,7 +36,10 @@ LDFLAGS += -T $(LDS)
 # Each architecture can have specific drivers
 LDFLAGS += $(LIBARCH)
 
-# We have a library too, let its Makefile do it all
+# We have drivers too, let its Makefile do it all
+include drivers/Makefile
+
+# Same for the generic library
 include lib/Makefile
 
 # As the system goes larger, we need libgcc to resolve missing symbols
