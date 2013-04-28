@@ -66,12 +66,13 @@ handles a few different tasks (but you can easily add more).
 @chapter Bathos and Thos
 
 Bathos is a spin-off of Thos, the Two-Hour Operating System.
-For that reason, the first
-chapters of this manual describe how to write the whole OS in
+For that reason, the complete documentation of Thos is included in
+this manual: it describes how to write the whole OS in
 two hours.  However, Bathos is more than Thos, so later chapters
 change completely the code layout, to achieve a more portable
-and flexible design, and add @i{printf}, some drivers and other stuff.
-This without changing the basic design ideas of Thos.
+and flexible design; they add @i{printf}, some drivers and other stuff.
+This without changing the basic design ideas of Thos, despite the change
+in code layout.
 
 @c ==========================================================================
 @node Introduction to Bathos
@@ -81,17 +82,21 @@ After showing the Thos project to my students,
 several of them actually made real projects with it, and I found
 myself playing with Thos as well.  So finally I decided to continue
 development, adding a real @i{printf} implementation (which I had
-around anyways), and some device drivers. The basic idea is still to
+around anyways), as well as some device drivers. The basic idea is still to
 keep the code as simple as possible and avoid interrupts. However, you
-can achieve real stuff with it.
+can write real stuff with it.
 
 This document is unchanged in its first part, which remains the ``two
 hour'' idea.  Everything from @ref{Bathos Code Layout} onwards is
 material I added later.  In order to look at the ``2-hour'' code, as
 described in the initial chapters of this document, you should check
-out commit @t{c41a2fd} or tag @t{V2012-12}, which is the commit before
-Thos becomes Bathos -- the first step is a massive rename. The current
-@i{git} repository is rooted on the complete history of Thos.
+out commit @t{c41a2fd} or tag @t{v2012-12}, which is the commit before
+Thos becomes Bathos -- the first step is a massive rename.  As an
+alternative, you can checkout @t{ada69c09} or tag @t{thos-v2013-01},
+which is the finare release of Thos, with support for Arduino and references
+to this newer project. The current
+@i{git} repository is rooted on the complete history of Thos
+up to @t{v2012-12}.
 
 @c ==========================================================================
 @node Introduction to Thos
@@ -99,16 +104,20 @@ Thos becomes Bathos -- the first step is a massive rename. The current
 
 The
 target CPU for Thos is the LPC1343 (Cortex-M3). The board I  used
-is the one sold by Olimex for 15 EUR. but I had to add a level converter
-for the serial port.  Actually, any board will work, but you, as a reader,
+is the chap one by Olimex (which actually has even cheaper boards now,
+based on the same CPU); however, I had to add a level converter
+for the serial port.  Actually, any board with that CPU
+will work; unfortunately you, as a reader,
 are not actually expected to run the code because of lack of hardware,
-but please be assured that it works fine on my hardware.
+but please be assured that this code works fine on my hardware.
 
 In the future I may port the system to the @i{Versatile} board, in
-order to be able to run it on @i{Qemu}, without real hardware. No
+order to be able to run it on @i{Qemu}, without real hardware; Bathos,
+in fact, already runs on the @i{Versatile}. No
 other changes to Thos are planned, because it must fit in two hours.
 (Once, in August 2012, I made an error with time slots and shrank
-my talk into one hour and 15 minutes, but it's not fun, that fast).
+my talk into one hour and 15 minutes, but it's not fun, that fast -- the
+video of that talk is available on the Internet).
 
 This project was born as a simplified spin-off of another OS that I am
 writing; Thos has been presented a few times in the form of a lesson.
@@ -120,7 +129,7 @@ depicted below.
 
 @center @image{lpc1343, 8cm}
 
-This document describes the whole writing of the OS, starting from an
+@ref{Writing Thos} describes the whole writing of the OS, starting from an
 empty directory. As a prerequisite, you are expected to know C
 language and have some experience with computer programming in
 general.  Master or PhD students are usually able to understand and enjoy
@@ -130,7 +139,7 @@ The released package is a @i{git} tree, so you can get back to older
 releases in the published history and follow the code described in the
 text as it is being written -- however, the document is committed
 after the code in the published history, so you need to keep a copy of
-the documentation before checking out individual chapters.
+the documentation before checking out individual sections.
 
 Please note that sometimes the choices being made are suboptimal, and
 I'm well aware of it. This material is really being shown in two
@@ -140,17 +149,26 @@ writing, but I still want this material to be explained while being
 typed live in a single lesson.
 
 @c ##########################################################################
+@node Writing Thos
+@chapter Writing Thos
+
+This chapter is the whole manual of Thos, unchanged. The concepts
+explained here are retained, almost unchanged, in Bathos.  The initial
+commits in the Bathos reporsitory match the steps described here, even
+if some detailes changed later, to achieve better portability.
+
+@c ==========================================================================
 @node Laying out the Makefile
-@chapter Laying out the Makefile
+@section Laying out the Makefile
 
 As a first step in setting up a new package, we'll set up a @i{Makefile},
 taking care of compilation of our sources, which are both C and assembly files.
 We'll use a simple @i{Makefile} (as simple as possible, as usual), so
 there is no support for dependencies or such stuff.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Cross-Compilation
-@section Cross-Compilation
+@subsection Cross-Compilation
 
 The code will be cross-compiled: the target is ARM while the build
 system is a PC. So let's start by defining the tools used for
@@ -196,9 +214,9 @@ example, if you unpack in @code{/opt}, you'll need to run this command
 
 in order for the @i{Makefile} to build all names for your commands.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node CFLAGS
-@section CFLAGS
+@subsection CFLAGS
 
 The Cortex-M3 is only one of the possible flavors of the ARM processor,
 so you'll need to always pass @code{-march=armv7-m -mthumb} to both
@@ -223,9 +241,9 @@ to avoid repetition of file names:
            $(LD) $(LDFLAGS) $^ -o $@
 @end example
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node A First Build
-@section A First Build
+@subsection A First Build
 
 We'll now ``@code{touch boot.S io.c main.c}'' to at least be able to
 start a compilation. The choice of the file names reflects the need to
@@ -246,17 +264,17 @@ always do for every chapter and section of this document. The
 commit message is a one liner, naming the chapter (or section)
 where the code is introduced.
 
-@c ##########################################################################
+@c ==========================================================================
 @node The Linker Script
-@chapter The Linker Script
+@section The Linker Script
 
 To perform the final link step, we actually need a @i{linker script}.
 In other words, we must tell the linker how to lay out the memory
 map for the program.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Spelling the Object Format
-@section Spelling the Object Format
+@subsection Spelling the Object Format
 
 When compiling your @code{hello.c} or equivalent program, you'll end
 up using the default linker script (usually in
@@ -278,9 +296,9 @@ in our small assembly source file.
    ENTRY(_thos_start)
 @end example
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Placing Sections in Memory
-@section Placing Sections in Memory
+@subsection Placing Sections in Memory
 
 After the header part, the script must list the ELF output sections,
 and the address in memory where they are placed.  To this aim, we need
@@ -351,9 +369,9 @@ I prefer to define initial code by putting it in a specially-named
 section instead of hardwiring the input file name in the linker script.
 
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Using the Script
-@section Using the Script
+@subsection Using the Script
 
 To put our linker script in action we need to set @code{LDFLAGS} in 
 the @i{Makefile}:
@@ -370,17 +388,17 @@ which confirms the linker script is being used:
 @end smallexample
 
 
-@c ##########################################################################
+@c ==========================================================================
 @node The Assembly Code
-@chapter The Assembly Code
+@section The Assembly Code
 
 When the system begins running at power-on, there is no pre-built
 context at all.  The only thing you can count on is the initial execution
 address, and you can place your assembly instructions there.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Naming an ELF Section
-@section Naming an ELF Section
+@subsection Naming an ELF Section
 
 Before you are able to run code in a higher level language at system
 boot, you need to build your so-called @i{run-time environment}.
@@ -427,9 +445,9 @@ another OS) the flag may be used to set permissions on memory pages,
 so we may say that marking executable sections with @code{"x"} is
 mandatory, even if sometimes things may work nonetheless.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Actual ASM code
-@section Actual ASM code
+@subsection Actual ASM code
 
 Within the @i{.boot} section we'll now place our code, labelling the
 first instruction as @code{_thos_start}, which is the @i{entry point}
@@ -522,9 +540,9 @@ instruction lengths.  In @i{thumb} (our case), instructions are
 every case.  Just copying the PC to SP will work as well, but you'll
 overwrite the first two instructions of your program with your stack.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Compiling boot.S
-@section Compiling boot.S
+@subsection Compiling boot.S
 
 With the assembly file in place, compilation now fails with
 @code{undefined reference to `thos_main'} and @code{undefined
@@ -563,17 +581,17 @@ but at least compiles and has some real content (here and elsewhere,
    10000450 B __bss_start
 @end example
 
-@c ##########################################################################
+@c ==========================================================================
 @node Loading the Binary
-@chapter Loading the Binary
+@section Loading the Binary
 
 With a ``working'' binary in our hands, it's now high time to write it
 to the final hardware.  The preferred way to do that is using the
 serial protocol offered by the internal ROM in the CPU.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Pin-strapping
-@section Pin-strapping
+@subsection Pin-strapping
 
 When power is applied to the LPC1343, pin P0_1 selects whether the CPU
 executes the program stored in internal flash or it runs code stored
@@ -590,9 +608,9 @@ this package includes two programs: @code{program} and @code{progrom},
 they write a binary to either RAM or flash (here called ROM for
 symmetry).
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Creating a Binary File
-@section Creating a Binary File
+@subsection Creating a Binary File
 
 The binary that must be programmed to the CPU, however, is not the ELF
 file, but a pure binary file, with no header or other extra information.
@@ -612,9 +630,9 @@ the same here; moreover, by having a binary file on disk you can
 easily compare it with a dump of your flash memory. For disassembly
 we'll still need the ELF file, to see symbolic names in the code.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node UART Programming
-@section UART Programming
+@subsection UART Programming
 
 The tools can be compiled by running @code{make -C tools}, as I lazily
 won't be changing our @i{Makefile} to build them.  Finally,
@@ -640,9 +658,9 @@ and from the serial port to @i{stdout}. This will be useful to see the
 output messages of @i{thos}, but at this point there is nothing to
 look at.
 
-@c ##########################################################################
+@c ==========================================================================
 @node Serial Output
-@chapter Serial Output
+@section Serial Output
 
 One advantage we achieve as a side effect of using the UART port for
 programming, is that the serial port has already been configured for
@@ -650,9 +668,9 @@ programming, is that the serial port has already been configured for
 some output function.  Let's write a simple @i{putc} and @i{puts},
 both in the @code{io.c} file.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node puts
-@section puts
+@subsection puts
 
 The implementation of @i{puts} is trivial: it just calls
 @i{putc} for each byte until end of string:
@@ -665,9 +683,9 @@ The implementation of @i{puts} is trivial: it just calls
    }
 @end example
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node An I/O Model
-@section An I/O Model
+@subsection An I/O Model
 
 As for @i{putc}, the function must write the next character to the TX
 register in the hardware, but only when there is no outstanding
@@ -722,9 +740,9 @@ perform a read or write instruction in generated machine code.
 Clearly, also the other I/O approaches listed above hide a
 @code{volatile} keyword somewhere in their implementation.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Defining Registers
-@section Defining Registers
+@subsection Defining Registers
 
 With @code{regs} properly declared, we need to define register
 names for our needs.  Since the @code{U0THR} register lives at
@@ -750,9 +768,9 @@ the CPU documentation, re-stresses that such things are registers by
 using @code{REG_} as a prefix, and finally enumerates bits in the name
 space of the hosting register by using a second underscore.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node putc
-@section putc
+@subsection putc
 
 With the three definitions in place, our @i{putc} turns out to be
 like this:
@@ -773,9 +791,9 @@ The function as shown takes also care of newlines: whereas C code uses
 @i{return-newline}, so the fix is performed at output time, to save
 source code from this boring detail.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node The regs Array
-@section The regs Array
+@subsection The regs Array
 
 The last missing point here is the definition of @code{regs}. This
 is simply done in the linker script, by means of the following line:
@@ -788,9 +806,9 @@ This is no different from the definition of @code{__bss_start} and
 @code{__bss_end}; the linker script is actually there exactly for this
 reason: defining symbols -- in addition to placing code in memory.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Header and more CFLAGS
-@section Header and more CFLAGS
+@subsection Header and more CFLAGS
 
 To close up this chapter with a working binary, we need a few more
 details, that deserve no discussion, being pretty trivial:
@@ -820,9 +838,9 @@ The compiler knows what are the prototypes for a number of standard-compliant
 functions, so we must clearly state that we are not hosted in a Posix
 environment, thus the @code{-ffreestanding}.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Testing puts
-@section Testing puts
+@subsection Testing puts
 
 With the code for this chapter, after programming we get an
 endless stream of:
@@ -834,16 +852,16 @@ endless stream of:
 The @i{endless} part depends on the fact that @i{thos_main} returns, and
 our assembly code restarts the system after calling @i{thos_main}.
 
-@c ##########################################################################
+@c ==========================================================================
 @node The Jiffies Variable
-@chapter The Jiffies Variable
+@section The Jiffies Variable
 
 The system is now equipped with serial output, which is a great first
 step. We now need a way to handle timing.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node The Timer Tick
-@section The Timer Tick
+@subsection The Timer Tick
 
 The easiest way to handle time is having an integer variable that
 counts timer interrupts. For example once every 10ms.  As a matter of
@@ -857,9 +875,9 @@ programmer might notice that the timers of the LPC1343 have a
 count as slowly as needed. For example it can count at 100HZ even if
 the input quartz we are using clocks the system as 12MHz.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Power-on the Timer
-@section Power-on the Timer
+@subsection Power-on the Timer
 
 In this specific SoC, when the device is turned on most peripherals are
 powered off until we gate their clock (the UART was already turned on
@@ -886,9 +904,9 @@ found in the CPU manual:
    #define REG_TMR32B1PR           (0x4001800c / 4)
 @end example
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node The HZ Macro and thos_setup
-@section The HZ Macro and thos_setup
+@subsection The HZ Macro and thos_setup
 
 To make thing a little abstract, let's also define our frequencies
 in @code{hw.h}, so they can be readily changed when porting to
@@ -925,9 +943,9 @@ With those additions to our headers, we are ready to fill
    }
 @end example
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Defining jiffies
-@section Defining jiffies
+@subsection Defining jiffies
 
 @i{jiffies} is now counting ad 100Hz. We only need to see it from C
 code: following Linux tradition, let's declare it in @code{thos.h} and
@@ -947,9 +965,9 @@ There are always several ways to achieve the same result, and you are
 free to change to code to test different implementations, this is only
 my personal choice for the sake of simplicity.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Using Our Time Facility
-@section Using Our Time Facility
+@subsection Using Our Time Facility
 
 As a final step in this chapter , let's now exercise the @i{jiffies}
 variable: our main function can print its self-promotion string once
@@ -971,9 +989,9 @@ per second:
 The code, simple as it is, works perfectly once programmed to
 the target CPU.
 
-@c ##########################################################################
+@c ==========================================================================
 @node The Task Model
-@chapter The Task Model
+@section The Task Model
 
 The OS is now in good shape. It has messaging and a time source; it
 only needs a task model. To avoid introducing interrupts, which
@@ -982,9 +1000,9 @@ each @i{task} is implemented by time-based @i{jobs} (the names being
 used here are common the real-time world).  A job is simply a function
 that returns when done.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Defining a Task Structure
-@section Defining a Task Structure
+@subsection Defining a Task Structure
 
 Considering that most tasks you need to accomplish can be reasonably
 modelled as a state machine, the job function can receive its current
@@ -1022,9 +1040,9 @@ The @code{release} field is the release time for the job: it is
 initialised to the first activation time and then modified by the
 scheduler according to @code{period}, each time the job runs.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Stuffing Tasks in an ELF Section
-@section Stuffing Tasks in an ELF Section
+@subsection Stuffing Tasks in an ELF Section
 
 The @i{thos} operating system is one of the conventional real-time
 operating systems that are built as a single binary images, which
@@ -1069,9 +1087,9 @@ Finally, the two extern symbols are defined in @code{thos.h}:
    extern struct thos_task __task_begin[], __task_end[];
 @end example
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Using Wildcards in Makefile
-@section Using Wildcards in Makefile
+@subsection Using Wildcards in Makefile
 
 I am a lazy typist, and I get upset whenever i need to edit a file to
 activate a feature; so, I want my users to be able to just drop-in new
@@ -1098,9 +1116,9 @@ because I can drop-in a task that plays music without any edit
 The commit for this chapter also includes a @code{make clean} target,
 which is useful in a system with no support for real dependencies.
 
-@c ==========================================================================
-@node Three Simple Tasks
-@section Three Simple Tasks
+@c ==========================================================================@
+node Three Simple Tasks
+@subsection Three Simple Tasks
 
 Let's write a few tasks that print strings on a timely basis. We can
 use a single job function, with a different argument. The source
@@ -1141,9 +1159,9 @@ working on priorities.  Once again, the choice is dictated by the lack
 of time -- the two hours are almost over, so we must hurry to meet the
 deadline.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Writing the Scheduler
-@section Writing the Scheduler
+@subsection Writing the Scheduler
 
 The scheduler is really simple: it must select which task is next to run,
 wait for its activation time to arrive, and call it. We put it inside
@@ -1174,9 +1192,9 @@ readable. Had we used @code{jiffies < t->release} the code would have
 failed after 497 days; not a real problem here, but it's a good habit
 to always deal with overflows.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Task-set Initialisation
-@section Task-set Initialisation
+@subsection Task-set Initialisation
 
 Something is missing here in the code just shown: we have no idea
 about what the initial value of @i{jiffies} is, and we are not allowed
@@ -1221,9 +1239,9 @@ This loop must run before the @code{release} times are updated,
 because UART output is slow: at 115200 baud we have output only 11
 bytes per millisecond.
 
-@c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Running the Task Set
-@section Running the Task Set
+@subsection Running the Task Set
 
 We are really done: let's just run @code{./tools/program thos.bin}
 to see that things do really work:
@@ -1250,9 +1268,9 @@ to see that things do really work:
    ....S....S....S....S....S....S....S....S....S....S
 @end example
 
-@c ##########################################################################
+@c ==========================================================================
 @node GPIO Output
-@chapter GPIO Output
+@section GPIO Output
 
 My major disappointment with the current code is that the OS provides
 for tasks as state machines, but the feature is not being used. There
@@ -1317,9 +1335,9 @@ a state machine:
 Needless to say, it works as expected, concurrently with the tasks
 that print messages to the serial port.
 
-@c ##########################################################################
+@c ==========================================================================
 @node The Buzzer
-@chapter The Buzzer
+@section The Buzzer
 
 The two hours of my lesson are now over, but there is no strict time
 limit in the written document. Thus, I'd like to introduce a new task,
@@ -1327,8 +1345,9 @@ one that plays a tune on a buzzer. The new task is not adding anything
 to the OS core, it's just a new task in the set.
 
 @c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Buzzer Hardware
-@section Buzzer Hardware
+@subsection Buzzer Hardware
 
 The hardware being used for playing music is a common buzzer or
 loudspeaker (one of those you can steal from a dead PC). It is
@@ -1338,8 +1357,9 @@ of timer 0 can be output.
 @center @image{speaker, 8cm}
 
 @c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Defining the Tune
-@section Defining the Tune
+@subsection Defining the Tune
 
 
 The patch called ``The Buzzer'' in the repository adds a new file,
@@ -1369,8 +1389,9 @@ distributing Thos in its current version is a crime, you are warned.
 @end example
 
 @c ==========================================================================
+@c --------------------------------------------------------------------------
 @node Defining the Notes
-@section Defining the Notes
+@subsection Defining the Notes
 
 The notes themselves are identified by their frequency: knowing that
 a semitone is the twelfth root of two and A is exactly 440Hz, this is
@@ -1418,8 +1439,9 @@ the frequency values to integer when assigning the @code{period} field
 at compile time.
 
 @c ==========================================================================
+@c --------------------------------------------------------------------------
 @node The PWM Task
-@section The PWM Task
+@subsection The PWM Task
 
 Based on the table just shown and the tune string, this is the code of
 the task that plays the tune (I won't show the boring @code{pwm_init}
@@ -1456,9 +1478,9 @@ non-note ASCII value).
 The task is then defined as usual, running at a frequency of @code{HZ
 / 10}.
 
-@c ##########################################################################
+@c ==========================================================================
 @node Thos on ARM-7
-@chapter Thos on ARM-7
+@section Thos on ARM-7
 
 I initially wrote Thos on the LPC-2104 processor, in the ``Christmas Tree''
 evaluation board.
@@ -1495,9 +1517,9 @@ chip families, and can write either to RAM or to Flash memory, even
 though the code shown here only works from RAM -- the LPC-21xx family
 has no USB-storage capabilities.
 
-@c ##########################################################################
+@c ==========================================================================
 @node The Future of Thos
-@chapter The Future of Thos
+@section The Future of Thos
 
 In 2011, after writing this document, I felt I was almost done with
 Thos, unless there were bugs to fix (like a I fixed a major typo in
