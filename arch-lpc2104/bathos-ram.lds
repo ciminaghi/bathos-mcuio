@@ -1,6 +1,6 @@
 OUTPUT_FORMAT("elf32-littlearm")
 OUTPUT_ARCH(arm)
-ENTRY(_bathos_start)
+ENTRY(_entry_ram)
 
 regs = 0;
 jiffies = 0xe0004008;
@@ -8,8 +8,11 @@ jiffies = 0xe0004008;
 SECTIONS
 {
 	. = 0x40000400;
+	 .text.boot : {
+		*(.text.ramboot);
+		*(.text.anyboot);
+	 }
 	.text : {
-		*(.boot)
 		*(.text)
 	}
 	.rodata : { *(.rodata) }
@@ -27,6 +30,7 @@ SECTIONS
 		. = ALIGN(16);
 		__bss_end = .;
 	}
+	/DISCARD/ : { *(.text.romboot); *(.vectors); }
 }
 
 PROVIDE(printf = pp_printf);
