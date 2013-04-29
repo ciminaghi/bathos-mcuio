@@ -11,9 +11,17 @@
 #define HZ			100
 
 /* uart */
-#define REG_U0THR		(0xe000c000 / 4)
+#define REG_U0THR		(0xe000c000 / 4) /* write */
+#define REG_U0RBR		(0xe000c000 / 4) /* read */
+#define REG_U0IER		(0xe000c004 / 4)
+#define REG_U0IIR		(0xe000c008 / 4) /* read */
+#define REG_U0FCR		(0xe000c008 / 4) /* write */
+#define REG_U0LCR		(0xe000c00c / 4)
 #define REG_U0LSR		(0xe000c014 / 4)
 #define REG_U0LSR_THRE		0x20
+
+#define REG_U0DLL		(0xe000c000 / 4) /* when DLAB=1 */
+#define REG_U0DLM		(0xe000c004 / 4) /* when DLAB=1 */
 
 /* timer 0 */
 #define REG_T0PR		(0xe000400c / 4)
