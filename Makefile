@@ -67,8 +67,11 @@ ASFLAGS += -g -Wall
 bathos.bin: bathos
 	$(OBJCOPY) -O binary $^ $@
 
-bathos: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
+bathos: bathos.o
 	$(LD) $^ $(LDFLAGS) -o $@
+
+bathos.o: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
+	$(LD) -r -T bigobj.lds $^ -o $@
 
 clean:
 	rm -f bathos.bin bathos *.o *~
