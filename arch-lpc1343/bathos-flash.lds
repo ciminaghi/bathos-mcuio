@@ -1,21 +1,26 @@
 OUTPUT_FORMAT("elf32-littlearm")
 OUTPUT_ARCH(arm)
-ENTRY(_bathos_start)
+ENTRY(_entry_rom)
 
 regs = 0;
 jiffies = 0x40018008;
 
 SECTIONS
 {
-	. = 0x10000400;
+	. = 0x0;
+        .text.boot : {
+                    *(.vectors);
+                    *(.text.romboot);
+                    *(.text.anyboot);
+        }
 	.text : {
-		*(.boot)
 		*(.text)
 	}
 	.rodata : {
 		*(.rodata)
 		. = ALIGN(4);
 		initcall_begin = .;
+		*(.init0);
 		*(.init1);
 		*(.init2);
 		*(.init3);
@@ -26,13 +31,19 @@ SECTIONS
 		*(.init8);
 		initcall_end = .;
 	}
-
-	.data : { *(.data) }
-
 	. = ALIGN(16);
-	__task_begin = .;
-	.task : {*(.task) }
-	__task_end = .;
+	_erom = .;
+
+	.data 0x10000400: AT(_erom) {
+		_sdata = .;
+		*(.data);
+
+		. = ALIGN(16);
+		__task_begin = .;
+		*(.task);
+		__task_end = .;
+		_edata = .;
+	}
 
 	.bss : {
 		. = ALIGN(16);
@@ -41,6 +52,7 @@ SECTIONS
 		. = ALIGN(16);
 		__bss_end = .;
 	}
+	/DISCARD/ : { *(.text.ramboot); }
 }
 
 PROVIDE(printf = pp_printf);

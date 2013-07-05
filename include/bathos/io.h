@@ -7,6 +7,10 @@
 #include <stdint.h>
 #include <arch/hw.h>
 
+#ifndef __SIZEOF_INT__
+#error "Please define __SIZEOF_INT__ or use a newer compiler"
+#endif
+
 /*
  * Our I/O model is based on the regs array. This assumes the regs array
  * lists 32-bit registers, but AVR is an 8-bit architecture, so single it out

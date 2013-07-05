@@ -17,6 +17,7 @@ extern int do_initcalls(void);
 #define __initcall(level,fn) static initcall_t __initcall_ ## fn \
 	__attribute__((used, __section__(".init" level))) = fn
 
+#define rom_initcall(fn)	__initcall("0", fn)
 #define core_initcall(fn)	__initcall("1", fn)
 #define subsys_initcall(fn)	__initcall("2", fn)
 #define device_initcall(fn)	__initcall("3", fn)

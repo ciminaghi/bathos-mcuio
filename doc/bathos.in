@@ -1623,10 +1623,18 @@ developed as a separate branch which is then merge.
 @node Supported Architectures 
 @chapter Supported Architectures
 
-The current version of Bathos supports the following architectures.
+The current version of Bathos supports several architectures, and a
+few of them can be built in two modes (@i{ram} and @i{flash}).
+
 You can choose what architecture to compile for by setting the @t{ARCH}
 variable, either in the environment or on the command line of @i{make}
 -- as described in @ref{Bathos Code Layout}.
+
+When more than one mode is supported, you can pass @t{MODE=} on the
+command line. Currently, the default is @i{ram} mode (like Thos
+originally did) but you can force flash mode by passing
+@t{MODE=flash}.  The ELF file is called @t{bathos} and the bare
+binary is called @t{bathos.bin}, irrespective of the mode.
 
 @table @code
 
@@ -1635,13 +1643,14 @@ variable, either in the environment or on the command line of @i{make}
 	This is the default, if no @t{ARCH=} is specified. It compiles
         the original Thos code for the respective hardware device
         (see @ref{Introduction to Thos}).  The port includes all the
-        tasks described earlier.
+        tasks described earlier.  @i{lpc1343} can be built for ram or flash.
 
 @item ARCH=lpc2104
 
 	Compile for the ARM-7 processor, LPC2104 (or 2105 or 2106).
         This architecture carries hardware support for the @i{Christmas Tree}
         (see @ref{Thos on ARM-7}). The port includes all the tasks
+        and can be built for ram or flash.
 
 @item ARCH=versatile
 
@@ -1651,6 +1660,7 @@ variable, either in the environment or on the command line of @i{make}
         script @t{arch-versatile/run-bathos} can be used to actually run
         the operating system.  The port only supports the serial
         tasks, so please compile with ``@t{TASK-y=task-uart.o}''.
+        The build is supported for RAM only.
 
 @item ARCH=atmega
 
@@ -1663,6 +1673,8 @@ variable, either in the environment or on the command line of @i{make}
         code must be flashed to the micro-controller, that doesn't allow
         running from RAM. The port only supports the serial
         tasks, so please compile with ``@t{TASK-y=task-uart.o}''.
+        The system is built for flash only (without passing @t{MODE=})
+        because the microprocessor can't run code in RAM.
 
 @end table
 

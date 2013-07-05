@@ -24,7 +24,13 @@ OBJDUMP         = $(CROSS_COMPILE)objdump
 
 # Files that depend on the architecture
 AOBJ  = $(ADIR)/boot.o $(ADIR)/io.o
-LDS   = $(ADIR)/bathos.lds
+
+# You can use "MODE=flash" on the command line", or BATHOS_MODE is from arch
+ifneq ($(MODE),)
+   BATHOS_MODE := -$(MODE)
+endif
+
+LDS   = $(ADIR)/bathos$(BATHOS_MODE).lds
 
 # Lib objects and flags
 LOBJ = pp_printf/printf.o pp_printf/vsprintf-xint.o

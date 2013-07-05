@@ -14,18 +14,39 @@ build_one () {
     echo "####################"
     echo "Build for " "$1"
     echo "Cross compilier is \"$CROSS_COMPILE\""
-    make -s -k
+    make -s -k MODE="$MAKEALL_MODE"
     test -f bathos.bin || echo "## Failed" >& 2
     test -f bathos && size bathos
+    test -n "$T" && test -d "$T" && cp bathos $T/bathos-$1
 }
 
 for var in ARCH; do
     unset $var
 done
 
+# if se requested, save stuff in /tmp
+if [ -n "$MAKEALL_SAVE" ]; then
+    T=$(mktemp /tmp/bathos-makeall-XXXXXX)
+    rm $T
+    mkdir $T
+else
+    T=""
+fi
 
 for a in lpc2104 lpc1343 versatile atmega; do
     export ARCH=$a
     eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
-    build_one $a
+    # if there is bathos.lds, we have one mode only
+    if [ -f arch-$a/bathos.lds ]; then
+	unset MAKEALL_MODE
+	build_one $a
+    else
+	for lds in $(echo arch-$a/bathos-*.lds); do
+	    mode=$(echo $lds | sed -e 's/^.*bathos-//' -e 's/.lds$//')
+	    export MAKEALL_MODE=$mode
+	    build_one "$a-$mode"
+	done
+    fi
 done
+
+test -n "$T" && test -d "$T" && echo "Binaries saved to $T"
