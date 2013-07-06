@@ -13,6 +13,8 @@ SECTIONS
 		*(.text)
 	}
 	.rodata : { *(.rodata) }
+	romcall_begin = .;
+	romcall_end = .;
 	.data : { *(.data) }
 	.bss : {
 		. = ALIGN(16);

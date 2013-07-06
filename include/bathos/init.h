@@ -9,6 +9,8 @@
 
 typedef int (*initcall_t)(void);
 
+/* Initcalls for flash builds cannot be merged in bigobj.lds */
+extern initcall_t  romcall_begin[],  romcall_end[];
 extern initcall_t initcall_begin[], initcall_end[];
 
 extern int do_initcalls(void);

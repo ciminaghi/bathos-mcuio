@@ -18,6 +18,9 @@ SECTIONS
 	}
 	.rodata : {
 		*(.rodata)
+		romcall_begin = .;
+		*(.init0);
+		romcall_end = .;
 	}
 	. = ALIGN(16);
 	_erom = .;

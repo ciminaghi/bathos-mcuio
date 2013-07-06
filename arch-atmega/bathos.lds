@@ -19,6 +19,9 @@ SECTIONS
 	.data 0x800060 : AT (__end_text) {
 		__data_start = .;      
 		*(.rodata);
+		romcall_begin = .;
+		*(.init0);
+		romcall_end = .;
 		*(.data);
 		__data = .;
 	}
