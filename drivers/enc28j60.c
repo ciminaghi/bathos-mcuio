@@ -183,24 +183,14 @@ static int enc28_init(struct enc28_dev *dev)
 	enc28_wr(dev, ENC28_TXNDH, 0x1fff >> 8);
 
 	/* Bank 1 stuff, packet filter:
-	 * For broadcast packets we allow only ARP packtets
-	 * All other packets should be unicast only for our mac (MAADR)
-	 *
-	 * The pattern to match on is therefore
-	 * Type	    ETH.DST
-	 * ARP	    BROADCAST
-	 * 06 08 -- ff ff ff ff ff ff -> ip checksum for theses bytes=f7f9
-	 * in binary these positions are:11 0000 0011 1111
-	 * This is hex 303F->EPMM0=0x3f,EPMM1=0x30
+	 * Accept all multicast and all broadcast.
+	 * No other hardware filtering
 	 */
 	enc28_wr(dev, ENC28_RXFCON,
 		 ENC28_RXFCON_UCEN |
-		 ENC28_RXFCON_CRCEN |
-		 ENC28_RXFCON_PMEN);
-	enc28_wr(dev, ENC28_PMM0, 0x3f);
-	enc28_wr(dev, ENC28_PMM1, 0x30);
-	enc28_wr(dev, ENC28_PMCSL, 0xf9);
-	enc28_wr(dev, ENC28_PMCSH, 0xf7);
+		 //ENC28_RXFCON_CRCEN |
+		 ENC28_RXFCON_MCEN |
+		 ENC28_RXFCON_BCEN);
 
 	/*
 	 * Bank 2 stuff:
