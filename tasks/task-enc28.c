@@ -3,6 +3,9 @@
 #include <arch/spi.h>
 #include <arch/gpio.h>
 
+#ifndef DEBUG_TASK_ENC28
+#define DEBUG_TASK_ENC28 0
+#endif
 
 #define GPIOCS 10
 
@@ -66,7 +69,18 @@ static void *enc28_task_run(void *arg)
 	int i;
 
 	i = enc28_send(dev, packet, sizeof(packet));
+	if (DEBUG_TASK_ENC28)
+		printf("send: %i\n", i);
 	i = enc28_recv(dev, inpacket, sizeof(inpacket));
+	if (DEBUG_TASK_ENC28) {
+		printf("recv: %i\n", i);
+		if (i > 0)
+			printf ("   to %02x:%02x:%02x, from %02x:%02x,%02x, "
+				"type %02x%02x\n",
+				inpacket[0], inpacket[1],inpacket[2],
+				inpacket[6], inpacket[7],inpacket[8],
+				inpacket[12], inpacket[13]);
+	}
 
 	return dev;
 }
