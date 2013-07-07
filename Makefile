@@ -22,7 +22,7 @@ STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
-# Files that depend on the architecture
+# Files that depend on the architecture (bathos.lds may be missing)
 AOBJ  = $(ADIR)/boot.o $(ADIR)/io.o
 
 # You can use "MODE=flash" on the command line", or BATHOS_MODE is from arch
@@ -30,14 +30,15 @@ ifneq ($(MODE),)
    BATHOS_MODE := -$(MODE)
 endif
 
-LDS   = $(ADIR)/bathos$(BATHOS_MODE).lds
+# There may or may not be a linker script (arch-unix doesn't)
+LDS   = $(wildcard $(ADIR)/bathos$(BATHOS_MODE).lds)
 
 # Lib objects and flags
 LOBJ = pp_printf/printf.o pp_printf/vsprintf-xint.o
 CFLAGS  += -Ipp_printf -DCONFIG_PRINT_BUFSIZE=256
 
-# Use our own linker script
-LDFLAGS += -T $(LDS)
+# Use our own linker script, if it exists
+LDFLAGS += $(patsubst %.lds, -T %.lds, $(LDS))
 
 # Each architecture can have specific drivers
 LDFLAGS += $(LIBARCH)
@@ -67,8 +68,11 @@ ASFLAGS += -g -Wall
 bathos.bin: bathos
 	$(OBJCOPY) -O binary $^ $@
 
-bathos: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
-	$(LD) $^ $(LDFLAGS) -o $@
+bathos: bathos.o
+	$(CC) $^ $(LDFLAGS) -o $@
+
+bathos.o: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
+	$(LD) -r -T bigobj.lds $^ -o $@
 
 clean:
 	rm -f bathos.bin bathos *.o *~

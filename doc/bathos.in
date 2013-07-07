@@ -1638,6 +1638,12 @@ binary is called @t{bathos.bin}, irrespective of the mode.
 
 @table @code
 
+@item ARCH=unix
+
+	The Unix build runs Bathos as a process.  This setup is the
+        most easily tested (running ``@t{make ARCH=unix}''), as it runs
+        on the build host. It currently only supports the serial tasks.
+
 @item ARCH=lpc1343
 
 	This is the default, if no @t{ARCH=} is specified. It compiles

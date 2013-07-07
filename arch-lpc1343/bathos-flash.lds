@@ -18,18 +18,9 @@ SECTIONS
 	}
 	.rodata : {
 		*(.rodata)
-		. = ALIGN(4);
-		initcall_begin = .;
+		romcall_begin = .;
 		*(.init0);
-		*(.init1);
-		*(.init2);
-		*(.init3);
-		*(.init4);
-		*(.init5);
-		*(.init6);
-		*(.init7);
-		*(.init8);
-		initcall_end = .;
+		romcall_end = .;
 	}
 	. = ALIGN(16);
 	_erom = .;
@@ -37,11 +28,6 @@ SECTIONS
 	.data 0x10000400: AT(_erom) {
 		_sdata = .;
 		*(.data);
-
-		. = ALIGN(16);
-		__task_begin = .;
-		*(.task);
-		__task_end = .;
 		_edata = .;
 	}
 

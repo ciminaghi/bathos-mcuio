@@ -33,7 +33,7 @@ else
     T=""
 fi
 
-for a in lpc2104 lpc1343 versatile atmega; do
+for a in unix lpc2104 lpc1343 versatile atmega; do
     export ARCH=$a
     eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
     # if there is bathos.lds, we have one mode only

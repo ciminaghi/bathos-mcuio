@@ -19,10 +19,10 @@ SECTIONS
 	.data 0x800060 : AT (__end_text) {
 		__data_start = .;      
 		*(.rodata);
+		romcall_begin = .;
+		*(.init0);
+		romcall_end = .;
 		*(.data);
-		__task_begin = .;
-		*(.task);
-		__task_end = .;
 		__data = .;
 	}
 	__end_data = .;
@@ -40,8 +40,3 @@ SECTIONS
 		__bss_end = .;
 	}
 }
-
-PROVIDE(printf = pp_printf);
-PROVIDE(sprintf = pp_sprintf);
-PROVIDE(vprintf = pp_sprintf);
-PROVIDE(vsprintf = pp_vsprintf);

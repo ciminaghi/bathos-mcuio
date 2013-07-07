@@ -5,14 +5,25 @@
 #include <bathos/bathos.h>
 #include <bathos/init.h>
 
+static int do_one_initcall(initcall_t *p)
+{
+	int error = (*p)();
+
+	if (error)
+		printf("initcall at %p: error %i\n", p, error);
+	return error;
+}
+
 int do_initcalls(void)
 {
 	initcall_t *p;
-	int error;
+
+	/* This list is empty for RAM boot */
+	for (p = romcall_begin; p < romcall_end; p++)
+		do_one_initcall(p);
 
 	for (p = initcall_begin; p < initcall_end; p++)
-		if ( (error = (*p)()) )
-			printf("initcall at %p: error %i\n", p, error);
+		do_one_initcall(p);
 	return 0;
 }
 
