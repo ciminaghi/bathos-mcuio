@@ -1527,7 +1527,7 @@ original code after release 2011-04, and a student fixed some typos
 and submitted a patch).
 
 Back then I planned to port tot the Arduino (something which finally
-happened, after I started Bathos.
+happened, after I started Bathos).
 But what actually happened is that I added some features and
 functionalities, that doesn't fit in the 2 hours at all, much less
 than the PWM task described earlier.  The material is libraries
@@ -1582,9 +1582,9 @@ The layout can be summarised in the following few points:
 @item The architecture is selected by a @i{make} variable: @t{ARCH=}.
 
 @item The tasks to be compiled-in are selected by another @i{make} variable:
-@t{TASK-y=} (by using the @t{-y} convention we can use configuration
-variable like @t{CONFIG_XXX}, which allows easy integration of
-Kconfig).
+@t{TASK-y=}. By using the @t{-y} convention we can use configuration
+variables like @t{CONFIG_XXX}, which allows later integration of
+Kconfig.
 
 @item Most @i{make} variables are built incrementally.
 
@@ -1595,9 +1595,9 @@ as the last Thos did.
 are referenced as @t{<bathos/xxx.h>} by source files.
 
 @item Architecture-specific files live in a directory called @t{arch-sth}.
-Such files are @t{boot.S}, @t{io.c} @t{bathos.lds} and a @t{Makefile}
-that specifies specific settings, like special @t{CFLAGS}. See
-available files to get some example.
+Such files are usually @t{io.c}, assembly code, the linker script
+and a @t{Makefile} for arch-specific settings, like special @t{CFLAGS}. See
+available files for examples.
 
 @item Portable tasks live in @t{tasks/}
 
@@ -1896,7 +1896,7 @@ simple network adapters and so on. In its most common form it is made
 up of 4 wires: clock, chip select and two data lines: MOSI (master out
 slave in) and MISO (master in slave out).  You can connect more than
 one peripheral to the same bus: each device has a personal CS line,
-while the other three are shared.
+while the other three wires are shared.
 
 SPI code in Bathos is, again, derived from a previous project. It is
 currently only supported for the LPC2104 architecture, because that is
@@ -2009,6 +2009,67 @@ Bathos includes a few tasks that act on SPI devices:
         is working and can build on it.
 
 @end table
+
+@c ##########################################################################
+@node Drivers
+@chapter Drivers
+
+The directory called @t{drivers} includes arch-independent code to
+deal with specific integrated circuits or protocols. For example,
+the bit-banged I2C driver will live in there, while arch-specific
+code using hardware I2C controllers lives in the respective @t{arch}
+directory.
+
+The current version only includes the @t{enc28j60} driver. The chip
+is a 10Mb Ethernet controller, connected through SPI.  The driver
+offers @i{create} and @i{destroy} functions, so the specific application
+can drive more than one device, if needed.  The header @t{<bathos/enc28j60.h>}
+should be enough to understand how this works, with the help of
+the sample task @t{tasks/task-enc28.c}.
+
+@c ##########################################################################
+@node Lib
+@chapter Lib
+
+The @t{lib} directory hosts a number of standard or generic functions.
+The object files are linked into @t{libbathos.a}.
+
+This is a list of source files and their role:
+
+@table @code
+
+@item setup.c
+
+	This implements @i{bathos_setup} using the @i{initcall} mechanism.
+        The function is @i{weak}, so the linker will pick an arch-specific
+        instance of the function if it exists, using this as a fall-back
+        implementation.
+
+@item udelay.c
+
+	The file includes a generic @t{udelay} function, that runs a
+        busy loop for the requested number of microseconds.  The function
+        is calibrated at system startup (using an @i{initcall}) by
+        calculating the @t{lpj} value, or @i{loops per jiffies}. The
+        delay itself is then achieved by running the same loop, so the
+        precision of the delay is acceptable.  There clearly is an
+        overhead in this function, so there is a constant added latency,
+        which depends on the architecture.
+        @c FIXME: find and list the latency
+
+@item ctype.c
+@itemx stdio.c
+@itemx string.c
+
+	Standard functions people may want to use in the code, including
+        @t{memset} that is called by the compiler itself. The functions
+        here are a subset of the ones you find in @i{libc}, so for
+        example there is no @i{strcmp} at this point and there will likely
+        never be @i{stricmp}.
+
+@end table
+
+
 
 
 @bye
