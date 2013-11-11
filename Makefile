@@ -81,3 +81,19 @@ clean:
 	rm -f bathos.bin bathos *.o *~
 	find . -name '*.o' -o -name '*~' -o -name '*.a' | \
 		grep -v scripts/kconfig | xargs rm -f
+
+# following targets from Makefile.kconfig
+Makefile: silentoldconfig
+
+silentoldconfig:
+	@mkdir -p include/config
+	$(MAKE) -f Makefile.kconfig $@
+
+scripts_basic config %config:
+	$(MAKE) -f Makefile.kconfig $@
+
+defconfig:
+	@echo "Using unix_defconfig"
+	@$(MAKE) -f Makefile.kconfig unix_defconfig
+
+.config: silentoldconfig
