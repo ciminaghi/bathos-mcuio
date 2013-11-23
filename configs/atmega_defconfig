@@ -1,0 +1,10 @@
+#
+# Automatically generated make config: don't edit
+#
+# CONFIG_ARCH_LPC1343 is not set
+# CONFIG_ARCH_LPC2104 is not set
+CONFIG_ARCH_ATMEGA=y
+# CONFIG_ARCH_VERSATILE is not set
+# CONFIG_ARCH_UNIX is not set
+CONFIG_ARCH="atmega"
+CONFIG_CROSS_COMPILE="avr-"
