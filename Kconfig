@@ -1,0 +1,50 @@
+mainmenu "BaThos configuration"
+
+choice
+	prompt "Architecture to build for"
+
+config ARCH_LPC1343
+	bool "LPC-1343 -- Cortex-M3"
+	help
+	  This architecture builds for LPC1343 and similar processors,
+	  by NXP.  This is the original architecture for Thos.
+	  Bathos can build both for RAM and FLASH modes.
+
+config ARCH_LPC2104
+	bool "LPC2104 -- ARM 7"
+	help
+	  This
+
+config ARCH_ATMEGA
+	bool "AtMega -- Arduino-like"
+	help
+	  This
+
+config ARCH_VERSATILE
+	bool "VERSATILE -- for Qemu"
+	help
+	  Build
+
+config ARCH_UNIX
+	bool "Unix -- run in a process"
+	help
+	  Build
+
+endchoice
+
+config ARCH
+       string
+       default "lpc1343" if ARCH_LPC1343
+       default "lpc2104" if ARCH_LPC2104
+       default "atmega" if ARCH_ATMEGA
+       default "versatile" if ARCH_VERSATILE
+       default "unix" if ARCH_UNIX
+
+
+config CROSS_COMPILE
+       string "Cross compiler prefix"
+       default "/opt/arm-2011.03/bin/arm-none-eabi-" if ARCH_LPC1343
+       default "/opt/arm-2011.03/bin/arm-none-eabi-" if ARCH_LPC2104
+       default "/opt/arm-2011.03/bin/arm-none-eabi-" if ARCH_VERSATILE
+       default "avr-" if ARCH_ATMEGA
+       default ""

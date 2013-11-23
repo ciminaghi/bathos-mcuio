@@ -1,5 +1,14 @@
-# Default architecture. We have several of them (look for arch-*)
-ARCH ?= lpc1343
+# Read .config first (if any) and use those values
+# But we must remove the quotes from these Kconfig values
+-include $(CURDIR)/.config
+ARCH ?= $(patsubst "%",%,$(CONFIG_ARCH))
+CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
+
+# if no .config is there, ARCH is still empty, this would prevent a simple
+# "make config"
+ifeq ($(ARCH),)
+  ARCH = lpc1343
+endif
 
 # First: the target. After that, we can include the arch Makefile
 all: bathos.bin
@@ -74,8 +83,10 @@ bathos.bin: bathos
 bathos: bathos.o
 	$(CC) bathos.o $(LDFLAGS) -o $@
 
-bathos.o: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
-	$(LD) -r -T bigobj.lds $^ -o $@
+obj-y =  main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
+
+bathos.o: silentoldconfig $(obj-y)
+	$(LD) -r -T bigobj.lds $(obj-y) -o $@
 
 clean:
 	rm -f bathos.bin bathos *.o *~
@@ -83,8 +94,6 @@ clean:
 		grep -v scripts/kconfig | xargs rm -f
 
 # following targets from Makefile.kconfig
-Makefile: silentoldconfig
-
 silentoldconfig:
 	@mkdir -p include/config
 	$(MAKE) -f Makefile.kconfig $@
@@ -93,7 +102,8 @@ scripts_basic config %config:
 	$(MAKE) -f Makefile.kconfig $@
 
 defconfig:
-	@echo "Using unix_defconfig"
-	@$(MAKE) -f Makefile.kconfig unix_defconfig
+	@echo "Using lpc1343_defconfig"
+	@test -f .config || touch .config
+	@$(MAKE) -f Makefile.kconfig lpc1343_defconfig
 
 .config: silentoldconfig
