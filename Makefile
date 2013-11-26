@@ -3,6 +3,7 @@
 -include $(CURDIR)/.config
 ARCH ?= $(patsubst "%",%,$(CONFIG_ARCH))
 CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
+MODE ?= $(patsubst "%",%,$(CONFIG_MEMORY_MODE))
 
 # if no .config is there, ARCH is still empty, this would prevent a simple
 # "make config"
@@ -34,16 +35,11 @@ OBJDUMP         = $(CROSS_COMPILE)objdump
 # Files that depend on the architecture (bathos.lds may be missing)
 AOBJ  = $(ADIR)/boot.o $(ADIR)/io.o
 
-# You can use "MODE=flash" on the command line", or BATHOS_MODE is from arch
-ifneq ($(MODE),)
-   BATHOS_MODE := -$(MODE)
-endif
-
 # The user can pass USER_CFLAGS if needed
 CFLAGS += $(USER_CFLAGS)
 
 # There may or may not be a linker script (arch-unix doesn't)
-LDS   = $(wildcard $(ADIR)/bathos$(BATHOS_MODE).lds)
+LDS   = $(wildcard $(ADIR)/bathos$(MODE).lds)
 
 # Lib objects and flags
 LOBJ = pp_printf/printf.o pp_printf/vsprintf-xint.o
