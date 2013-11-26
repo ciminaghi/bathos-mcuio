@@ -79,4 +79,5 @@ bathos.o: main.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 
 clean:
 	rm -f bathos.bin bathos *.o *~
-	find . -name '*.o' -o -name '*~' -o -name '*.a' | xargs rm -f
+	find . -name '*.o' -o -name '*~' -o -name '*.a' | \
+		grep -v scripts/kconfig | xargs rm -f
