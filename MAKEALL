@@ -1,52 +1,59 @@
 #!/bin/sh
-# This trivially compiles all known-good configurations
+# A trivial script to build with all known configurations
+# (please add a configs/ file to test your special case)
 
-# You can set env variables for the cross-compiler used for each architecture
-DEFAULT_CROSS_COMPILE="/opt/arm-2011.03/bin/arm-none-eabi-"
+# remove environment variables, so config values apply
+unset CROSS_COMPILE
+unset ARCH
 
-PREFIX_lpc2104=${PREFIX_lpc2104:-$DEFAULT_CROSS_COMPILE}
-PREFIX_lpc1343=${PREFIX_lpc1343:-$DEFAULT_CROSS_COMPILE}
-PREFIX_versatile=${PREFIX_versatile:-$DEFAULT_CROSS_COMPILE}
-PREFIX_atmega=${PREFIX_atmega:-avr-}
+# Backup previous .config file, if present
+rm -f .config.backup 2> /dev/null
+mv -f .config .config.backup 2> /dev/null
+touch .config
 
-build_one () {
-    make -s clean
-    echo "####################"
-    echo "Build for " "$1"
-    echo "Cross compilier is \"$CROSS_COMPILE\""
-    make -s -k MODE="$MAKEALL_MODE"
-    test -f bathos.bin || echo "## Failed" >& 2
-    test -f bathos && size bathos
-    test -n "$T" && test -d "$T" && cp bathos $T/bathos-$1
-}
+# make some temporary files for logs
+C=$(mktemp /tmp/bathos-config.XXXXXX)
+remove_tmp_c=true
 
-for var in ARCH; do
-    unset $var
-done
+B=$(mktemp /tmp/bathos-build.XXXXXX)
+remove_tmp_b=true
 
-# if se requested, save stuff in /tmp
-if [ -n "$MAKEALL_SAVE" ]; then
-    T=$(mktemp /tmp/bathos-makeall-XXXXXX)
-    rm $T
-    mkdir $T
-else
-    T=""
-fi
+TMPLOG=$(mktemp /tmp/bathos-tmp-build.XXXXXX)
 
-for a in unix lpc2104 lpc1343 versatile atmega; do
-    export ARCH=$a
-    eval export CROSS_COMPILE="\${PREFIX_$(echo $ARCH | sed 's/-/_/g')}"
-    # if there is bathos.lds, we have one mode only
-    if [ -f arch-$a/bathos.lds ]; then
-	unset MAKEALL_MODE
-	build_one $a
-    else
-	for lds in $(echo arch-$a/bathos-*.lds); do
-	    mode=$(echo $lds | sed -e 's/^.*bathos-//' -e 's/.lds$//')
-	    export MAKEALL_MODE=$mode
-	    build_one "$a-$mode"
-	done
+# loop on default .config files, building for all architectures
+configs=$(ls configs)
+for c in $configs; do
+    echo "##### Building with '$c'"
+    echo "##### Building with '$c'" >> $B
+    echo "##### Configuring for '$c'" >> $C
+    # make config and log
+    if ! make -s $c >> $C 2>&1; then
+	echo "Error in configuration (see $C)"
+	remove_tmp_c=false
     fi
+    make -s clean
+    # build binaries and log
+    if ! make -j5 -s > $TMPLOG 2>&1; then
+	cat $TMPLOG
+	echo "Build error (see $B)"
+	remove_tmp_b=false
+    else
+	grep -v 'ar:.crea' $TMPLOG
+    fi
+    cat $TMPLOG >> $B
+    # print sizes
+    test -f bathos.o && size bathos.o
+    test -f bathos && size bathos | tail -n 1
+
 done
 
-test -n "$T" && test -d "$T" && echo "Binaries saved to $T"
+make -s clean
+
+# clean logs if succesful
+if $remove_tmp_c; then rm $C; fi
+if $remove_tmp_b; then rm $B; fi
+rm $TMPLOG
+
+# restore previous .config file if needed, otherwise just clean.
+rm -f .config 2> /dev/null
+mv -f .config.backup .config 2> /dev/null

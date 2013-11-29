@@ -1,0 +1,14 @@
+#
+# Automatically generated make config: don't edit
+#
+CONFIG_HAS_MEMORY_MODE=y
+# CONFIG_ARCH_LPC1343 is not set
+CONFIG_ARCH_LPC2104=y
+# CONFIG_ARCH_ATMEGA is not set
+# CONFIG_ARCH_VERSATILE is not set
+# CONFIG_ARCH_UNIX is not set
+CONFIG_ARCH="lpc2104"
+CONFIG_CROSS_COMPILE="/opt/arm-2011.03/bin/arm-none-eabi-"
+# CONFIG_MMODE_RAM is not set
+CONFIG_MMODE_FLASH=y
+CONFIG_MEMORY_MODE="-flash"

@@ -33,7 +33,7 @@
 
 @setchapternewpage off
 
-@set update-month April 2013
+@set update-month November 2013
 @c @set release v2012-12
 
 @finalout
@@ -1571,25 +1571,41 @@ An operating system cannot really be replicated with minor differences
 for each and every board or CPU flavour it is ported to.
 
 For this reason, the transition from Thos to Bathos is marked by a
-complete reshuffling of source code.  As I write this, both LPC1343
-and LPC2104 are supported with very little code duplication, and
-a few more architectures are being added.
+complete reshuffling of source code.  Several architectures
+are supported (using @t{arch-} subdirectories) with very little
+code duplication.
 
-The layout can be summarised in the following few points:
+At the end of November 2013 I added Kconfig to select some of
+the features. Over time I plan to move all setup to Kconfig, but
+currently the task-set is still selected on the command line.
+
+To build a binary system, you should perform the following steps:
 
 @itemize @bullet
 
-@item The architecture is selected by a @i{make} variable: @t{ARCH=}.
+@item Configure the architecture, by running @t{make menuconfig}
+or equivalent command. @t{make defconfig} selects the ram-based
+build for LPC1343.
 
-@item The tasks to be compiled-in are selected by another @i{make} variable:
+@item Choose your cross-compiler. Please note that the environment
+variable @t{CROSS_COMPILE} is still supported, even if you can
+specify the compiler prefix in the configuration.
+
+@item Run @t{make}.  The chosen task-set is the default for
+the chosen architecture.  To select a different task-set you
+can pass on the command line a @i{make} variable:
 @t{TASK-y=}. By using the @t{-y} convention we can use configuration
-variables like @t{CONFIG_XXX}, which allows later integration of
-Kconfig.
+variables like @t{CONFIG_XXX}, which are being moved to the Kconfig
+system.
+
+@end itemize
+
+If you want to play with the code base, there a few more points
+that you should be aware of:
+
+@itemize @bullet
 
 @item Most @i{make} variables are built incrementally.
-
-@item The defaults provided by @i{Makefile} build the same code
-as the last Thos did.
 
 @item Bathos-specific headers live in @i{include/bathos} and
 are referenced as @t{<bathos/xxx.h>} by source files.
@@ -1599,18 +1615,23 @@ Such files are usually @t{io.c}, assembly code, the linker script
 and a @t{Makefile} for arch-specific settings, like special @t{CFLAGS}. See
 available files for examples.
 
+@item Some architectures have two linker scripts, for ram-based and
+flash-based build. The name being used is selected by @t{CONFIG_MEMORY_MODE}.
+
 @item Portable tasks live in @t{tasks/}
 
 @item Architecture-specific tasks live in @t{tasks-sth} (for the
 architecture @t{sth}). For example, the LED and PWM tasks in the
-two Thos ports rely on specific bit numbers
+two Thos ports rely on specific bit numbers (until I put such configuration
+in Kconfig variables).
 
 @item Other subdirectories, like @t{lib/}, have the usual meaning.
 
 @end itemize
 
 This set of changes is marked in @i{git} history as the merge of a
-branch called ``file-layout''. In general, every set of changes is
+branch called ``file-layout'' and, later, a branch called
+``kconfig''. In general, every set of changes is
 marked in the commit history in the same way, where the final commit
 before the merge is documentation for the new feature set.  This is
 done help my readers in seeing how change sets are grouped; however,
@@ -1626,27 +1647,27 @@ developed as a separate branch which is then merge.
 The current version of Bathos supports several architectures, and a
 few of them can be built in two modes (@i{ram} and @i{flash}).
 
-You can choose what architecture to compile for by setting the @t{ARCH}
-variable, either in the environment or on the command line of @i{make}
--- as described in @ref{Bathos Code Layout}.
+The architecture is selected by running the configurator,
+as described in @ref{Bathos Code Layout}. You can still pass
+@t{ARCH=} on the command line of @i{make} or in the environment,
+but this is not the suggested way to configure @i{bathos}.
 
-When more than one mode is supported, you can pass @t{MODE=} on the
-command line. Currently, the default is @i{ram} mode (like Thos
-originally did) but you can force flash mode by passing
-@t{MODE=flash}.  The ELF file is called @t{bathos} and the bare
-binary is called @t{bathos.bin}, irrespective of the mode.
-
+When more than one mode is supported (i.e., both RAM and Flash
+can be used to run the program), the configurator
+allows to choose one but, again, you can pass @t{MODE=} on the
+command line.
 @table @code
 
 @item ARCH=unix
 
 	The Unix build runs Bathos as a process.  This setup is the
-        most easily tested (running ``@t{make ARCH=unix}''), as it runs
+        most easily tested, as it runs
         on the build host. It currently only supports the serial tasks.
 
 @item ARCH=lpc1343
 
-	This is the default, if no @t{ARCH=} is specified. It compiles
+	This is the default (i.e., @t{make defconfig}), and by
+        defuautl selects a RAM build, to compile
         the original Thos code for the respective hardware device
         (see @ref{Introduction to Thos}).  The port includes all the
         tasks described earlier.  @i{lpc1343} can be built for ram or flash.
@@ -1679,13 +1700,11 @@ binary is called @t{bathos.bin}, irrespective of the mode.
         code must be flashed to the micro-controller, that doesn't allow
         running from RAM. The port only supports the serial
         tasks, so please compile with ``@t{TASK-y=task-uart.o}''.
-        The system is built for flash only (without passing @t{MODE=})
-        because the microprocessor can't run code in RAM.
 
 @end table
 
-In the future I'll add more architectures, as well as Kconfig support
-with default configs.  Also, I plan to support the ATmega328 without
+In the future I'll add more architectures.
+Also, I plan to support the ATmega328 without
 introducing a new architecture for it.
 
 @c ##########################################################################

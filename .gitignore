@@ -6,3 +6,10 @@
 /bathos
 /bathos.bin
 
+*.cmd
+*.o
+.tmp_*
+.config
+.config.old
+include/config
+include/generated
