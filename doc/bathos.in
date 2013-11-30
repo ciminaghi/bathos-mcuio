@@ -2119,16 +2119,162 @@ Bathos includes a few tasks that act on SPI devices:
 @end table
 
 @c ##########################################################################
+@node OneWire
+@chapter OneWire
+
+The OneWire protocol is supported by a set of files called @t{w1-*},
+and the API is defined in @t{<bathos/w1.h>}.  Currently the only
+available backend is @t{w1-gpio.c}, which in turn relies on
+@i{udelay}.
+
+@c ==========================================================================
+@node W1 API
+@section W1 API
+
+The code is based on the context of @i{bus}, and relies on some
+hardware-specific methods, host in @t{struct w1_ops}.  Due to my
+laziness, currently there can only be one set of operations: while I
+support several busses of the same kind (i.e., several wires), you
+can't define busses of different kinds (e.g., one using GPIO and the
+other using an hardware controller.
+
+These are the components of the API, defined in @t{<bathos/w1.h}:
+
+@table @code
+
+@item struct w1_bus
+
+	A bus can host at most 8 devices, because the structure includes
+        a static array of devices. It also includes a @t{detail} field
+        that can be used to differentiate between different busses. For
+        the GPIO back-end, the detail is the GPIO number of this wire.
+
+@item struct w1_dev
+
+	The device is found by library functions, and tasks can access
+        the array of devices in @t{bus->devs}.
+
+@item int w1_scan_bus(struct w1_bus *bus);
+
+	The function is used to scan a new bus and enumerate the
+        devices in there. The caller is expected to fill the
+        @t{detail} field beforehand.
+
+@item void w1_write_byte(struct w1_bus *bus, int byte);
+@itemx int w1_read_byte(struct w1_bus *bus);
+
+	Low-level operations to communicate on the bus.
+
+@item void w1_match_rom(struct w1_dev *dev);
+
+	This higher-level function issues the ``@i{match rom} command
+        for the specific device. The caller can use it to select one
+        of the devices on the bus and then send and receive bytes
+        from it, even if other devices exist on the bus.  The device
+        will remain selected until @t{w1_match_rom} is called again,
+        for a different device, or @t{w1_scan bus} is called again.
+
+@end table
+
+Since devices are usually only thermometers or EEPROM devices, the
+library offers specific support for some of those devices: the
+thermometer DS18S20, DS18B20 and DS28EA00, and the EEPROM DS28EC20
+(class 0x43).  I accept patches for other families.
+
+The following functions work on the specific devices:
+
+@table @code
+
+@item int32_t w1_read_temp(struct w1_dev *dev, unsigned long flags);
+@item int32_t w1_read_temp_bus(struct w1_bus *bus, unsigned long flags);
+
+	The former function reds the temperature from a specific
+        device; the latter uses the first thermometer in your bus,
+        according to the result of the initial bus scan. Temperature
+        is returned as a fixed point floating number, with 16 integer
+        bits and 16 fractional bits. If an error occurs, the functions
+        return  0x8000.0000.
+
+        The flags argument can be used to issue the command without
+        waiting for the result, or rather collect the result of a previous
+        read-temperature command.  When passing 0, the code waits for
+        temperature to be converted (i.e., it takrs more or less 0.5s).
+
+@item int w1_read_eeprom(struct w1_dev *dev, int offset, uint8_t *buffer, int blen);
+@itemx int w1_read_eeprom_bus(struct w1_bus *bus, int offset, uint8_t *buffer, int blen);
+
+      The functions read an area of the EEPROM; either from the specified
+      device of from the first device of class 0x43. The functions return
+      the number of bytes successfully read, or a negative number in case
+      of error.
+
+@item int w1_write_eeprom(struct w1_dev *dev, int offset, const uint8_t *buffer, int blen);
+
+@itemx int w1_write_eeprom_bus(struct w1_bus *bus, int offset, const uint8_t *buffer, int blen);
+
+      The functions write an area of the EEPROM; either from the specified
+      device of from the first device of class 0x43. The functions return
+      the number of bytes successfully written, or a negative number in case
+      of error.
+
+@end table
+
+@c ==========================================================================
+@node W1 Sample Task
+@section W1 Sample Task
+
+The sample task @t{task-w1.c} can be used to see how to use the W1 API.
+It accesses GPIO 8 to communicate with a bus, and it can be built with:
+
+@example
+   make TASK-y=task-w1.o
+@end example
+
+This is what happens in a system with three devices: the task uses
+@t{w1_read_temp_bus} and @t{w1_read_eeprom_bus}, so it accesses the
+``first'' suitable device. Thus, it ignores the fact that there are
+two thermometers.
+
+@example
+   Task: w1
+   w1_init: scan result: 3 devices
+     68000801dce56910
+     f70000001eda8242
+     5f00000040e50143
+   temp 0x0013e000: 19.8750
+   eeprom data @ 0x00000000: 53 44 42 2d 00 05 01 01
+   temp 0x0013c000: 19.7500
+   eeprom data @ 0x00000008: 00 00 00 00 00 00 00 00
+   temp 0x0013d000: 19.8125
+   eeprom data @ 0x00000010: 00 00 00 00 00 00 03 7f
+   temp 0x0013f000: 19.9375
+   eeprom data @ 0x00000018: 46 69 6c 65 44 61 74 61
+   temp 0x00135000: 19.3125
+   eeprom data @ 0x00000020: 2e 20 20 20 00 00 00 01
+@end example
+
+The task acts on each device every 4 seconds, and reports
+no error if no device is found; you can see that there is no device
+from the initial @t{scan result} message.
+
+While I could re-scan the bus at each iteration, this task does it only
+at startup, in its own @i{init} function; thus, if you replace the device
+after power on, the new device won't be used.
+
+
+@c ##########################################################################
 @node Drivers
 @chapter Drivers
 
 The directory called @t{drivers} includes arch-independent code to
-deal with specific integrated circuits or protocols. For example,
-the bit-banged I2C driver will live in there, while arch-specific
+deal with specific integrated circuits or software protocols. For example,
+the OneWire (@t{w1}) protocol and its hardware-independent gpio backend
+lives here. Drivers will host the I2C code
+the bit-banged I2C driver, while arch-specific
 code using hardware I2C controllers lives in the respective @t{arch}
 directory.
 
-The current version only includes the @t{enc28j60} driver. The chip
+Here I also host the @t{enc28j60} driver. The chip
 is a 10Mb Ethernet controller, connected through SPI.  The driver
 offers @i{create} and @i{destroy} functions, so the specific application
 can drive more than one device, if needed.  The header @t{<bathos/enc28j60.h>}
