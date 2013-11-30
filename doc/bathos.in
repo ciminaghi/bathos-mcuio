@@ -87,13 +87,13 @@ keep the code as simple as possible and avoid interrupts. However, you
 can write real stuff with it.
 
 This document is unchanged in its first part, which remains the ``two
-hour'' idea.  Everything from @ref{Bathos Code Layout} onwards is
+hour'' idea.  Everything from @ref{Bathos Design Choices} onwards is
 material I added later.  In order to look at the ``2-hour'' code, as
 described in the initial chapters of this document, you should check
 out commit @t{c41a2fd} or tag @t{v2012-12}, which is the commit before
 Thos becomes Bathos -- the first step is a massive rename.  As an
 alternative, you can checkout @t{ada69c09} or tag @t{thos-v2013-01},
-which is the finare release of Thos, with support for Arduino and references
+which is the final release of Thos, with support for Arduino and references
 to this newer project. The current
 @i{git} repository is rooted on the complete history of Thos
 up to @t{v2012-12}.
@@ -154,8 +154,8 @@ typed live in a single lesson.
 
 This chapter is the whole manual of Thos, unchanged. The concepts
 explained here are retained, almost unchanged, in Bathos.  The initial
-commits in the Bathos reporsitory match the steps described here, even
-if some detailes changed later, to achieve better portability.
+commits in the Bathos repository match the steps described here, even
+if some details changed later, to achieve better portability.
 
 @c ==========================================================================
 @node Laying out the Makefile
@@ -695,7 +695,7 @@ Register) and the @code{U0LSR} register, with its @code{THRE} bit
 (Line Status Register, Transmit Holding Register Empty).
 
 Once the register values are known, the code is pretty simple, however,
-we need to define our I/O primitives: a standardised way to access
+we need to define our I/O primitives: a standardized way to access
 hardware registers.  Here a few approaches are possible. Let's list
 a few possibilities
 
@@ -734,7 +734,7 @@ is uses the standard sized type @code{uint32_t} from @code{<stdint.h>}:
 @end example
 
 Here, the @code{volatile} attribute is needed to kill compiler
-optimisations over read/write operations concerning the array: every
+optimizations over read/write operations concerning the array: every
 read or write operation that appears in source code will actually
 perform a read or write instruction in generated machine code.
 Clearly, also the other I/O approaches listed above hide a
@@ -822,7 +822,7 @@ details, that deserve no discussion, being pretty trivial:
 @item Add @code{-ffreestanding -O2} to @code{CFLAGS} in @i{Makefile}.
 @end itemize
 
-Optimisations are generally needed to make the code better; with the
+Optimizations are generally needed to make the code better; with the
 current code the overall binary size is reduced from 240 to 176 bytes
 (although actual figures may differ according to the compiler being
 used).
@@ -1193,8 +1193,8 @@ failed after 497 days; not a real problem here, but it's a good habit
 to always deal with overflows.
 
 @c --------------------------------------------------------------------------
-@node Task-set Initialisation
-@subsection Task-set Initialisation
+@node Task-set Initialization
+@subsection Task-set Initialization
 
 Something is missing here in the code just shown: we have no idea
 about what the initial value of @i{jiffies} is, and we are not allowed
@@ -1562,8 +1562,8 @@ no excuse -- even if writing an HTTP server is still easier, if you can
 count on a working TCP implementation.
 
 @c ##########################################################################
-@node Bathos Code Layout
-@chapter Bathos Code Layout
+@node Bathos Design Choices
+@chapter Bathos Design Choices
 
 In order to add more features and be able to achieve real tasks with
 the simple thing described so far, we need a different code layout.
@@ -1571,9 +1571,16 @@ An operating system cannot really be replicated with minor differences
 for each and every board or CPU flavour it is ported to.
 
 For this reason, the transition from Thos to Bathos is marked by a
-complete reshuffling of source code.  Several architectures
-are supported (using @t{arch-} subdirectories) with very little
+complete reshuffling of source code.  Now Bathos supports several
+architectures (using @t{arch-} subdirectories) with very little
 code duplication.
+
+This chapter introduces the basic design choices that I try to
+consistently follow.
+
+@c ==========================================================================
+@node Building
+@section Building
 
 At the end of November 2013 I added Kconfig to select some of
 the features. Over time I plan to move all setup to Kconfig, but
@@ -1599,6 +1606,99 @@ variables like @t{CONFIG_XXX}, which are being moved to the Kconfig
 system.
 
 @end itemize
+
+@c ==========================================================================
+@node Git History
+@section Git History
+
+The main aim of this project is simplicity. This, for me, includes
+helping my readers in understanding the choices I made; thus I tend
+to be quite self-disciplined about the repository history, because
+it's a great supplement to documentation -- I noted that in serious
+projects I follow or contribute to, and I want to do the same for
+my users.
+
+Every major set of changes is marked in @i{git} history as the merge of a
+branch with a meaningful name, like ``file-layout'' or ``flashing''.
+This is
+done to help my readers in seeing how change sets are grouped.
+Usually, in such branches, the last commit
+before the merge is documentation for the whole set of commits, so
+the merge points are bot stable and documented.  The published @i{master}
+branch is always pushed at such stable points, but other branches are
+available for those who want to see work in progress.
+
+Unfortunately,
+it may happen that some details are fixed or added later; in that case
+I won't back-port the commit to the original branch, in order not to
+change past history of the @i{master} branch.
+
+@c ==========================================================================
+@node Initcalls
+@section Initcalls
+
+Bathos supports initcalls, in the typical Linux way.  This means that
+most initialization functions are marked as @t{core_initcall} or
+@t{task_initcall} (see @t{<bathos/init.h>} for the full set of names.
+
+Pointers to functions declared as @i{initcalls} are placed in a
+special ELF section, where initialization code finds them, sorted by
+initialization level.
+
+The @t{rom_initcall} declaration is slightly different from all other
+initcalls: the pointer is only used if you build for flash. This
+allows, for example, to avoid initializing the serial port in the
+@sc{lpc1343} if the code is being programmed through that very
+serial port; in that case the internal SoC ROM already configured
+the port and we'd better avoid doing it again.
+
+@c ==========================================================================
+@node Kconfig
+@section Kconfig
+
+Configuration of the architecture and the memory mode is currently
+performed through Kconfig. The code base I imported is from
+Linux-2.6.34, and while I tried a forward port to Linux-3.4 code, the
+result is not worth the big amount of code lines, in my opinion.
+
+As usual, you can run ``@t{make config}'' and ll the other variants:
+@i{menuconfig}, @i{xconfig}, @i{gconfig}. For each you need the related
+development libraries (@i{ncurses}, @i{kde} and @i{gnome}, resp.).
+
+Running @t{make defconfig} selects @sc{lpc1343} in @sc{ram} mode, like
+the original Thos.  Each architecture and memory mode has a pre-build
+configuration in @t{./configs}, so for example``@t{make
+unix_defconfig}'' selects a Unix build.
+
+The configurations I provide include a selection of @t{CROSS_COMPILE},
+but the environment variable takes precedence, if set.  I lazily provided
+my own configuration in the default configs, so the @t{./MAKEALL} script
+can build for all architectures without user interaction.  I welcome
+patches to make @t{MAKEALL} more independent of my own setup.
+
+@c ==========================================================================
+@node Linking Object Files
+@section Linking Object Files
+
+While building Bathos, I first create a big object file, called
+@t{bathos.o}, that includes everything that is expected to be part of
+the final binary.  The rule to create @t{bathos.o} references the
+libraries and everything needed.  The final link step is then
+performed using an architecture-specific and memory-mode-specific
+linker script.
+
+The step through @t{bathos.o} allows me to implement initcalls in a
+single place, i.e. @t{bigobj.lds}, the linker script used to build the
+intermediate object file.  The alternative, to avoid code duplication,
+would be preprocessing the final linker script, to include initcall
+management in each and every architecture.  I currently prefer the
+intermediate object file for this project, to keep the final linker
+scripts simpler than they would.
+
+
+@c ==========================================================================
+@node Other Points about Code
+@section Other Points about Code
 
 If you want to play with the code base, there a few more points
 that you should be aware of:
@@ -1629,17 +1729,6 @@ in Kconfig variables).
 
 @end itemize
 
-This set of changes is marked in @i{git} history as the merge of a
-branch called ``file-layout'' and, later, a branch called
-``kconfig''. In general, every set of changes is
-marked in the commit history in the same way, where the final commit
-before the merge is documentation for the new feature set.  This is
-done help my readers in seeing how change sets are grouped; however,
-it may happen that some details are fixed or added later; in that case
-I won't back-port the commit to the original branch, in order not to
-change past history. Such later fixes or small features are not
-developed as a separate branch which is then merge.
-
 @c ##########################################################################
 @node Supported Architectures 
 @chapter Supported Architectures
@@ -1648,9 +1737,9 @@ The current version of Bathos supports several architectures, and a
 few of them can be built in two modes (@i{ram} and @i{flash}).
 
 The architecture is selected by running the configurator,
-as described in @ref{Bathos Code Layout}. You can still pass
+as described in @ref{Bathos Design Choices}. You can still pass
 @t{ARCH=} on the command line of @i{make} or in the environment,
-but this is not the suggested way to configure @i{bathos}.
+but this is not the suggested way to configure Bathos.
 
 When more than one mode is supported (i.e., both RAM and Flash
 can be used to run the program), the configurator
@@ -1821,7 +1910,7 @@ skip the whole section.
 The choices described here are not the only way to abstract GPIO,
 and you may agree or disagree with what I did.
 
-For perfomance, the @i{gpio} argument is
+For performance, the @i{gpio} argument is
 checked for correctness only in the configuration function, which is
 expected to be executed at least once before using the bit, and possibly
 only once in the life of your program.
@@ -2096,4 +2185,5 @@ This is a list of source files and their role:
 @c  LocalWords:  thos Olimex README rubini gnudd Alessandro titlepage texinfo
 @c  LocalWords:  iftex smallexample linux CFLAGS LDFLAGS ASFLAGS rodata objdump
 @c  LocalWords:  GPIO LocalWords objcopy putc THRE microcontroller regs readl
-@c  LocalWords:  writel init struct Arduino HTTP printf
+@c  LocalWords:  writel init struct Arduino HTTP printf AHBCLKCTRL uart Kconfig
+@c  LocalWords:  initcall initcalls libgcc gpio
