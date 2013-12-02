@@ -10,7 +10,8 @@ TASK-y ?= task-uart.o
 
 # Following stuff is calculated, no further customization expected
 
-CFLAGS  = -mmcu=$(word 1, $(BATHOS_MCU))
+MCU=$(word 1, $(BATHOS_MCU))
+CFLAGS  = -mmcu=$(MCU) -DMCU_$(MCU)=1
 LDFLAGS = -nostdlib
 ASFLAGS = -mmcu=$(word 1, $(BATHOS_MCU))
 
