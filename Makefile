@@ -79,7 +79,8 @@ bathos.bin: bathos
 bathos: bathos.o
 	$(CC) bathos.o $(LDFLAGS) -o $@
 
-obj-y =  main.o sys_timer.o $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
+obj-y =  main.o sys_timer.o periodic_scheduler.o \
+$(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 
 bathos.o: silentoldconfig $(obj-y)
 	$(LD) -r -T bigobj.lds $(obj-y) -o $@
