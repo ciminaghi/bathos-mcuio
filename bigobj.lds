@@ -20,6 +20,9 @@ SECTIONS
 		__task_begin = .;
 		*(.task);
 		__task_end = .;
+		events_start = .;
+		*(.events);
+		events_end = .;
 	}
 }
 

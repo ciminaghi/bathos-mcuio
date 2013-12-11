@@ -36,7 +36,7 @@ OBJDUMP         = $(CROSS_COMPILE)objdump
 AOBJ  = $(ADIR)/boot.o $(ADIR)/io.o
 
 # The user can pass USER_CFLAGS if needed
-CFLAGS += $(USER_CFLAGS)
+CFLAGS += $(USER_CFLAGS) -DMODULE_NAME=$(subst -,_,$(subst /,_,$(subst .o,,$@)))
 
 # There may or may not be a linker script (arch-unix doesn't)
 LDS   = $(wildcard $(ADIR)/bathos$(MODE).lds)
