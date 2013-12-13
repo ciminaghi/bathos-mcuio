@@ -5,13 +5,33 @@
 #include <bathos/bathos.h>
 #include <bathos/jiffies.h>
 #include <bathos/event.h>
+#include <bathos/idle.h>
+#include <bathos/sys_timer.h>
 #include <arch/hw.h>
+
+/*
+ * Dummy default idle
+ */
+void __attribute__((weak)) idle(void)
+{
+	unsigned long now = jiffies;
+	unsigned long next;
+	void *data;
+	if (sys_timer_get_next_tick(&next, &data) < 0)
+		/* No next tick */
+		return;
+	if (time_before(now, next))
+		return;
+	trigger_event(&event_name(sys_timer_tick), data, EVT_PRIO_MAX);
+}
 
 int bathos_main(void)
 {
 	printf("Hello, Bathos is speaking (built on %s)\n", __DATE__);
 	events_init();
-	while(1)
+	while(1) {
 		handle_events();
+		idle();
+	}
 	return 0;
 }
