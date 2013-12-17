@@ -27,6 +27,12 @@ SECTIONS
 		evt_sys_timer_tick_handlers_start = .;
 		*(.evt_sys_timer_tick_handlers);
 		evt_sys_timer_tick_handlers_end = .;
+		evt_pipe_opened_handlers_start = .;
+		*(.evt_pipe_opened_handlers);
+		evt_pipe_opened_handlers_end = .;
+		bathos_devices_start = .;
+		*(.bathos_devices);
+		bathos_devices_end = .;
 	}
 }
 

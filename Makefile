@@ -79,7 +79,7 @@ bathos.bin: bathos
 bathos: bathos.o
 	$(CC) bathos.o $(LDFLAGS) -o $@
 
-obj-y =  main.o sys_timer.o periodic_scheduler.o \
+obj-y =  main.o sys_timer.o periodic_scheduler.o pipe.o \
 $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 
 bathos.o: silentoldconfig $(obj-y)
