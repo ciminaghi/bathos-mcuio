@@ -6,8 +6,11 @@
 #include <bathos/jiffies.h>
 #include <bathos/event.h>
 #include <bathos/idle.h>
+#include <bathos/errno.h>
 #include <bathos/sys_timer.h>
 #include <arch/hw.h>
+
+int bathos_errno;
 
 /*
  * Dummy default idle
