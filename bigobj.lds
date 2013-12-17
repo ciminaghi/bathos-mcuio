@@ -23,6 +23,10 @@ SECTIONS
 		events_start = .;
 		*(.events);
 		events_end = .;
+		. = ALIGN(64);
+		evt_sys_timer_tick_handlers_start = .;
+		*(.evt_sys_timer_tick_handlers);
+		evt_sys_timer_tick_handlers_end = .;
 	}
 }
 
