@@ -6,6 +6,8 @@ TASK-y ?= task-uart.o
 LIBARCH = $(ADIR)/libarch.a
 LIBARCH_OBJS = $(ADIR)/jiffies.o
 
+AOBJ = $(ADIR)/idle.o
+
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
 
