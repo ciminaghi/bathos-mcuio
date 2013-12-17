@@ -33,7 +33,7 @@ OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
 # Files that depend on the architecture (bathos.lds may be missing)
-AOBJ  = $(ADIR)/boot.o $(ADIR)/io.o
+AOBJ  += $(ADIR)/boot.o $(ADIR)/io.o
 
 # The user can pass USER_CFLAGS if needed
 CFLAGS += $(USER_CFLAGS) -DMODULE_NAME=$(subst -,_,$(subst /,_,$(subst .o,,$@)))
