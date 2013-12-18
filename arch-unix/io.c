@@ -16,10 +16,3 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-/* And this trivially uses stdout */
-void putc(int c)
-{
-	uint8_t ch = c;
-
-	write(1, &ch, 1);
-}
