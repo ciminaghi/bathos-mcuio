@@ -5,7 +5,10 @@
 
 extern struct bathos_dev bathos_devices_start[], bathos_devices_end[];
 
-declare_event(pipe_opened);
+declare_event(input_pipe_opened);
+declare_event(output_pipe_opened);
+declare_event(pipe_input_ready);
+declare_event(pipe_output_ready);
 
 static struct bathos_pipe pipes[MAX_BATHOS_PIPES];
 
@@ -60,7 +63,10 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 			return NULL;
 		}
 	}
-	trigger_event(&evt_pipe_opened, out, EVT_PRIO_MAX);
+	trigger_event(mode == BATHOS_MODE_INPUT ?
+		      &evt_input_pipe_opened :
+		      &evt_output_pipe_opened,
+		      out, EVT_PRIO_MAX);
 	return out;
 }
 

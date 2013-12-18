@@ -48,7 +48,8 @@ int pipe_read(struct bathos_pipe *, char *buf, int len);
 int pipe_write(struct bathos_pipe *, const char *buf, int len);
 int pipe_ioctl(struct bathos_pipe *, struct bathos_ioctl_data *data);
 
-declare_extern_event(pipe_opened);
+declare_extern_event(input_pipe_opened);
+declare_extern_event(output_pipe_opened);
 declare_extern_event(pipe_input_ready);
 declare_extern_event(pipe_output_ready);
 declare_extern_event(pipe_error);
