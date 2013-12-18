@@ -6,6 +6,8 @@
 #define NULL 0
 #endif
 
+#include <bathos/pipe.h>
+
 /* These 4 are actually pp_printf and friends */
 extern int printf(const char *fmt, ...)
         __attribute__((format(printf,1,2)));
@@ -21,5 +23,8 @@ extern int vsprintf(char *buf, const char *, va_list)
 /* Puts is not actually "standard", as it doesn't add the trailing newline */
 extern void putc(int c);
 extern int puts(const char *s);
+
+extern struct bathos_pipe *bathos_stdout;
+extern struct bathos_pipe *bathos_stdin;
 
 #endif /* __BATHOS_STDIO_H__ */
