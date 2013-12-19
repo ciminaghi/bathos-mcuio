@@ -22,7 +22,7 @@ core_initcall(stdio_init);
 int main(int argc, char **argv)
 {
 	/* Open stdout before getting to main */
-	bathos_stdout = pipe_open("/dev/stdout", BATHOS_MODE_OUTPUT, NULL);
+	bathos_setup();
 	bathos_main();
 	return 0;
 }
