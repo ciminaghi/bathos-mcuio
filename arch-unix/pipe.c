@@ -144,3 +144,13 @@ struct bathos_dev *bathos_find_dev(struct bathos_pipe *p)
 	out->priv = adata;
 	return out;
 }
+
+struct bathos_pipe *unix_fd_to_pipe(int fd)
+{
+	int i;
+	for (i = 0; i < ARRAY_SIZE(priv); i++) {
+		if (priv[i].fd == fd)
+			return priv[i].pipe;
+	}
+	return NULL;
+}
