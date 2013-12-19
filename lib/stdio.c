@@ -1,6 +1,7 @@
 #include <bathos/stdio.h>
 
 struct bathos_pipe *bathos_stdout;
+struct bathos_pipe *bathos_stdin;
 
 void __attribute__((weak)) putc(int c)
 {
