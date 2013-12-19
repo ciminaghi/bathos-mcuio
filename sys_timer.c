@@ -14,8 +14,6 @@
 static struct list_head scheduled_ticks;
 static struct list_head free_ticks;
 
-static int initialized = 0;
-
 struct scheduled_tick {
 	unsigned long when;
 	void *data;
@@ -41,10 +39,6 @@ core_initcall(system_timer_init);
 static struct scheduled_tick *alloc_tick(void)
 {
 	struct scheduled_tick *out = NULL;
-	if (!initialized) {
-		system_timer_init();
-		initialized = 1;
-	}
 	if (list_empty(&free_ticks))
 		return out;
 	out = list_entry(free_ticks.next, struct scheduled_tick, list);
