@@ -4,23 +4,25 @@
 #include <stdint.h>
 
 struct mcuio_range;
+struct mcuio_function;
+
+typedef int (*mcuio_read)(const struct mcuio_range *,
+			  unsigned offset, uint32_t *out);
+typedef int (*mcuio_write)(const struct mcuio_range *, unsigned offset,
+			   const uint32_t *in);
 
 struct mcuio_range_ops {
-	int (*readb)(struct mcuio_range *r, unsigned offset, uint8_t *dst);
-	int (*readw)(struct mcuio_range *r, unsigned offset, uint16_t *dst);
-	int (*readdw)(struct mcuio_range *r, unsigned offset, uint32_t *dst);
-	int (*readq)(struct mcuio_range *r, unsigned offset, uint64_t *dst);
-	int (*writeb)(struct mcuio_range *r, unsigned offset, uint8_t *dst);
-	int (*writew)(struct mcuio_range *r, unsigned offset, uint16_t *dst);
-	int (*writedw)(struct mcuio_range *r, unsigned offset, uint32_t *dst);
-	int (*writeq)(struct mcuio_range *r, unsigned offset, uint64_t *dst);
+	/* Pointers to read operations */
+	mcuio_read rd[4];
+	/* Pointers to write operations */
+	mcuio_write wr[4];
 };
 
 struct mcuio_range {
 	unsigned int start;
 	unsigned int length;
 	void *target;
-	struct mcuio_range_ops *ops;
+	const struct mcuio_range_ops *ops;
 };
 
 struct mcuio_function_runtime {
@@ -43,18 +45,42 @@ struct mcuio_function {
 	struct mcuio_function_runtime *runtime;
 };
 
-#if 0
-#define declare_mcuio_function(name, descr)			\
+#define declare_mcuio_function(name, r, th, o, rt)		\
 	struct mcuio_function name				\
 	__attribute__((section(".mcuio_functions"))) = {	\
-		.nranges = nr					\
+		.nranges = ARRAY_SIZE(r),			\
+		.ranges = r,					\
+		.to_host = th,					\
+		.ops = o,					\
+		.runtime = r,					\
 	};
-#endif
 
 extern struct mcuio_function mcuio_functions_start[], mcuio_functions_end[];
 
 declare_extern_event(mcuio_function_request);
 declare_extern_event(mcuio_function_reply);
+
+
+extern int mcuio_rdb(const struct mcuio_range *, unsigned offset,
+		     uint32_t *out);
+extern int mcuio_rdw(const struct mcuio_range *, unsigned offset,
+		     uint32_t *out);
+extern int mcuio_rddw(const struct mcuio_range *, unsigned offset,
+		      uint32_t *out);
+extern int mcuio_rdq(const struct mcuio_range *, unsigned offset,
+		     uint32_t *out);
+extern int mcuio_wrb(const struct mcuio_range *, unsigned offset,
+		     const uint32_t *in);
+extern int mcuio_wrw(const struct mcuio_range *, unsigned offset,
+		     const uint32_t *in);
+extern int mcuio_wrdw(const struct mcuio_range *, unsigned offset,
+		      const uint32_t *in);
+extern int mcuio_wrq(const struct mcuio_range *, unsigned offset,
+		     const uint32_t *in);
+
+extern const struct mcuio_range_ops default_mcuio_range_ops;
+extern const struct mcuio_range_ops default_mcuio_range_ro_ops;
+
 
 
 #endif /* __MCUIO_FUNCTION_H__ */
