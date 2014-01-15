@@ -175,7 +175,7 @@ static void pipe_input_handle(struct event_handler_data *ed)
 	struct mcuio_data *data = ed->priv;
 	struct mcuio_function *f;
 
-	pipe = ed->evt->data;
+	pipe = ed->data;
 	packet = &data->input_packet;
 	stat = pipe_read(pipe, (char *)packet, sizeof(packet));
 	if (stat < sizeof(packet))
@@ -189,7 +189,7 @@ static void pipe_input_handle(struct event_handler_data *ed)
 
 static void pipe_input_exit(struct event_handler_data *ed)
 {
-	struct mcuio_data *data = ed->evt->data;
+	struct mcuio_data *data = ed->data;
 	pipe_close(data->input_pipe);
 	pipe_close(data->output_pipe);
 }
@@ -202,7 +202,7 @@ declare_event_handler_with_priv(pipe_input_ready, NULL, pipe_input_handle,
 static void mcuio_function_request_handle(struct event_handler_data *ed)
 {
 	struct mcuio_data *data = ed->priv;
-	struct mcuio_function *f = ed->evt->data;
+	struct mcuio_function *f = ed->data;
 	mcuio_send_request_to_host(data, f);
 }
 

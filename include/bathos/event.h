@@ -45,17 +45,25 @@ struct event_handler_data {
 };
 
 /*
- * @overrun: this is incremented when the event is triggered more than once
- *           before being handled
+ * This structure represents an event
+ *
  * @handlers_start: pointer to the first handler for this event
- * @handlers_stop: pointer to the last handler for this event
- * @list: this is used to link the event to the list of pending events
- * @data: event specific data
+ * @handlers_end: pointer to the last handler for this event
  */
 struct event {
-	int overrun;
 	struct event_handler_data *handlers_start;
 	struct event_handler_data *handlers_end;
+};
+
+/*
+ * This structure represents a pending instance of an event
+ *
+ * @event: pointer to relevant event structure
+ * @list: this is used to link this instance to the list of pending events
+ * @data: data related to this instance
+ */
+struct pending_event {
+	struct event *event;
 	struct list_head list;
 	void *data;
 };
@@ -89,7 +97,6 @@ extern struct event events_start[], events_end[];
 	extern struct event_handler_data event_handlers_start(n)[],	\
 		event_handlers_end(n)[];				\
 	struct event event_name(n) __attribute__((section(".events"))) = { \
-		.overrun = 0,						\
 		.handlers_start = event_handlers_start(n),		\
 		.handlers_end = event_handlers_end(n),			\
 	}
@@ -108,6 +115,7 @@ extern struct event events_start[], events_end[];
     struct event_handler_data xcat(MODULE_NAME, event_handler_struct(n)) \
     __attribute__((section(xstr(event_handler_section_name(n)))) = {	\
 	    .ops = &event_handler_ops_struct(n),			\
-	};
+	    .priv = p,							\
+    };
 
 #endif /* __EVENT_H__ */
