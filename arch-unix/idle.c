@@ -92,7 +92,42 @@ static void pipe_opened_handle(struct event_handler_data *data)
 	nfds = max(nfds, adata->fd + 1);
 }
 
+static int __recalc_nfds(void)
+{
+	int i, out = -1;
+	for (i = 0; i < 255; i++)
+		if (FD_ISSET(i, &rd_fdset) || FD_ISSET(i, &wr_fdset))
+			out = i+1;
+	return out;
+}
+
+static void pipe_closed_handle(struct event_handler_data *data)
+{
+	struct bathos_pipe *p = data->data;
+	struct bathos_dev *dev;
+	struct arch_unix_pipe_data *adata;
+	printf("%s %d, pipe = %p\n", __func__, __LINE__, p);
+	if (!p)
+		return;
+	dev = p->dev;
+	if (!dev)
+		return;
+	adata = dev->priv;
+	if (!adata)
+		return;
+	if (p->mode & BATHOS_MODE_OUTPUT)
+		FD_CLR(adata->fd, &wr_fdset);
+	if (p->mode & BATHOS_MODE_INPUT)
+		FD_CLR(adata->fd, &rd_fdset);
+	if ((adata->fd + 1) == nfds)
+		nfds = __recalc_nfds();
+	printf("%s %d, nfds = %d\n", __func__, __LINE__, nfds);
+}
+
+
 declare_event_handler(input_pipe_opened, pipe_opened_init,
 		      pipe_opened_handle, NULL);
 declare_event_handler(output_pipe_opened, pipe_opened_init,
 		      pipe_opened_handle, NULL);
+declare_event_handler(input_pipe_closed, NULL, pipe_closed_handle, NULL);
+declare_event_handler(output_pipe_closed, NULL, pipe_closed_handle, NULL);
