@@ -118,4 +118,10 @@ extern struct event events_start[], events_end[];
 	    .priv = p,							\
     };
 
+#define declare_event_handler(n, i, h, e)	\
+    __declare_event_handler(n, i, h, e, NULL)
+
+#define declare_event_handler_with_priv(n, i, h, e, p) \
+    __declare_event_handler(n, i, h, e, p)
+
 #endif /* __EVENT_H__ */
