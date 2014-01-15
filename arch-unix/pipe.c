@@ -65,7 +65,10 @@ static int unix_open(struct bathos_pipe *pipe)
 	if (!adata)
 		/* OH OH, should never happen */
 		return -EINVAL;
-	adata->fd = open(d->name, mode);
+	if (strstr(d->name, "fd:"))
+		adata->fd = atoi(index(d->name, ':') + 1);
+	else
+		adata->fd = open(d->name, mode);
 	if (adata->fd < 0)
 		return -errno;
 	return 0;
