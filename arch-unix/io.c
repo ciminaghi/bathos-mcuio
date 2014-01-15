@@ -15,7 +15,7 @@ int stdio_init(void)
 	return 0;
 }
 
-core_initcall(stdio_init);
+subsys_initcall(stdio_init);
 
 
 /* We need a main function, called by libc initialization */
