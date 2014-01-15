@@ -53,9 +53,11 @@ void idle(void)
 	if (stat > 0) {
 		int i;
 		for (i = 0; i < nfds; i++) {
-			struct bathos_pipe *p = unix_fd_to_pipe(i);
-			if (p)
-				trigger_event_for_pipe(p);
+			struct bathos_pipe *p;
+			if (!FD_ISSET(i, &__rdfds))
+				continue;
+			p = unix_fd_to_pipe(i);
+			trigger_event_for_pipe(p);
 		}
 		return;
 	}
