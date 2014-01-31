@@ -68,7 +68,7 @@ int strncmp(const char *cs, const char *ct, int count)
 	return 0;
 }
 
-void *memcpy(void *d, void *s, int count)
+void *memcpy(void *d, const void *s, int count)
 {
 	intptr_t *dl = (intptr_t *)d, *sl = (intptr_t *)s;
 	char *d8, *s8;
