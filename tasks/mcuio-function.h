@@ -7,9 +7,9 @@ struct mcuio_range;
 struct mcuio_function;
 
 typedef int (*mcuio_read)(const struct mcuio_range *,
-			  unsigned offset, uint32_t *out);
+			  unsigned offset, uint32_t *out, int fill_data);
 typedef int (*mcuio_write)(const struct mcuio_range *, unsigned offset,
-			   const uint32_t *in);
+			   const uint32_t *in, int fill_data);
 
 struct mcuio_range_ops {
 	/* Pointers to read operations */
@@ -28,6 +28,8 @@ struct mcuio_range {
 struct mcuio_function_runtime {
 	int last_error;
 	void *priv;
+	struct mcuio_base_packet to_host;
+	struct mcuio_base_packet from_host;
 };
 
 struct mcuio_function_ops {
@@ -38,9 +40,6 @@ struct mcuio_function_ops {
 struct mcuio_function {
 	int nranges;
 	const struct mcuio_range *ranges;
-	const struct mcuio_base_packet *to_host;
-	/* This is written on host replies */
-	struct mcuio_base_packet *from_host;
 	const struct mcuio_function_ops *ops;
 	struct mcuio_function_runtime *runtime;
 };
@@ -50,9 +49,8 @@ struct mcuio_function {
 	__attribute__((section(".mcuio_functions"))) = {	\
 		.nranges = ARRAY_SIZE(r),			\
 		.ranges = r,					\
-		.to_host = th,					\
 		.ops = o,					\
-		.runtime = r,					\
+		.runtime = rt,					\
 	};
 
 extern struct mcuio_function mcuio_functions_start[], mcuio_functions_end[];
@@ -62,21 +60,21 @@ declare_extern_event(mcuio_function_reply);
 
 
 extern int mcuio_rdb(const struct mcuio_range *, unsigned offset,
-		     uint32_t *out);
+		     uint32_t *out, int fill);
 extern int mcuio_rdw(const struct mcuio_range *, unsigned offset,
-		     uint32_t *out);
+		     uint32_t *out, int fill);
 extern int mcuio_rddw(const struct mcuio_range *, unsigned offset,
-		      uint32_t *out);
+		      uint32_t *out, int fill);
 extern int mcuio_rdq(const struct mcuio_range *, unsigned offset,
-		     uint32_t *out);
+		     uint32_t *out, int fill);
 extern int mcuio_wrb(const struct mcuio_range *, unsigned offset,
-		     const uint32_t *in);
+		     const uint32_t *in, int fill);
 extern int mcuio_wrw(const struct mcuio_range *, unsigned offset,
-		     const uint32_t *in);
+		     const uint32_t *in, int fill);
 extern int mcuio_wrdw(const struct mcuio_range *, unsigned offset,
-		      const uint32_t *in);
+		      const uint32_t *in, int fill);
 extern int mcuio_wrq(const struct mcuio_range *, unsigned offset,
-		     const uint32_t *in);
+		     const uint32_t *in, int fill);
 
 extern const struct mcuio_range_ops default_mcuio_range_ops;
 extern const struct mcuio_range_ops default_mcuio_range_ro_ops;

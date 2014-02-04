@@ -20,6 +20,7 @@ struct mcuio_base_packet {
 	uint32_t type:8;
 	uint32_t data[2];
 	uint16_t crc;
+	uint16_t dummy;
 } __attribute__((packed));
 
 static inline int mcuio_packet_is_read(struct mcuio_base_packet *p)
@@ -37,6 +38,11 @@ static inline int mcuio_packet_is_reply(struct mcuio_base_packet *p)
 	return p->type & (1 << 6);
 }
 
+static inline int mcuio_packet_is_fill_data(struct mcuio_base_packet *p)
+{
+	return (p->type & (1 << 7));
+}
+
 static inline void mcuio_packet_set_reply(struct mcuio_base_packet *p)
 {
 	p->type |= (1 << 6);
@@ -45,6 +51,11 @@ static inline void mcuio_packet_set_reply(struct mcuio_base_packet *p)
 static inline int mcuio_packet_is_error(struct mcuio_base_packet *p)
 {
 	return p->type & (1 << 5);
+}
+
+static inline int mcuio_packet_set_error(struct mcuio_base_packet *p)
+{
+	return p->type |= (1 << 5);
 }
 
 static inline int mcuio_packet_data_len(struct mcuio_base_packet *p)
@@ -63,6 +74,10 @@ static inline const char *mcuio_packet_type_to_str(int t)
 		return "mcuio_type_rdw";
 	case mcuio_type_wrw:
 		return "mcuio_type_wrw";
+	case mcuio_type_rddw:
+		return "mcuio_type_rddw";
+	case mcuio_type_wrdw:
+		return "mcuio_type_wrdw";
 	case mcuio_type_rdq:
 		return "mcuio_type_rdq";
 	case mcuio_type_wrq:
@@ -75,8 +90,8 @@ static inline const char *mcuio_packet_type_to_str(int t)
 struct mcuio_func_descriptor {
 	uint32_t device:16;
 	uint32_t vendor:16;
-	uint32_t rev:8;
 	uint32_t class:24;
+	uint32_t rev:8;
 } __attribute__((packed));
 
 struct mcuio_func_data {
