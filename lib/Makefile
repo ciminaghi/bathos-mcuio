@@ -8,6 +8,7 @@ LIB_OBJS += lib/ctype.o
 LIB_OBJS += lib/setup.o
 LIB_OBJS += lib/udelay.o
 LIB_OBJS += lib/event.o
+LIB_OBJS += lib/statemachine.o
 
 $(LIBBATHOS): $(LIB_OBJS)
 	$(AR) r $@ $(LIB_OBJS)
