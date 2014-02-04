@@ -42,9 +42,24 @@ SECTIONS
 		evt_pipe_input_ready_handlers_start = .;
 		*(.evt_pipe_input_ready_handlers);
 		evt_pipe_input_ready_handlers_end = .;
+		evt_mcuio_function_request_handlers_start = .;
+		*(.evt_mcuio_function_request_handlers);
+		evt_mcuio_function_request_handlers_end = .;
+		evt_input_pipe_closed_handlers_start = .;
+		*(.evt_input_pipe_closed_handlers);
+		evt_input_pipe_closed_handlers_end = .;
+		evt_output_pipe_closed_handlers_start = .;
+		*(.evt_output_pipe_closed_handlers);
+		evt_output_pipe_closed_handlers_end = .;
+		evt_pipe_really_closed_handlers_start = .;
+		*(.evt_pipe_really_closed_handlers);
+		evt_pipe_really_closed_handlers_end = .;
 		bathos_devices_start = .;
 		*(.bathos_devices);
 		bathos_devices_end = .;
+		mcuio_functions_start = .;
+		*(.mcuio_functions);
+		mcuio_functions_end = .;
 	}
 }
 
