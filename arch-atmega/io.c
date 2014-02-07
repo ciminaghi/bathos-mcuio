@@ -1,28 +1,25 @@
 #include <bathos/bathos.h>
 #include <bathos/io.h>
+#include <bathos/init.h>
 #include <arch/hw.h>
+
+#define CPU_PRESCALE(n) (CLKPR = 0x80, CLKPR = (n))
+
+int stdio_init(void)
+{
+	bathos_stdout = pipe_open("usb-uart", BATHOS_MODE_OUTPUT, NULL);
+	bathos_stdin = pipe_open("usb-uart", BATHOS_MODE_INPUT, NULL);
+	return 0;
+}
+rom_initcall(stdio_init);
 
 int bathos_setup(void)
 {
-	/* This setup function should configure the uart pins and clock */
+	CPU_PRESCALE(0);
+	/* Turn red led on */
+	timer_init();
 
-	/*
-	 * Input clock is 16MHz, divided by 8 (using U2X) makes 2MHz.
-	 * To get 2% precision we need 50 ticks per bit, so 40k bits,
-	 * so let's try a 38400 rate:
-	 *   2000000 / 38400 = 52.08
-	 */
-	regs[REG_UCSRC] = 0;
-	regs[REG_UBBRL] = 51;
-
-	/* size is 011 for 8-bit symbols */
-	regs[REG_UCSRC] = REG_UCSRC_URSEL | REG_UCSRC_UCSZ1 | REG_UCSRC_UCSZ0;
-	regs[REG_UCSRA] = REG_UCSRA_UDRE | REG_UCSRA_U2X;
-	regs[REG_UCSRB] = REG_UCSRB_TXEN;
-
-	/* similarly, set up the timer: use 256 as a prescaler, and irq */
-	regs[REG_TCCR0] = REG_TCCR0_P256;
-	regs[REG_TIMSK] = REG_TIMSK_TOIE0;
+	do_initcalls();
 
 	/* Interrupts are enabled by the calling assembly code */
 	return 0;
