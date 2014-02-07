@@ -24,12 +24,3 @@ int bathos_setup(void)
 	/* Interrupts are enabled by the calling assembly code */
 	return 0;
 }
-
-void putc(int c)
-{
-	if (c == '\n')
-		putc('\r');
-	while ( !(regs[REG_UCSRA] & REG_UCSRA_UDRE) )
-		;
-	regs[REG_UDR] = c;
-}
