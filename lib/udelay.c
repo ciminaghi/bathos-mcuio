@@ -68,7 +68,7 @@ void generic_udelay(unsigned usec)
 {
 	/* Sleep 10ms each time, to prevent overlfows */
 	const int step = 10 * 1000;
-	const int usec_per_jiffy = 1000 * 1000 / HZ;
+	const int usec_per_jiffy = 1000L * 1000L / HZ;
 	const int count_per_step = udelay_lpj * step / usec_per_jiffy;
 
 	while (usec > step)  {
