@@ -16,7 +16,7 @@ SECTIONS
 	}
 	__end_text = .;
 	/* By conventions, RAM is thought to be at address 0x80.0000 */
-	.data 0x800060 : AT (__end_text) {
+	.data 0x800100 : AT (__end_text) {
 		__data_start = .;      
 		*(.rodata);
 		romcall_begin = .;
