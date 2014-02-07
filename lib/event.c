@@ -1,7 +1,6 @@
 
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
+#include <bathos/errno.h>
+#include <bathos/string.h>
 
 #include <bathos/init.h>
 #include <bathos/event.h>
