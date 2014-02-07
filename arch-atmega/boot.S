@@ -60,8 +60,10 @@ _bathos_start:
 	eor r1, r1
 	out 0x3f, r1
 	/* set SP at address 0x3d, 0x3e -- assume 1k RAM + 0x60 for regs */
-	ldi r28, lo8(1023 + 0x60)
-	ldi r29, hi8(1023 + 0x60)
+	//ldi r28, lo8(1023 + 0x60)
+	//ldi r29, hi8(1023 + 0x60)
+	ldi r28, lo8(0xaff)
+	ldi r29, hi8(0xaff)
 	out 0x3d, r28
 	out 0x3e, r29
 
