@@ -2,6 +2,7 @@ SECTIONS
 {
 	.rodata : {
 		*(.rodata);
+		*(.rodata.str1.1);
 		. = ALIGN(8);
 		romcall_begin = .;
 		romcall_end = .;
