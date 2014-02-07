@@ -13,6 +13,9 @@ SECTIONS
 		*(.boot)
 		*(.text)
 		*(.text.*)
+		/* For data that needs to reside in the lower 64k of progmem. */
+		*(.progmem.gcc*)
+    		*(.progmem*)
 	}
 	__end_text = .;
 	/* By conventions, RAM is thought to be at address 0x80.0000 */
