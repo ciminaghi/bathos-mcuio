@@ -20,6 +20,12 @@ ASFLAGS = -mmcu=$(word 1, $(BATHOS_MCU))
 LIBARCH = $(ADIR)/libarch.a
 LIBARCH_OBJS = $(ADIR)/jiffies.o
 
+ifeq ($(MCU),atmega8)
+LIBARCH_OBJS += $(ADIR)/atmega-a8.o
+else ifeq ($(MCU),atmega32u4)
+LIBARCH_OBJS += $(ADIR)/atmega-32u4.o $(ADIR)/usb-uart.o
+endif
+
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
 
