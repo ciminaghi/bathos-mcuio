@@ -2,14 +2,43 @@
 .extern do_jiffies_irq
 .section .vectors, "ax"
 
-	rjmp _bathos_start
+	rjmp _bathos_start /* 0 */
+	nop /* 2 */
+	nop /* 4 */
+	nop /* 6 */
+	nop /* 8 */
+	nop /* a */
+	nop /* c */
+	nop /* e */
+	nop /* 10 */
+	nop /* 12 */
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	rjmp __vector_10   /* 14 */
+	nop
+	/* rjmp cippa */
+	rjmp __vector_11   /* 16 */
+	/* rjmp lippa */
+	.rep 50
+	nop
+	.endr
 	
+#if 0	
 	/* We use one interrupt only, to count jiffies: always jump there */
 	.rep 25
 	nop
 	.endr
 
 	rjmp do_jiffies_irq
+#endif
 
 /* Fllowins is boot code */
 .section .boot, "ax"
