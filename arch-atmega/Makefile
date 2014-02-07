@@ -11,7 +11,8 @@ TASK-y ?= task-uart.o
 # Following stuff is calculated, no further customization expected
 
 MCU=$(word 1, $(BATHOS_MCU))
-CFLAGS  = -mmcu=$(MCU) -DMCU_$(MCU)=1
+CFLAGS  = -mmcu=$(MCU) -DMCU_$(MCU)=1 -funsigned-char -funsigned-bitfields \
+-ffunction-sections -fpack-struct -fshort-enums
 LDFLAGS = -nostdlib
 ASFLAGS = -mmcu=$(word 1, $(BATHOS_MCU))
 
