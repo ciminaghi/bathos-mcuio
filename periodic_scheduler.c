@@ -32,7 +32,7 @@ static int pts_init(void)
 	return sys_timer_enqueue_tick(next->release - now, NULL);
 }
 
-task_initcall(pts_init);
+rom_initcall(pts_init);
 
 static void pts_handle(struct event_handler_data *d)
 {

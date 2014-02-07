@@ -48,7 +48,7 @@ int events_init(void)
 	return 0;
 }
 
-core_initcall(events_init);
+rom_initcall(events_init);
 
 int trigger_event(struct event *e, void *data, int evt_prio)
 {
