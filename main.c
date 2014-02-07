@@ -30,7 +30,13 @@ void __attribute__((weak)) idle(void)
 
 int bathos_main(void)
 {
-	printf("Hello, Bathos is speaking (built on %s)\n", __DATE__);
+	/* Wait for stdout to be ready for writing */
+	/* pipe_write with zero length returns -1 and sets bathos_errno
+	   if pipe is not ready for writing
+	*/
+	while (pipe_write(bathos_stdout, "", 0) && (bathos_errno == EAGAIN));
+
+	printf("Hello, Bathos is speaking (built on %s)\r\n", __DATE__);
 	while(1) {
 		handle_events();
 		idle();
