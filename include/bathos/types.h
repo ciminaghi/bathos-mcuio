@@ -14,6 +14,4 @@ typedef int32_t s32;
 typedef int16_t s16;
 typedef int8_t s8;
 
-typedef unsigned long size_t;
-
 #endif /* __TYPES_H__ */
