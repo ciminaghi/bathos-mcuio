@@ -1,5 +1,6 @@
 
 #include <arch/hw.h>
+#include <avr/interrupt.h>
 #include <avr/io.h>
 
 void pll_init(void)
@@ -12,6 +13,11 @@ void pll_init(void)
 
 void timer_init(void)
 {
+	/* prescaler: 256, 16MHz / 256 = 62500Hz */
+	TCCR0B = 1 << CS02;
+	/* 62500Hz / 250 = 250HZ */
+	OCR0A = 250;
+	TIMSK0 = 1 << TOIE0;
 }
 
 void usb_enable_freeze(void)
@@ -27,4 +33,11 @@ void usb_config(void)
 void usb_hw_config(void)
 {
 	UHWCON = 0x81;
+}
+
+volatile unsigned long jiffies;
+
+ISR(TIMER0_OVF_vect)
+{
+	jiffies++;
 }

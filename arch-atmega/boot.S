@@ -12,24 +12,43 @@
 	nop /* e */
 	nop /* 10 */
 	nop /* 12 */
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	rjmp __vector_10   /* 14 */
-	nop
-	/* rjmp cippa */
-	rjmp __vector_11   /* 16 */
-	/* rjmp lippa */
-	.rep 50
-	nop
-	.endr
+	nop /* 14 */
+	nop /* 16 */
+	nop /* 18 */
+	nop /* 1a */
+	nop /* 1c */
+	nop /* 1e */
+	nop /* 20 */
+	nop /* 22 */
+	nop /* 24 */
+	nop /* 26 */
+	rjmp __vector_10   /* 28 */
+	nop /* 2a */
+	rjmp __vector_11   /* 2c */
+	nop /* 2e */
+	nop /* 30 */
+	nop /* 32 */
+	nop /* 34 */
+	nop /* 36 */
+	nop /* 38 */
+	nop /* 3a */
+	nop /* 3c */
+	nop /* 3e */
+	nop /* 40 */
+	nop /* 42 */
+	nop /* 44 */
+	nop /* 46 */
+	nop /* 48 */
+	nop /* 4a */
+	nop /* 4c */
+	nop /* 4e */
+	nop /* 50 */
+	nop /* 52 */
+	nop /* 54 */
+	nop /* 56 */
+	nop /* 58 */
+	nop /* 5a */
+	rjmp __vector_23 /* 5c */
 	
 #if 0	
 	/* We use one interrupt only, to count jiffies: always jump there */

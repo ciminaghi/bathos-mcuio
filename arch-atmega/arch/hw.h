@@ -1,7 +1,11 @@
 #include <stdint.h>
 
 #define THOS_QUARTZ		(16UL * 1000 * 1000)
+#if (MCU_atmega32u4==1)
+#define HZ			(THOS_QUARTZ / 256 / 250) /* 250 */
+#else
 #define HZ			(THOS_QUARTZ / 256 / 256) /* 244 (+.140625) */
+#endif
 
 #include <avr/io.h>
 
