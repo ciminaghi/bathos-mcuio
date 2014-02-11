@@ -1,3 +1,8 @@
+#include <bathos/bathos.h>
+#include <bathos/jiffies.h>
+#include <bathos/event.h>
+#include <bathos/idle.h>
+#include <bathos/sys_timer.h>
 
 #include <arch/hw.h>
 #include <avr/interrupt.h>
@@ -40,4 +45,12 @@ volatile unsigned long jiffies;
 ISR(TIMER0_OVF_vect)
 {
 	jiffies++;
+	unsigned long next;
+	void *data;
+	if (sys_timer_get_next_tick(&next, &data) < 0)
+		/* No next tick */
+		return;
+	if (time_before(next, jiffies))
+		return;
+	trigger_event(&event_name(sys_timer_tick), NULL, EVT_PRIO_MAX);
 }
