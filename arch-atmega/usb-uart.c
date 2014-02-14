@@ -323,7 +323,7 @@ static const struct descriptor_list_struct {
 /*
  * ISR: FIXME: add interrupt support
  */
-ISR(USB_GEN_vect)
+ISR(USB_GEN_vect, __attribute__((section(".text.ISR"))))
 {
 	uint8_t intbits, t;
 	intbits = UDINT;
@@ -384,7 +384,7 @@ uint8_t usb_serial_get_control(void)
  * The other endpoints are manipulated by the user-callable
  * functions, and the start-of-frame interrupt.
  */
-ISR(USB_COM_vect)
+ISR(USB_COM_vect, __attribute__((section(".text.ISR"))))
 {
 	uint8_t intbits;
 	const uint8_t *list;

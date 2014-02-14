@@ -11,6 +11,7 @@ SECTIONS
 	.text : {
 		*(.vectors)
 		*(.boot)
+		*(.text.ISR)
 		*(.text)
 		*(.text.*)
 		/* For data that needs to reside in the lower 64k of progmem. */

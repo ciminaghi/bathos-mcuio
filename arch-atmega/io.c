@@ -13,7 +13,7 @@ int stdio_init(void)
 }
 rom_initcall(stdio_init);
 
-int bathos_setup(void)
+int __attribute__((section(".text.vectors)"))) bathos_setup(void)
 {
 	CPU_PRESCALE(0);
 	/* Turn red led on */

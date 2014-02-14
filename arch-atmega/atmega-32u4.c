@@ -42,7 +42,7 @@ void usb_hw_config(void)
 
 volatile unsigned long jiffies;
 
-ISR(TIMER0_OVF_vect)
+ISR(TIMER0_OVF_vect, __attribute__((section(".text.ISR"))))
 {
 	jiffies++;
 	unsigned long next;
