@@ -49,6 +49,10 @@
 	nop /* 58 */
 	nop /* 5a */
 	rjmp __vector_23 /* 5c */
+	nop /* 5e */
+	nop /* 60 */
+	nop /* 62 */
+	rjmp __vector_25 /* 64 */
 	
 #if 0	
 	/* We use one interrupt only, to count jiffies: always jump there */

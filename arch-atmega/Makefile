@@ -30,7 +30,7 @@ $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
 
 ifeq ($(MCU),atmega32u4)
-AOBJ = $(ADIR)/idle.o
+AOBJ = $(ADIR)/idle.o $(ADIR)/uart.o
 endif
 
 # and the load target, not there in other architectures
