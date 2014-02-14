@@ -626,52 +626,6 @@ static int usb_uart_read(struct bathos_pipe *pipe, char *buf, int len)
 	return i;
 }
 
-static int8_t __usb_uart_putchar(uint8_t c)
-{
-	uint8_t timeout, intr_state;
-
-	if (!__data.usb_configuration) return -1;
-	intr_state = SREG;
-	cli();
-	UENUM = CDC_TX_ENDPOINT;
-	if (__data.transmit_previous_timeout) {
-		if (!(UEINTX & (1<<RWAL))) {
-			SREG = intr_state;
-			return -1;
-		}
-		__data.transmit_previous_timeout = 0;
-	}
-	/* wait for the FIFO to be ready to accept data */
-	timeout = UDFNUML + TRANSMIT_TIMEOUT;
-	while (1) {
-		/* are we ready to transmit? */
-		if (UEINTX & (1<<RWAL)) break;
-		SREG = intr_state;
-		/* 
-		 * have we waited too long?  This happens if the user
-		 * is not running an application that is listening
-		 */
-		if (UDFNUML == timeout) {
-			__data.transmit_previous_timeout = 1;
-			return -1;
-		}
-		/* has the USB gone offline? */
-		if (!__data.usb_configuration)
-			return -1;
-		/* get ready to try checking again */
-		intr_state = SREG;
-		cli();
-		UENUM = CDC_TX_ENDPOINT;
-	}
-	/* actually write the byte into the FIFO */
-	UEDATX = c;
-	/* if this completed a packet, transmit it now! */
-	if (!(UEINTX & (1<<RWAL))) UEINTX = 0x3A;
-	__data.transmit_flush_timer = TRANSMIT_FLUSH_TIMEOUT;
-	SREG = intr_state;
-	return 0;
-}
-
 int __usb_uart_write(const uint8_t *buffer, uint16_t size)
 {
 	uint8_t timeout, intr_state, write_size;
