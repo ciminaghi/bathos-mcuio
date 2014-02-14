@@ -4,6 +4,7 @@
 
 #include <bathos/init.h>
 #include <bathos/event.h>
+#include <bathos/interrupt.h>
 
 #define PENDING_EVENTS_POOL_SIZE 32
 
@@ -18,10 +19,15 @@ static struct pending_event pe_array[PENDING_EVENTS_POOL_SIZE];
 struct pending_event *alloc_pending_event(void)
 {
 	struct pending_event *out;
-	if (list_empty(&free_pending_events))
+	int flags;
+	interrupt_disable(flags);
+	if (list_empty(&free_pending_events)) {
+		interrupt_restore(flags);
 		return NULL;
+	}
 	out = list_entry(free_pending_events.next, struct pending_event, list);
 	list_del_init(&out->list);
+	interrupt_restore(flags);
 	return out;
 }
 
@@ -53,6 +59,7 @@ rom_initcall(events_init);
 int trigger_event(struct event *e, void *data, int evt_prio)
 {
 	struct pending_event *pe;
+	int flags;
 	if (evt_prio < EVT_PRIO_MIN || evt_prio > EVT_PRIO_MAX)
 		return -EINVAL;
 	pe = alloc_pending_event();
@@ -60,7 +67,9 @@ int trigger_event(struct event *e, void *data, int evt_prio)
 		return -ENOMEM;
 	pe->data = data;
 	pe->event = e;
+	interrupt_disable(flags);
 	list_add_tail(&pe->list, &next_pending_events[evt_prio]);
+	interrupt_restore(flags);
 	return 0;
 }
 
@@ -73,10 +82,13 @@ void handle_events(void)
 	int i, empty;
 
 	do {
+		uint8_t flags;
+		interrupt_disable(flags);
 		/* Swap events list */
 		tmpl = next_pending_events;
 		next_pending_events = pending_events;
 		pending_events = tmpl;
+		interrupt_restore(flags);
 
 		for (i = EVT_PRIO_MAX, empty = NEVT_PRIOS;
 		     i >= EVT_PRIO_MIN; i--) {
@@ -90,7 +102,9 @@ void handle_events(void)
 					if (d->ops->handle)
 						d->ops->handle(d);
 				};
+				interrupt_disable(flags);
 				list_move(&pe->list, &free_pending_events);
+				interrupt_restore(flags);
 			}
 		}
 		
