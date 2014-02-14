@@ -28,6 +28,10 @@ SECTIONS
 		romcall_end = .;
 		*(.data);
 		__data = .;
+		. = ALIGN(8);
+		bathos_devices_start = .;
+		*(.bathos_devices);
+		bathos_devices_end = .;
 	}
 	__end_data = .;
 

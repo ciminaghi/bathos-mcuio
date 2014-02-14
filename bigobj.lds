@@ -55,9 +55,6 @@ SECTIONS
 		evt_pipe_really_closed_handlers_start = .;
 		*(.evt_pipe_really_closed_handlers);
 		evt_pipe_really_closed_handlers_end = .;
-		bathos_devices_start = .;
-		*(.bathos_devices);
-		bathos_devices_end = .;
 		mcuio_functions_start = .;
 		*(.mcuio_functions);
 		mcuio_functions_end = .;
