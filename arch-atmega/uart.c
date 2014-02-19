@@ -90,7 +90,8 @@ ISR(USART1_RX_vect, __attribute__((section(".text.ISR"))))
 		data->buf[data->cbuf.head] = c;
 		data->cbuf.head = (data->cbuf.head + 1) & (UART_BUF_SIZE - 1);
 	}
-	trigger_event(&evt_pipe_input_ready, data->pipe, EVT_PRIO_MAX);
+	pipe_dev_trigger_event(&__uart_dev, &evt_pipe_input_ready,
+			       EVT_PRIO_MAX);
 }
 
 static struct bathos_dev_ops uart_dev_ops = {
