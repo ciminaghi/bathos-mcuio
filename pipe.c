@@ -83,8 +83,7 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 	}
 	list_add(&out->list, &dev->pipes);
 	e = mode == BATHOS_MODE_INPUT ? &evt_input_pipe_opened :
-	    &evt_output_pipe_opened;
-	printf("Event = %p\n", e);
+		&evt_output_pipe_opened;
 	trigger_event(e, out, EVT_PRIO_MAX);
 	return out;
 }
@@ -92,7 +91,6 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 int pipe_close(struct bathos_pipe *pipe)
 {
 	struct event *e;
-	printf("%s %d, pipe = %p\n", __func__, __LINE__, pipe);
 	if (!pipe->dev) {
 		bathos_errno = EBADF;
 		return -1;
@@ -155,7 +153,6 @@ int pipe_ioctl(struct bathos_pipe *pipe, struct bathos_ioctl_data *data)
 static void do_free_pipe(struct event_handler_data *data)
 {
 	struct bathos_pipe *p = data->data;
-	printf("%s %d, pipe =  %p\n", __func__, __LINE__, p);
 	list_del_init(&p->list);
 	/* Last pipe related to this device ? */
 	if (list_empty(&p->dev->pipes))
