@@ -38,6 +38,18 @@ struct bathos_dev * __attribute__((weak)) bathos_find_dev(struct bathos_pipe *p)
 	return NULL;
 }
 
+void pipe_dev_trigger_event(struct bathos_dev *dev, struct event *evt,
+			    int prio)
+{
+	struct bathos_pipe *p;
+	if (!dev->pipes.next)
+		/* List not even initialized */
+		return;
+	list_for_each_entry(p, &dev->pipes, list) {
+		trigger_event(evt, p, prio);
+	}
+}
+
 struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 {
 	struct bathos_pipe *out = NULL;
@@ -59,6 +71,8 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 		return NULL;
 	}
 	out->dev = dev;
+	if (!dev->pipes.next)
+		INIT_LIST_HEAD(&dev->pipes);
 	if (dev->ops->open) {
 		stat = dev->ops->open(out);
 		if (stat) {
@@ -67,6 +81,7 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 			return NULL;
 		}
 	}
+	list_add(&out->list, &dev->pipes);
 	e = mode == BATHOS_MODE_INPUT ? &evt_input_pipe_opened :
 	    &evt_output_pipe_opened;
 	printf("Event = %p\n", e);
@@ -82,8 +97,6 @@ int pipe_close(struct bathos_pipe *pipe)
 		bathos_errno = EBADF;
 		return -1;
 	}
-	if (pipe->dev->ops->close)
-		pipe->dev->ops->close(pipe);
 	e = pipe->mode == BATHOS_MODE_INPUT ? &evt_input_pipe_closed :
 		&evt_output_pipe_closed;
 	trigger_event(e, pipe, EVT_PRIO_MAX);
@@ -143,6 +156,11 @@ static void do_free_pipe(struct event_handler_data *data)
 {
 	struct bathos_pipe *p = data->data;
 	printf("%s %d, pipe =  %p\n", __func__, __LINE__, p);
+	list_del_init(&p->list);
+	/* Last pipe related to this device ? */
+	if (list_empty(&p->dev->pipes))
+		if (p->dev->ops->close)
+			p->dev->ops->close(p);
 	__do_free_pipe(p);
 }
 
