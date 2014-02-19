@@ -23,6 +23,7 @@ SECTIONS
 	.data 0x800100 : AT (__end_text) {
 		__data_start = .;      
 		*(.rodata);
+		. = ALIGN(2);
 		romcall_begin = .;
 		*(.init0);
 		romcall_end = .;
