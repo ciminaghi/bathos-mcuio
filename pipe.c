@@ -32,7 +32,7 @@ static struct bathos_pipe *__find_free_pipe(void)
 struct bathos_dev * __attribute__((weak)) bathos_find_dev(struct bathos_pipe *p)
 {
 	struct bathos_dev *d;
-	for (d = bathos_devices_start; d != bathos_devices_end; d++)
+	for (d = bathos_devices_start; d < bathos_devices_end; d++)
 		if (!strcmp(p->n, d->name))
 			return d;
 	return NULL;
@@ -56,6 +56,10 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 	struct event *e;
 	int stat;
 	struct bathos_dev *dev;
+	if (!mode) {
+		bathos_errno = EINVAL;
+		return out;
+	}
 	out = __find_free_pipe();
 	if (!out) {
 		bathos_errno = ENFILE;
