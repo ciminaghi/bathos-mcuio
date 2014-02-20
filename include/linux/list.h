@@ -4,17 +4,15 @@
 #include <bathos/bathos.h>
 
 /* THIS FILE ORIGINALLY COMES FROM THE LINUX KERNEL SOURCES */
+#include <stddef.h>
 
-#undef offsetof
+#ifndef offsetof
 #ifdef __compiler_offsetof
 #define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
 #else
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#define offsetof(TYPE, MEMBER) ((int) &((TYPE *)0)->MEMBER)
 #endif
-
-#define container_of(ptr, type, member) ({                      \
-        const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-        (type *)( (char *)__mptr - offsetof(type,member) );})
+#endif
 
 
 struct list_head {
