@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include <bathos/init.h>
 #include <bathos/event.h>
 
 static struct list_head pending_events_1[NEVT_PRIOS];
@@ -30,6 +31,8 @@ int events_init(void)
 	}
 	return 0;
 }
+
+core_initcall(events_init);
 
 int trigger_event(struct event *e, void *data, int evt_prio)
 {
