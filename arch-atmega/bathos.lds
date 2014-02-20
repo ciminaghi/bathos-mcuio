@@ -33,6 +33,10 @@ SECTIONS
 		bathos_devices_start = .;
 		*(.bathos_devices);
 		bathos_devices_end = .;
+		. = ALIGN(4);
+		__task_begin = .;
+		*(.task);
+		__task_end = .;
 	}
 	__end_data = .;
 

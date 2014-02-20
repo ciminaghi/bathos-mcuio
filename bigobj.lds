@@ -20,10 +20,7 @@ SECTIONS
 	}
 	.data : {
 		*(.data);      
-		. = ALIGN(16);
-		__task_begin = .;
-		*(.task);
-		__task_end = .;
+		. = ALIGN(2);
 		events_start = .;
 		*(.events);
 		events_end = .;
