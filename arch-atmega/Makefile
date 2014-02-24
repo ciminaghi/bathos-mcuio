@@ -1,6 +1,12 @@
-# The user can set BATHOS_MCU on the command line or environment
 # The first item is for CFLAGS, the second for avrdude
-BATHOS_MCU ?= atmega8 m8
+ifeq ($(CONFIG_MACH),"atmega8")
+BATHOS_MCU = atmega8 m8
+else ifeq ($(CONFIG_MACH),"atmega32u4")
+BATHOS_MCU = atmega32u4 m32u4
+else
+BATHOS_MCU = atmega8 m8
+endif
+
 
 # Similary, the user can set TTY= when running "make load"
 TTY ?= /dev/ttyUSB0
@@ -14,7 +20,7 @@ MCU=$(word 1, $(BATHOS_MCU))
 CFLAGS  = -mmcu=$(MCU) -DMCU_$(MCU)=1 -funsigned-char -funsigned-bitfields \
 -ffunction-sections -fpack-struct -fshort-enums
 LDFLAGS = -nostdlib
-ASFLAGS = -mmcu=$(word 1, $(BATHOS_MCU))
+ASFLAGS = -mmcu=$(word 1, $(BATHOS_MCU)) -Iinclude -I$(ADIR)
 
 # Library: we have one assembly source file
 LIBARCH = $(ADIR)/libarch.a
@@ -23,14 +29,26 @@ LIBARCH_OBJS = $(ADIR)/jiffies.o
 ifeq ($(MCU),atmega8)
 LIBARCH_OBJS += $(ADIR)/atmega-a8.o
 else ifeq ($(MCU),atmega32u4)
-LIBARCH_OBJS += $(ADIR)/atmega-32u4.o $(ADIR)/usb-uart.o
+LIBARCH_OBJS += $(ADIR)/atmega-32u4.o
 endif
 
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
 
 ifeq ($(MCU),atmega32u4)
-AOBJ = $(ADIR)/idle.o $(ADIR)/uart.o $(ADIR)/uart-mux-yun.o
+AOBJ = $(ADIR)/idle.o $(ADIR)/uart-mux-yun.o
+endif
+
+ifeq ($(CONFIG_DEBUG_BITBANG),y)
+AOBJ += $(ADIR)/debug-bitbang.o
+endif
+
+ifeq ($(CONFIG_USB_UART),y)
+AOBJ += $(ADIR)/usb-uart.o
+endif
+
+ifeq ($(CONFIG_UART),y)
+AOBJ += $(ADIR)/uart.o
 endif
 
 # and the load target, not there in other architectures
