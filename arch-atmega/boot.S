@@ -1,3 +1,5 @@
+#include <generated/autoconf.h>
+
 /* We need to provide interrupt vectors here */
 .extern do_jiffies_irq
 .section .vectors, "ax"
@@ -22,9 +24,17 @@
 	nop /* 22 */
 	nop /* 24 */
 	nop /* 26 */
+#if defined CONFIG_USB_UART
 	rjmp __vector_10   /* 28 */
+#else
+	nop
+#endif
 	nop /* 2a */
+#if defined CONFIG_USB_UART
 	rjmp __vector_11   /* 2c */
+#else
+	nop
+#endif
 	nop /* 2e */
 	nop /* 30 */
 	nop /* 32 */
@@ -52,15 +62,10 @@
 	nop /* 5e */
 	nop /* 60 */
 	nop /* 62 */
+#if defined CONFIG_UART
 	rjmp __vector_25 /* 64 */
-	
-#if 0	
-	/* We use one interrupt only, to count jiffies: always jump there */
-	.rep 25
+#else
 	nop
-	.endr
-
-	rjmp do_jiffies_irq
 #endif
 
 /* Fllowins is boot code */
