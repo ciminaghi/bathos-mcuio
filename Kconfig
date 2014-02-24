@@ -78,3 +78,7 @@ config MEMORY_MODE
        default "-ram" if MMODE_RAM
        default "-flash" if MMODE_FLASH
        default ""
+
+if ARCH_ATMEGA
+   source "arch-atmega/Kconfig"
+endif

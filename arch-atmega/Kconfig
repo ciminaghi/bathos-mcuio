@@ -1,0 +1,123 @@
+
+config HAVE_USB
+       bool
+
+choice
+	prompt "Target machine for bathos"
+	default MACH_ATMEGA32U4
+
+config MACH_ATMEGA8
+       prompt "Build for an ATMEGA8"
+       bool
+       help
+         Build for an atmega8 MPU
+
+config MACH_ATMEGA32U4
+       prompt "Build for and ATMEGA 32U4"
+       bool
+       select HAVE_USB
+       help
+         Build for an atmega 32U4 MPU
+
+endchoice
+
+config MACH
+       string
+       default "atmega8" if MACH_ATMEGA8
+       default "atmega32u4" if MACH_ATMEGA32U4
+
+config USB_UART
+       bool "Usb-uart driver"
+       depends on HAVE_USB
+       help
+         Add an UART over USB driver
+
+config UART
+       bool "UART driver"
+       help
+         Add an UART driver
+
+choice
+	prompt "Bathos console"
+
+config CONSOLE_UART
+       bool "Console on UART"
+       help
+         This option selects a console on the chip's UART device
+
+config CONSOLE_USB_UART
+       bool "Console on usb (ACM device)"
+       depends on USB_UART
+       help
+	 This option selects a console via USB
+
+endchoice
+
+config CONSOLE
+       string
+       default "avr-uart" if CONSOLE_UART
+       default "usb-uart" if CONSOLE_USB_UART
+
+config EARLY_CONSOLE
+       bool "Setup an early console"
+       depends on !CONSOLE_USB_UART
+
+choice
+	prompt "Bathos stdin"
+
+config STDIN_CONSOLE
+       bool "Stdin from console"
+       help
+         Take standard input from selected console
+
+config STDIN_UART
+       bool "Stdin from UART"
+       depends on UART
+       help
+	 Get standard input from uart
+
+config STDIN_USB_UART
+       bool "Stdin from USB-UART"
+       depends on USB_UART
+       help
+         Get standard input from usb-uart device
+endchoice
+
+config STDIN
+       string
+       default CONSOLE if STDIN_CONSOLE
+       default "avr-uart" if STDIN_UART
+       default "usb-uart" if STDIN_USB_UART
+
+choice
+	prompt "Bathos stdout"
+
+config STDOUT_CONSOLE
+       bool "Stdout to console"
+       help
+         Send stdandard output to selected console
+
+config STDOUT_UART
+       bool "Stdout to UART"	
+       depends on UART
+       help
+         Send standard output from uart
+
+config STDOUT_USB_UART
+       bool "Stdout to USB-UART"
+       depends on USB_UART
+       help
+         Send standard output to usb-uart device
+endchoice
+
+config STDOUT
+       string
+       default CONSOLE if STDOUT_CONSOLE
+       default "avr-uart" if STDOUT_UART
+       default "usb-uart" if STDOUT_USB_UART
+
+config COPY_STDOUT_TO_CONSOLE
+       bool "Copy stdout to console"
+       depends on !STDOUT_CONSOLE
+       help
+         Copy standard output to console
