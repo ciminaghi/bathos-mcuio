@@ -19,7 +19,7 @@ TASK-y ?= task-uart.o
 MCU=$(word 1, $(BATHOS_MCU))
 CFLAGS  = -mmcu=$(MCU) -DMCU_$(MCU)=1 -funsigned-char -funsigned-bitfields \
 -ffunction-sections -fpack-struct -fshort-enums
-LDFLAGS = -nostdlib
+LDFLAGS = -nostdlib -Wl,-Map=bathos.map
 ASFLAGS = -mmcu=$(word 1, $(BATHOS_MCU)) -Iinclude -I$(ADIR)
 
 # Library: we have one assembly source file
