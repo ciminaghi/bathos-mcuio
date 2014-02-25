@@ -88,6 +88,7 @@ static struct usb_uart_data {
 
 	volatile uint8_t transmit_flush_timer;
 	uint8_t transmit_previous_timeout;
+	struct bathos_pipe *pipe;
 } __data = {
 	.cdc_line_coding = {0x00, 0xE1, 0x00, 0x00, 0x00, 0x00, 0x08},
 };
@@ -348,6 +349,9 @@ ISR(USB_GEN_vect, __attribute__((section(".text.ISR"))))
 				}
 			}
 		}
+		/* Enable RX out data interrupt */
+		UENUM = CDC_RX_ENDPOINT;
+		UEIENX = 1 << RXOUTE;
 	}
 }
 
@@ -400,6 +404,15 @@ ISR(USB_COM_vect, __attribute__((section(".text.ISR"))))
 	const uint8_t *desc_addr;
 	uint8_t	desc_length;
 
+	if (UEINT & (1 << CDC_RX_ENDPOINT)) {
+		UENUM = CDC_RX_ENDPOINT;
+		intbits = UEINTX;
+		if (intbits & (1<<RXOUTI)) {
+			trigger_event(&evt_pipe_input_ready,
+				      __data.pipe, EVT_PRIO_MAX);
+		}
+		UEINTX &= ~(NAKINI|NAKOUTI|RXSTPI|RXOUTI|STALLEDI|TXINI);
+	}
 	UENUM = 0;
 	intbits = UEINTX;
 	if (intbits & (1<<RXSTPI)) {
@@ -578,12 +591,39 @@ rom_initcall(usb_uart_init);
 
 static int usb_uart_open(struct bathos_pipe *pipe)
 {
+	__data.pipe = pipe;
 	return 0;
 }
 
+#define USB_SERIAL_DTR			0x01
+
 static int usb_uart_read(struct bathos_pipe *pipe, char *buf, int len)
 {
-	return -1;
+	int i;
+	uint8_t available;
+	if (!usb_configured()) {
+		//|| !(usb_serial_get_control() & USB_SERIAL_DTR)) {
+		/* user no longer connected */
+		return -EAGAIN;
+	}
+	cli();
+	UENUM = CDC_RX_ENDPOINT;
+	available = UEBCLX;
+	for (i = 0; i < min(len, available); i++) {
+		UENUM = CDC_RX_ENDPOINT;
+		uint8_t ueintx = UEINTX;
+		if (!(ueintx & (1<<RWAL)))
+			/* No more data available */
+			break;
+		UENUM = CDC_RX_ENDPOINT;
+		buf[i] = UEDATX;
+	}
+	UENUM = CDC_RX_ENDPOINT;
+	available = UEBCLX;
+	if (!available)
+		UEINTX &= ~0x80;	
+	sei();
+	return i;
 }
 
 static int8_t __usb_uart_putchar(uint8_t c)
