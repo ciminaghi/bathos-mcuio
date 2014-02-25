@@ -8,6 +8,7 @@
 #include <bathos/pipe.h>
 #include <bathos/init.h>
 #include <bathos/errno.h>
+#include <bathos/interrupt.h>
 #include <arch/hw.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -600,22 +601,24 @@ static int usb_uart_open(struct bathos_pipe *pipe)
 
 static int usb_uart_read(struct bathos_pipe *pipe, char *buf, int len)
 {
-	int i;
+	int i, flags;
 	uint8_t available;
 	if (!usb_configured()) {
 		//|| !(usb_serial_get_control() & USB_SERIAL_DTR)) {
 		/* user no longer connected */
 		return -EAGAIN;
 	}
-	cli();
+	interrupt_disable(flags);
 	UENUM = CDC_RX_ENDPOINT;
 	available = UEBCLX;
 	for (i = 0; i < min(len, available); i++) {
 		UENUM = CDC_RX_ENDPOINT;
 		uint8_t ueintx = UEINTX;
-		if (!(ueintx & (1<<RWAL)))
+		if (!(ueintx & (1<<RWAL))) {
+			interrupt_restore(flags);
 			/* No more data available */
 			break;
+		}
 		UENUM = CDC_RX_ENDPOINT;
 		buf[i] = UEDATX;
 	}
@@ -623,24 +626,25 @@ static int usb_uart_read(struct bathos_pipe *pipe, char *buf, int len)
 	available = UEBCLX;
 	if (!available)
 		UEINTX &= ~0x80;	
-	sei();
+	interrupt_restore(flags);
 	return i;
 }
 
 int __usb_uart_write(const uint8_t *buffer, uint16_t size)
 {
-	uint8_t timeout, intr_state, write_size;
+	uint8_t timeout, write_size;
+	int flags;
 
 	/* if we're not online (enumerated and configured), error */
 	if (!__data.usb_configuration)
 		return -EAGAIN;
-	intr_state = SREG;
-	cli();
+
+	interrupt_disable(flags);
 	UENUM = CDC_TX_ENDPOINT;
 	/* if we gave up due to timeout before, don't wait again */
 	if (__data.transmit_previous_timeout) {
 		if (!(UEINTX & (1<<RWAL))) {
-			SREG = intr_state;
+			interrupt_restore(flags);
 			return -EIO;
 		}
 		__data.transmit_previous_timeout = 0;
@@ -653,7 +657,7 @@ int __usb_uart_write(const uint8_t *buffer, uint16_t size)
 			/* are we ready to transmit? */
 			if (UEINTX & (1<<RWAL))
 				break;
-			SREG = intr_state;
+			interrupt_restore(flags);
 			/*
 			  have we waited too long?  This happens if the user
 			  is not running an application that is listening
@@ -666,8 +670,7 @@ int __usb_uart_write(const uint8_t *buffer, uint16_t size)
 			if (!__data.usb_configuration)
 				return -EAGAIN;
 			/* get ready to try checking again */
-			intr_state = SREG;
-			cli();
+			interrupt_disable(flags);
 			UENUM = CDC_TX_ENDPOINT;
 		}
 
@@ -757,7 +760,7 @@ int __usb_uart_write(const uint8_t *buffer, uint16_t size)
 		if (!(UEINTX & (1<<RWAL)))
 			UEINTX = 0x3A;
 		__data.transmit_flush_timer = TRANSMIT_FLUSH_TIMEOUT;
-		SREG = intr_state;
+		interrupt_restore(flags);
 	}
 	return 0;
 }
