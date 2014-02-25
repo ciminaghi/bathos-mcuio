@@ -30,7 +30,14 @@ static int uart_init(void)
 	return 0;
 }
 
+#if defined CONFIG_CONSOLE_UART && CONFIG_EARLY_CONSOLE
+int console_early_init(void)
+{
+	return uart_init();
+}
+#else
 rom_initcall(uart_init);
+#endif
 
 static int uart_open(struct bathos_pipe *pipe)
 {
