@@ -17,6 +17,9 @@ rom_initcall(stdio_init);
 int bathos_setup(void)
 {
 	CPU_PRESCALE(0);
+
+	console_early_init();
+
 	/* Turn red led on */
 	timer_init();
 
