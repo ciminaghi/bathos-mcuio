@@ -126,7 +126,7 @@ __do_clear_bss:
 	rjmp 0b
 	
 1:	/* Finally, run real code */
-	rcall bathos_setup
+	call bathos_setup
 	sei
-	rcall bathos_main
+	call bathos_main
 	rjmp _bathos_start
