@@ -1,14 +1,15 @@
 #include <bathos/bathos.h>
 #include <bathos/io.h>
 #include <bathos/init.h>
+#include <generated/autoconf.h>
 #include <arch/hw.h>
 
 #define CPU_PRESCALE(n) (CLKPR = 0x80, CLKPR = (n))
 
 int stdio_init(void)
 {
-	bathos_stdout = pipe_open("usb-uart", BATHOS_MODE_OUTPUT, NULL);
-	bathos_stdin = pipe_open("usb-uart", BATHOS_MODE_INPUT, NULL);
+	bathos_stdout = pipe_open(CONFIG_STDOUT, BATHOS_MODE_OUTPUT, NULL);
+	bathos_stdin = pipe_open(CONFIG_STDIN, BATHOS_MODE_INPUT, NULL);
 	return 0;
 }
 rom_initcall(stdio_init);
