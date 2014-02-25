@@ -88,7 +88,6 @@ static struct usb_uart_data {
 
 	volatile uint8_t transmit_flush_timer;
 	uint8_t transmit_previous_timeout;
-	struct bathos_pipe *pipe;
 } __data = {
 	.cdc_line_coding = {0x00, 0xE1, 0x00, 0x00, 0x00, 0x00, 0x08},
 };
@@ -388,6 +387,8 @@ uint8_t usb_serial_get_control(void)
  * The other endpoints are manipulated by the user-callable
  * functions, and the start-of-frame interrupt.
  */
+extern struct bathos_dev __usb_uart_dev;
+
 ISR(USB_COM_vect, __attribute__((section(".text.ISR"))))
 {
 	uint8_t intbits;
@@ -408,8 +409,9 @@ ISR(USB_COM_vect, __attribute__((section(".text.ISR"))))
 		UENUM = CDC_RX_ENDPOINT;
 		intbits = UEINTX;
 		if (intbits & (1<<RXOUTI)) {
-			trigger_event(&evt_pipe_input_ready,
-				      __data.pipe, EVT_PRIO_MAX);
+			pipe_dev_trigger_event(&__usb_uart_dev,
+					       &evt_pipe_input_ready,
+					       EVT_PRIO_MAX);
 		}
 		UEINTX &= ~(NAKINI|NAKOUTI|RXSTPI|RXOUTI|STALLEDI|TXINI);
 	}
@@ -591,7 +593,6 @@ rom_initcall(usb_uart_init);
 
 static int usb_uart_open(struct bathos_pipe *pipe)
 {
-	__data.pipe = pipe;
 	return 0;
 }
 

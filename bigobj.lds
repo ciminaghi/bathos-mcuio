@@ -55,6 +55,9 @@ SECTIONS
 		evt_pipe_really_closed_handlers_start = .;
 		*(.evt_pipe_really_closed_handlers);
 		evt_pipe_really_closed_handlers_end = .;
+		evt_mcuio_data_ready_handlers_start = .;
+		*(.evt_mcuio_data_ready_handlers);
+		evt_mcuio_data_ready_handlers_end = .;
 		mcuio_functions_start = .;
 		*(.mcuio_functions);
 		mcuio_functions_end = .;
