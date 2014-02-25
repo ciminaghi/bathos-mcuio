@@ -6,6 +6,7 @@
 #define NULL 0
 #endif
 
+#include <generated/autoconf.h>
 #include <bathos/pipe.h>
 
 /* These 4 are actually pp_printf and friends */
@@ -26,5 +27,16 @@ extern int puts(const char *s);
 
 extern struct bathos_pipe *bathos_stdout;
 extern struct bathos_pipe *bathos_stdin;
+
+extern void console_putc(int c);
+
+#if defined CONFIG_EARLY_CONSOLE
+extern int console_early_init(void);
+#else
+static inline int console_early_init(void)
+{
+	return 0;
+}
+#endif
 
 #endif /* __BATHOS_STDIO_H__ */
