@@ -7,6 +7,9 @@
 #define HZ			(THOS_QUARTZ / 256 / 256) /* 244 (+.140625) */
 #endif
 
+/* Make avr-libc happy */
+#define F_CPU THOS_QUARTZ
+
 #include <avr/io.h>
 
 extern void timer_init(void);
