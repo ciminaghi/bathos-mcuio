@@ -9,5 +9,9 @@
 
 int avr_bathos_main(void)
 {
+#if defined CONFIG_USB_UART
+	/* Without this, USB doesn't seem to work well */
+	_delay_ms(200);
+#endif
 	return bathos_main();
 }
