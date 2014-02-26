@@ -128,5 +128,5 @@ __do_clear_bss:
 1:	/* Finally, run real code */
 	call bathos_setup
 	sei
-	call bathos_main
+	call avr_bathos_main
 	rjmp _bathos_start
