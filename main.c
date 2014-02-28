@@ -17,15 +17,7 @@ int bathos_errno;
  */
 void __attribute__((weak)) idle(void)
 {
-	unsigned long now = jiffies;
-	unsigned long next;
-	void *data;
-	if (sys_timer_get_next_tick(&next, &data) < 0)
-		/* No next tick */
-		return;
-	if (time_before(now, next))
-		return;
-	trigger_event(&event_name(sys_timer_tick), data, EVT_PRIO_MAX);
+	trigger_event(&event_name(hw_timer_tick), NULL, EVT_PRIO_MAX);
 }
 
 int bathos_main(void)
