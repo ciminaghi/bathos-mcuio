@@ -52,8 +52,7 @@ static struct scheduled_tick *alloc_tick(void)
 
 static void free_tick(struct scheduled_tick *t)
 {
-	list_del_init(&t->list);
-	list_add_tail(&free_ticks, &t->list);
+	list_move(&t->list, &free_ticks);
 }
 
 int sys_timer_enqueue_tick(unsigned long evt_jiffies, void *data)
