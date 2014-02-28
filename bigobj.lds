@@ -28,6 +28,9 @@ SECTIONS
 		evt_sys_timer_tick_handlers_start = .;
 		*(.evt_sys_timer_tick_handlers);
 		evt_sys_timer_tick_handlers_end = .;
+		evt_hw_timer_tick_handlers_start = .;
+		*(.evt_hw_timer_tick_handlers);
+		evt_hw_timer_tick_handlers_end = .;
 		evt_input_pipe_opened_handlers_start = .;
 		*(.evt_input_pipe_opened_handlers);
 		evt_input_pipe_opened_handlers_end = .;

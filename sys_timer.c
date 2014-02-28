@@ -8,9 +8,12 @@
 #include <bathos/init.h>
 #include <bathos/types.h>
 #include <bathos/jiffies.h>
+#include <bathos/sys_timer.h>
 #include <linux/list.h>
 
 #define MAX_SCHEDULED_TICKS 32
+
+declare_event(hw_timer_tick);
 
 static struct list_head scheduled_ticks;
 static struct list_head free_ticks;
