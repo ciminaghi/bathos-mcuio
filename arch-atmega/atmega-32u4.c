@@ -45,12 +45,5 @@ volatile unsigned long jiffies;
 ISR(TIMER0_OVF_vect, __attribute__((section(".text.ISR"))))
 {
 	jiffies++;
-	unsigned long next;
-	void *data;
-	if (sys_timer_get_next_tick(&next, &data) < 0)
-		/* No next tick */
-		return;
-	if (time_before(next, jiffies))
-		return;
-	trigger_event(&event_name(sys_timer_tick), NULL, EVT_PRIO_MAX);
+	trigger_event(&event_name(hw_timer_tick), NULL, EVT_PRIO_MAX);
 }
