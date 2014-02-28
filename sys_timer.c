@@ -95,15 +95,22 @@ int sys_timer_get_next_tick(unsigned long *j, void **data)
 	return 0;
 }
 
-void sys_timer_tick_done(struct event_handler_data *d)
+void on_hw_timer_tick(struct event_handler_data *d)
 {
-	struct scheduled_tick *next;
-	next = list_entry(scheduled_ticks.next, struct scheduled_tick, list);
-	free_tick(next);
-	if (list_empty(&scheduled_ticks))
-		return;
-	next = list_entry(scheduled_ticks.next, struct scheduled_tick, list);
-	next->when += jiffies;
+	struct scheduled_tick *next, *tmp;
+	list_for_each_entry_safe(next, tmp, &scheduled_ticks, list) {
+		if (time_after(next->when, jiffies))
+			break;
+		trigger_event(&event_name(sys_timer_tick), next->data,
+			      EVT_PRIO_MAX);
+		if (!list_is_last(&next->list, &scheduled_ticks)) {
+			struct scheduled_tick *t;
+			t = list_entry(next->list.next,
+				       struct scheduled_tick, list);
+			t->when += jiffies;
+		}
+		free_tick(next);
+	}
 }
 
-declare_event_handler(sys_timer_tick, NULL, sys_timer_tick_done, NULL);
+declare_event_handler(hw_timer_tick, NULL, on_hw_timer_tick, NULL);
