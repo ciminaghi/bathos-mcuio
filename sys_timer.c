@@ -1,6 +1,7 @@
 
 //#include <stdlib.h>
 #include <bathos/errno.h>
+#include <bathos/interrupt.h>
 
 #include <bathos/bathos.h>
 #include <bathos/event.h>
@@ -55,24 +56,29 @@ static void free_tick(struct scheduled_tick *t)
 int sys_timer_enqueue_tick(unsigned long evt_jiffies, void *data)
 {
 	struct scheduled_tick *t, *ptr;
+	int flags;
 	t = alloc_tick();
 	if (!t)
 		return -ENOMEM;
 	t->when = jiffies + evt_jiffies;
 	t->data = data;
+	interrupt_disable(flags);
 	if (list_empty(&scheduled_ticks)) {
 		list_add(&t->list, &scheduled_ticks);
+		interrupt_restore(flags);
 		return 0;
 	}
 	list_for_each_entry(ptr, &scheduled_ticks, list) {
 		if (time_before(t->when, ptr->when)) {
 			ptr->when -= t->when;
 			list_add_tail(&t->list, &ptr->list);
+			interrupt_restore(flags);
 			return 0;
 		}
 		t->when -= ptr->when;
 	}
 	list_add_tail(&t->list, &ptr->list);
+	interrupt_restore(flags);
 	return 0;
 }
 
