@@ -54,8 +54,6 @@ int events_init(void)
 	return 0;
 }
 
-rom_initcall(events_init);
-
 int trigger_event(struct event *e, void *data, int evt_prio)
 {
 	struct pending_event *pe;
