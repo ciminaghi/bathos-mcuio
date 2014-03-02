@@ -62,7 +62,7 @@ void idle(void)
 		return;
 	}
 end:
-	trigger_event(&event_name(sys_timer_tick), NULL, EVT_PRIO_MAX);
+	trigger_event(&event_name(hw_timer_tick), NULL, EVT_PRIO_MAX);
 }
 
 static int pipe_opened_init(struct event_handler_data *data)
