@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifndef PROGMEM
+#define PROGMEM
+#endif
+
 struct mcuio_range;
 struct mcuio_function;
 
@@ -21,8 +25,9 @@ struct mcuio_range_ops {
 struct mcuio_range {
 	unsigned int start;
 	unsigned int length;
-	void *target;
-	const struct mcuio_range_ops *ops;
+	const void * PROGMEM rd_target;
+	void *wr_target;
+	const struct mcuio_range_ops * PROGMEM ops;
 };
 
 struct mcuio_function_runtime {
@@ -39,14 +44,16 @@ struct mcuio_function_ops {
 
 struct mcuio_function {
 	int nranges;
-	const struct mcuio_range *ranges;
-	const struct mcuio_function_ops *ops;
+	const struct mcuio_range * PROGMEM ranges;
+	const struct mcuio_function_ops * PROGMEM ops;
 	struct mcuio_function_runtime *runtime;
 };
 
+#define __mcuio_func __attribute__((section(".mcuio_functions")))
+
 #define declare_mcuio_function(name, r, th, o, rt)		\
 	struct mcuio_function name				\
-	__attribute__((section(".mcuio_functions"))) = {	\
+	__mcuio_func  = {					\
 		.nranges = ARRAY_SIZE(r),			\
 		.ranges = r,					\
 		.ops = o,					\

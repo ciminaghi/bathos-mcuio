@@ -247,9 +247,9 @@ int mcuio_rdb(const struct mcuio_range *r, unsigned offset, uint32_t *__out,
 {
 	uint8_t *out = (uint8_t *)__out;
 	if (!fill)
-		*out = *(uint8_t *)(r->target + offset);
+		*out = *(uint8_t *)(r->rd_target + offset);
 	else
-		memcpy(out, r->target + offset, sizeof(uint64_t));
+		memcpy(out, r->rd_target + offset, sizeof(uint64_t));
 	return fill ? sizeof(uint64_t) : sizeof(uint8_t);
 }
 
@@ -258,9 +258,9 @@ int mcuio_rdw(const struct mcuio_range *r, unsigned offset, uint32_t *__out,
 {
 	uint16_t *out = (uint16_t *)__out;
 	if (!fill)
-		*out = *(uint16_t *)(r->target + offset);
+		*out = *(uint16_t *)(r->rd_target + offset);
 	else
-		memcpy(out, r->target + offset, sizeof(uint64_t));
+		memcpy(out, r->rd_target + offset, sizeof(uint64_t));
 	return fill ? sizeof(uint64_t): sizeof(uint16_t);
 }
 
@@ -269,16 +269,17 @@ int mcuio_rddw(const struct mcuio_range *r, unsigned offset, uint32_t *out,
 {
 	printf("%s: reading %p (offset = %u), fill = %d\n", __func__,
 	       r->target, offset, fill);
-	*out = *(uint32_t *)(r->target + offset);
+	*out = *(uint32_t *)(r->rd_target + offset);
 	if (fill)
-		out[1] = *(uint32_t *)(r->target + offset + sizeof(uint32_t));
+		out[1] = *(uint32_t *)(r->rd_target + offset +
+				       sizeof(uint32_t));
 	return fill ? sizeof(uint64_t) : sizeof(uint32_t);
 }
 
 int mcuio_rdq(const struct mcuio_range *r, unsigned offset, uint32_t *out,
 	      int fill)
 {
-	memcpy(out, r->target + offset, sizeof(uint64_t));
+	memcpy(out, r->rd_target + offset, sizeof(uint64_t));
 	return sizeof(uint64_t);
 }
 
@@ -287,9 +288,9 @@ int mcuio_wrb(const struct mcuio_range *r, unsigned offset,
 {
 	const uint8_t *in = (const uint8_t *)__in;
 	if (!fill)
-		*(uint8_t *)(r->target + offset) = *in;
+		*(uint8_t *)(r->wr_target + offset) = *in;
 	else
-		memcpy(r->target + offset, in, sizeof(uint64_t));
+		memcpy(r->wr_target + offset, in, sizeof(uint64_t));
 	return fill ? sizeof(uint64_t) : sizeof(uint8_t);
 }
 
@@ -298,25 +299,25 @@ int mcuio_wrw(const struct mcuio_range *r, unsigned offset,
 {
 	const uint16_t *in = (const uint16_t *)__in;
 	if (!fill)
-		*(uint16_t *)(r->target + offset) = *in;
+		*(uint16_t *)(r->wr_target + offset) = *in;
 	else
-		memcpy(r->target + offset, in, sizeof(uint64_t));
+		memcpy(r->wr_target + offset, in, sizeof(uint64_t));
 	return fill ? sizeof(uint64_t) : sizeof(uint16_t);
 }
 
 int mcuio_wrdw(const struct mcuio_range *r, unsigned offset,
 	       const uint32_t *in, int fill)
 {
-	*(uint32_t *)(r->target + offset) = *in;
+	*(uint32_t *)(r->wr_target + offset) = *in;
 	if (fill)
-		*(uint32_t *)(r->target + offset + sizeof(uint32_t)) = in[1];
+		*(uint32_t *)(r->wr_target + offset + sizeof(uint32_t)) = in[1];
 	return fill ? sizeof(uint64_t) : sizeof(uint32_t);
 }
 
 int mcuio_wrq(const struct mcuio_range *r, unsigned offset, const uint32_t *in,
 	      int fill)
 {
-	memcpy(r->target + offset, in, sizeof(uint64_t));
+	memcpy(r->wr_target + offset, in, sizeof(uint64_t));
 	return sizeof(uint64_t);
 }
 
