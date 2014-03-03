@@ -10,6 +10,21 @@
 
 #include "mcuio-function.h"
 
+#ifdef CONFIG_MCUIO_DEBUG
+static void dump_packet(struct mcuio_base_packet *packet)
+{
+	printf("I: bus = %u, dev = %u, func = %u, type = %s, "
+	       "offset = 0x%04x\r\n",
+	       packet->bus, packet->dev, packet->func,
+	       mcuio_packet_type_to_str(packet->type),
+	       packet->offset);
+}
+#else
+static inline void dump_packet(struct mcuio_base_packet *packet)
+{
+}
+#endif
+
 declare_event(mcuio_function_request);
 
 struct mcuio_data {
@@ -171,16 +186,6 @@ static struct bathos_task __task t_mcuio = {
 	.release = 3,
 };
 
-static void dump_packet(struct mcuio_base_packet *packet)
-{
-	printf("bus = %u, dev = %u, func = %u, type = %s, offset = 0x%04x\n",
-	       packet->bus, packet->dev, packet->func,
-	       mcuio_packet_type_to_str(packet->type),
-	       packet->offset);
-	if (mcuio_packet_is_write(packet))
-		printf("data = 0x%08x - 0x%08x\n", packet->data[0],
-		       packet->data[1]);
-}
 
 static void pipe_input_handle(struct event_handler_data *ed)
 {
