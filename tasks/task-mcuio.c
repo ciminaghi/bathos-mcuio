@@ -147,8 +147,8 @@ static void mcuio_request_received(struct mcuio_data *d,
 
 static struct bathos_pipe *__open_input_pipe(struct mcuio_data *data)
 {
-	struct bathos_pipe *out;
-	out = pipe_open("fd:3", BATHOS_MODE_INPUT, data);
+	struct bathos_pipe *out = NULL;
+	out = pipe_open(CONFIG_MCUIO_PIPE_INPUT_PATH, BATHOS_MODE_INPUT, data);
 	if (!out)
 		out = bathos_stdin;
 	return out;
@@ -164,7 +164,8 @@ static int mcuio_init(void *arg)
 		printf("mcuio: error opening input pipe\n");
 		return -1;
 	}
-	data->output_pipe = pipe_open("fd:4", BATHOS_MODE_OUTPUT,
+	data->output_pipe = pipe_open(CONFIG_MCUIO_PIPE_OUTPUT_PATH,
+				      BATHOS_MODE_OUTPUT,
 				      data);
 	if (!data->output_pipe)
 		data->output_pipe = bathos_stdout;
