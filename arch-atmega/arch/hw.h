@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+#include <avr/pgmspace.h>
+
 #define THOS_QUARTZ		(16UL * 1000 * 1000)
 #if (MCU_atmega32u4==1)
 #define HZ			(THOS_QUARTZ / 256 / 250) /* 250 */
