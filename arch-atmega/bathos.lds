@@ -17,6 +17,9 @@ SECTIONS
 		/* For data that needs to reside in the lower 64k of progmem. */
 		*(.progmem.gcc*)
     		*(.progmem*)
+		mcuio_functions_start = .;
+		*(.mcuio_functions);
+		mcuio_functions_end = .;
 	}
 	__end_text = .;
 	/* By conventions, RAM is thought to be at address 0x80.0000 */
