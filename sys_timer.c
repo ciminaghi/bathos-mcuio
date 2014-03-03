@@ -84,17 +84,6 @@ int sys_timer_enqueue_tick(unsigned long evt_jiffies, void *data)
 	return 0;
 }
 
-int sys_timer_get_next_tick(unsigned long *j, void **data)
-{
-	struct scheduled_tick *t;
-	if (list_empty(&scheduled_ticks))
-		return -1;
-	t = list_entry(scheduled_ticks.next, struct scheduled_tick, list);
-	*j = t->when;
-	*data = t->data;
-	return 0;
-}
-
 void on_hw_timer_tick(struct event_handler_data *d)
 {
 	struct scheduled_tick *next, *tmp;
