@@ -186,8 +186,7 @@ static struct bathos_task __task t_mcuio = {
 	.release = 3,
 };
 
-
-static void pipe_input_handle(struct event_handler_data *ed)
+static void data_ready_handle(struct event_handler_data *ed)
 {
 	struct bathos_pipe *pipe;
 	struct mcuio_base_packet *packet;
@@ -195,7 +194,9 @@ static void pipe_input_handle(struct event_handler_data *ed)
 	struct mcuio_data *data = ed->priv;
 	struct mcuio_function *f;
 
-	pipe = ed->data;
+
+	pipe = data->input_pipe;
+
 	packet = &data->input_packet;
 	stat = pipe_read(pipe, (char *)packet, sizeof(*packet));
 	if (!stat) {
@@ -220,16 +221,8 @@ static void pipe_input_handle(struct event_handler_data *ed)
 		mcuio_request_received(data, f);
 }
 
-static void pipe_input_exit(struct event_handler_data *ed)
-{
-	struct mcuio_data *data = ed->data;
-	pipe_close(data->input_pipe);
-	pipe_close(data->output_pipe);
-}
-
-
-declare_event_handler_with_priv(pipe_input_ready, NULL, pipe_input_handle,
-				pipe_input_exit, &global_data);
+declare_event_handler_with_priv(mcuio_data_ready, NULL, data_ready_handle,
+				NULL, &global_data);
 
 
 static void mcuio_function_request_handle(struct event_handler_data *ed)
