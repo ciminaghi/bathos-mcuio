@@ -60,13 +60,11 @@ static int __exec_request(struct mcuio_function *f,
 	mcuio_read rptr = NULL;
 	mcuio_write wptr = NULL;
 	int fill = mcuio_packet_is_fill_data(p);
-	printf("%s %d, p->type = %d\n", __func__, __LINE__, p->type);
 	if (mcuio_packet_is_read(p))
 		rptr = r->ops->rd[(p->type & ((1 << 5) - 1)) >> 1];
 	if (mcuio_packet_is_write(p))
 		wptr = r->ops->wr[((p->type - 1) & ((1 << 5) - 1)) >> 1];
 	f->runtime->to_host = *p;
-	printf("%s %d: rptr = %p, wptr = %p\n", __func__, __LINE__, rptr, wptr);
 	mcuio_packet_set_reply(&f->runtime->to_host);
 	if (rptr)
 		return rptr(r, p->offset - r->start, f->runtime->to_host.data,
@@ -129,9 +127,6 @@ static void mcuio_request_received(struct mcuio_data *d,
 {
 	const struct mcuio_range *r = __lookup_range(f, &d->input_packet);
 	int stat;
-	printf("d = %p\n", d);
-	printf("d->input_pipe = %p, d->output_pipe = %p, r = %p\n",
-	       d->input_pipe, d->output_pipe, r);
 
 	if (!r) {
 		__mcuio_send_error_to_host(d, &f->runtime->to_host, EINVAL);
@@ -173,8 +168,7 @@ static int mcuio_init(void *arg)
 		printf("mcuio: error opening output pipe\n");
 		return -1;
 	}
-	printf("mcuio init ok, d = %p, input_pipe = %p, output_pipe = %p\n",
-	       data, data->input_pipe, data->output_pipe);
+	printf("mcuio init ok\n");
 	return 0;
 }
 
@@ -280,8 +274,6 @@ int mcuio_rdw(const struct mcuio_range *r, unsigned offset, uint32_t *__out,
 int mcuio_rddw(const struct mcuio_range *r, unsigned offset, uint32_t *out,
 	       int fill)
 {
-	printf("%s: reading %p (offset = %u), fill = %d\n", __func__,
-	       r->target, offset, fill);
 	*out = *(uint32_t *)(r->rd_target + offset);
 	if (fill)
 		out[1] = *(uint32_t *)(r->rd_target + offset +
