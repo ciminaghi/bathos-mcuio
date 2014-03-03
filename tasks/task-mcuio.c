@@ -31,6 +31,7 @@ struct mcuio_data {
 	struct bathos_pipe *input_pipe;
 	struct bathos_pipe *output_pipe;
 	struct mcuio_base_packet input_packet;
+	int curr_len;
 };
 
 static struct mcuio_data global_data;
@@ -198,19 +199,29 @@ static void data_ready_handle(struct event_handler_data *ed)
 	pipe = data->input_pipe;
 
 	packet = &data->input_packet;
-	stat = pipe_read(pipe, (char *)packet, sizeof(*packet));
-	if (!stat) {
-		/* The other end closed the pipe, reopen it */
-		pipe_close(pipe);
-		data->input_pipe = __open_input_pipe(data);
+	stat = pipe_read(pipe, &((char *)packet)[data->curr_len],
+			 sizeof(*packet) - data->curr_len);
+	if (stat <= 0) {
+		if (!stat) {
+			/*
+			  The other end closed the pipe (or an error occurred),
+			  reopen it
+			*/
+			printf("reopening input pipe\n");
+			pipe_close(pipe);
+			data->input_pipe = __open_input_pipe(data);
+		}
+		data->curr_len = 0;
 		return;
 	}
-	if (stat < sizeof(packet))
+	data->curr_len += stat;
+	if (data->curr_len < sizeof(*packet))
 		return;
+	data->curr_len = 0;
+	dump_packet(packet);
 	/* HACK: fixed dev 1, ignore other destinations */
 	if (packet->dev != 1)
 		return;
-	dump_packet(packet);
 	f = &mcuio_functions_start[packet->func];
 	if (f >= mcuio_functions_end) {
 		__mcuio_send_error_to_host(data, packet, -ENODEV);
