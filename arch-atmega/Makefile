@@ -24,7 +24,6 @@ ASFLAGS = -mmcu=$(word 1, $(BATHOS_MCU)) -Iinclude -I$(ADIR)
 
 # Library: we have one assembly source file
 LIBARCH = $(ADIR)/libarch.a
-LIBARCH_OBJS = $(ADIR)/jiffies.o
 
 ifeq ($(MCU),atmega8)
 LIBARCH_OBJS += $(ADIR)/atmega-a8.o
