@@ -1,1 +1,31 @@
 
+config TASK_MCUIO
+       prompt "Mcuio protocol implementation"
+       bool
+       help
+	 Enable mcuio implementation
+
+config MCUIO_PIPE_INPUT_PATH
+       prompt "Mcuio input pipe path"
+       string
+       depends on TASK_MCUIO
+       default "fd:3" if ARCH=unix
+       default "uart-mux-yun" if ARCH=atmega
+       help
+         The pipe where mcuio will take its input from
+
+config MCUIO_PIPE_OUTPUT_PATH
+       prompt "Mcuio output pipe path"
+       string
+       depends on TASK_MCUIO
+       default "fd:4" if ARCH=unix
+       default "uart-mux-yun" if ARCH=atmega
+       help
+         The pipe where mcuio will send its output to
+
+config MCUIO_DEBUG
+       prompt "Mcuio debug"
+       bool
+       depends on TASK_MCUIO
+       default n
+
