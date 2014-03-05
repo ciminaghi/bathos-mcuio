@@ -12,8 +12,8 @@ uint32_t gpio_data[2];
 static const int PROGMEM gpio_configs_length = sizeof(gpio_configs);
 
 static const struct mcuio_func_descriptor PROGMEM gpio_descr = {
-	.device = 0x0001,
-	.vendor = 0xbeef,
+	.device = CONFIG_MCUIO_GPIO_DEVICE,
+	.vendor = CONFIG_MCUIO_GPIO_VENDOR,
 	.rev = 0,
 	/* GPIOs class */
 	.class = 0x00000002,

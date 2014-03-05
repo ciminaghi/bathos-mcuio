@@ -40,3 +40,15 @@ config MCUIO_GPIO
        bool
        depends on TASK_MCUIO
        default n
+
+config MCUIO_GPIO_DEVICE
+       prompt "Device id for gpios"
+       hex
+       depends on MCUIO_GPIO
+       default 0x8255
+
+config MCUIO_GPIO_VENDOR
+       prompt "Vendor id for gpios"
+       hex
+       depends on MCUIO_GPIO
+       default 0xaaaa
