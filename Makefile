@@ -19,7 +19,20 @@ include $(ADIR)/Makefile
 
 # Task choice. This follows the -y convention, to allow use of $(CONFIG_STH) 
 # The arch may have its choice, or you can override on the command line
-TASK-y ?= task-mcuio.o mcuio_zero_func.o mcuio_gpio_func.o
+TASK-y ?=
+
+ifeq ($(TASK-y),)
+  ifeq ($(CONFIG_TASK_MCUIO),y)
+    TASK-y+=task-mcuio.o
+  endif
+  ifeq ($(CONFIG_MCUIO_ZERO),y)
+    TASK-y+=mcuio_zero_func.o
+  endif
+  ifeq ($(CONFIG_MCUIO_GPIO),y)
+    TASK-y+=mcuio_gpio_func.o
+  endif
+endif
+
 
 # Cross compiling:
 AS              = $(CROSS_COMPILE)as
