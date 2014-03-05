@@ -2,6 +2,7 @@
  * Very simple protocol for microprocessor <-> mcu communication
  */
 #include <arch/hw.h>
+#include <arch/bathos-arch.h>
 #include <bathos/bathos.h>
 #include <bathos/pipe.h>
 #include <bathos/string.h>
@@ -36,19 +37,95 @@ struct mcuio_data {
 
 static struct mcuio_data global_data;
 
-static const struct mcuio_range *__lookup_range(struct mcuio_function *f,
-						struct mcuio_base_packet *p)
+#if defined CONFIG_ARCH_ATMEGA
+/*
+ * f is a pointer to data memory
+ */
+static inline int __get_range(const struct mcuio_function *f,
+			      int index, struct mcuio_range *out)
 {
-	int i, len;
+	const struct mcuio_range *r;
+	r = &f->ranges[index];
+	memcpy_P(out, r, sizeof(*r));
+	return 0;
+}
+
+static inline int __get_nranges(const struct mcuio_function *f)
+{
+	return f->nranges;
+}
+
+static inline struct mcuio_function *__get_function(int fn,
+						    struct mcuio_function *f)
+{
+	struct mcuio_function *out = &mcuio_functions_start[fn];
+	if (out >= mcuio_functions_end)
+		return NULL;
+	memcpy_P(f, out, sizeof(*f));
+	return f;
+}
+#else /* !ARCH_ATMEGA */
+static inline void __get_range(const struct mcuio_function *f,
+			       int index, struct mcuio_range *out)
+{
+	*out = f->ranges[i];
+}
+
+static inline int __get_nranges(const struct mcuio_function *f)
+{
+	*out = f->nranges;
+}
+
+static inline struct mcuio_function *__get_function(int fn,
+						    struct mcuio_function *f)
+{
+	struct mcuio_function *out = &mcuio_functions_start[packet->func];
+	if (out >= mcuio_functions_end)
+		return NULL;
+	*f = *out;
+	return f;
+}
+
+static inline int __copy_byte(uint8_t *dst, const uint8_t *src)
+{
+	*dst = *src;
+	return 0;
+}
+
+static inline int __copy_word(uint16_t *dst, const uint16_t *src)
+{
+	*dst = *src;
+	return 0;
+}
+
+static inline int __copy_dword(uint32_t *dst, const uint32_t *src)
+{
+	*dst = *src;
+	return 0;
+}
+
+static inline void *memcpy_p(void *dst, const void *src, int size)
+{
+	return memcpy(dst, src, size);
+}
+#endif
+
+static const struct mcuio_range *__lookup_range(struct mcuio_function *f,
+						struct mcuio_base_packet *p,
+						struct mcuio_range *r)
+{
+	int i, len, nranges;
 
 	len = mcuio_packet_data_len(p);
+	nranges = __get_nranges(f);
 
 	/* FIXME: SMARTER SEARCH */
 	for (i = 0; i < f->nranges; i++) {
-		unsigned int start = f->ranges[i].start;
-		unsigned int end = start + f->ranges[i].length - 1;
-		if ((p->offset >= start) && (p->offset + len - 1 <= end))
-			return &f->ranges[i];
+		__get_range(f, i, r);
+		int end = r->start + r->length - 1;
+		if ((p->offset >= r->start) &&
+		    (p->offset + len - 1 <= end))
+			return r;
 	}
 	return NULL;
 }
@@ -125,7 +202,9 @@ static void mcuio_send_reply_to_function(struct mcuio_data *d,
 static void mcuio_request_received(struct mcuio_data *d,
 				   struct mcuio_function *f)
 {
-	const struct mcuio_range *r = __lookup_range(f, &d->input_packet);
+	struct mcuio_range __r;
+	const struct mcuio_range *r = NULL;
+	r = __lookup_range(f, &d->input_packet, &__r);
 	int stat;
 
 	if (!r) {
@@ -191,6 +270,7 @@ static void data_ready_handle(struct event_handler_data *ed)
 	struct mcuio_base_packet *packet;
 	int stat;
 	struct mcuio_data *data = ed->priv;
+	struct mcuio_function __f;
 	struct mcuio_function *f;
 
 
@@ -220,8 +300,8 @@ static void data_ready_handle(struct event_handler_data *ed)
 	/* HACK: fixed dev 1, ignore other destinations */
 	if (packet->dev != 1)
 		return;
-	f = &mcuio_functions_start[packet->func];
-	if (f >= mcuio_functions_end) {
+	f = __get_function(packet->func, &__f);
+	if (!f) {
 		__mcuio_send_error_to_host(data, packet, -ENODEV);
 		return;
 	}
@@ -253,10 +333,11 @@ int mcuio_rdb(const struct mcuio_range *r, unsigned offset, uint32_t *__out,
 	      int fill)
 {
 	uint8_t *out = (uint8_t *)__out;
-	if (!fill)
-		*out = *(uint8_t *)(r->rd_target + offset);
-	else
-		memcpy(out, r->rd_target + offset, sizeof(uint64_t));
+	if (!fill) {
+		if (__copy_byte(out, (uint8_t *)(r->rd_target + offset)) < 0)
+			return -1;
+	} else
+		memcpy_p(out, r->rd_target + offset, sizeof(uint64_t));
 	return fill ? sizeof(uint64_t) : sizeof(uint8_t);
 }
 
@@ -264,20 +345,23 @@ int mcuio_rdw(const struct mcuio_range *r, unsigned offset, uint32_t *__out,
 	      int fill)
 {
 	uint16_t *out = (uint16_t *)__out;
-	if (!fill)
-		*out = *(uint16_t *)(r->rd_target + offset);
-	else
-		memcpy(out, r->rd_target + offset, sizeof(uint64_t));
+	if (!fill) {
+		if (__copy_word(out, (uint16_t *)(r->rd_target + offset)) < 0)
+			return -1;
+	} else
+		memcpy_p(out, r->rd_target + offset, sizeof(uint64_t));
 	return fill ? sizeof(uint64_t): sizeof(uint16_t);
 }
 
 int mcuio_rddw(const struct mcuio_range *r, unsigned offset, uint32_t *out,
 	       int fill)
 {
-	*out = *(uint32_t *)(r->rd_target + offset);
+	if (__copy_dword(out, (uint32_t *)(r->rd_target + offset)) < 0)
+		return -1;
 	if (fill)
-		out[1] = *(uint32_t *)(r->rd_target + offset +
-				       sizeof(uint32_t));
+		if (__copy_dword(&out[1], (uint32_t *)(r->rd_target + offset +
+						       sizeof(uint32_t))) < 0)
+			return -1;
 	return fill ? sizeof(uint64_t) : sizeof(uint32_t);
 }
 
