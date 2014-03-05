@@ -121,3 +121,18 @@ config COPY_STDOUT_TO_CONSOLE
        depends on !STDOUT_CONSOLE
        help
          Copy standard output to console
+
+config CHECK_PTR_ERRORS
+       bool "Enable checks on pointers"
+       help
+         Functions/macros are available for users to check pointers
+	 (being the atmega an harvard architecture, data and
+	 program pointers cannot be mixed). If this option is
+	 selected, checks are actually performed
+
+config VERBOSE_PTR_ERRORS
+       bool "Verbose error messages on pointer errors"
+       depends on CHECK_PTR_ERRORS
+       help
+         With this option selected, messages are printed on
+	 pointers errors (see also CONFIG_CHECK_PTR_ERRORS)
