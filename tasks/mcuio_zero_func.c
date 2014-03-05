@@ -14,28 +14,34 @@ static struct mcuio_func_descriptor PROGMEM zero_descr = {
 	.class = 0,
 };
 
+const int PROGMEM zero_descr_length = sizeof(zero_descr);
+
 const char PROGMEM zero_ro_contents[8] = "mcuio";
 
+const int PROGMEM zero_ro_contents_length = sizeof(zero_ro_contents);
+
 char PROGMEM zero_rw_contents[8] = "deadbeef";
+
+const int PROGMEM zero_rw_contents_length = sizeof(zero_rw_contents);
 
 static struct mcuio_function_runtime zero_rt;
 
 static const struct mcuio_range PROGMEM zero_ranges[] = {
 	{
 		.start = 0,
-		.length = sizeof(zero_descr),
+		.length = &zero_descr_length,
 		.rd_target = &zero_descr,
 		.ops = &default_mcuio_range_ro_ops,
 	},
 	{
 		.start = 8,
-		.length = sizeof(zero_ro_contents),
+		.length = &zero_ro_contents_length,
 		.rd_target = (char *)zero_ro_contents,
 		.ops = &default_mcuio_range_ro_ops,
 	},
 	{
 		.start = 16,
-		.length = sizeof(zero_rw_contents),
+		.length = &zero_rw_contents_length,
 		.rd_target = zero_rw_contents,
 		.wr_target = zero_rw_contents,
 		.ops = &default_mcuio_range_ops,

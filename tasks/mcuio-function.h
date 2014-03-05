@@ -24,7 +24,7 @@ struct mcuio_range_ops {
 
 struct mcuio_range {
 	unsigned int start;
-	unsigned int length;
+	const unsigned int * PROGMEM length;
 	const void * PROGMEM rd_target;
 	void *wr_target;
 	const struct mcuio_range_ops * PROGMEM ops;

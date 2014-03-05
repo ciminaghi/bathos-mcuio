@@ -9,6 +9,8 @@
 uint32_t gpio_configs[2];
 uint32_t gpio_data[2];
 
+static const int PROGMEM gpio_configs_length = sizeof(gpio_configs);
+
 static const struct mcuio_func_descriptor PROGMEM gpio_descr = {
 	.device = 0x0001,
 	.vendor = 0xbeef,
@@ -16,6 +18,8 @@ static const struct mcuio_func_descriptor PROGMEM gpio_descr = {
 	/* GPIOs class */
 	.class = 0x00000002,
 };
+
+static const int PROGMEM gpio_descr_length = sizeof(gpio_descr);
 
 static uint32_t PROGMEM gpio_ro_range[] = {
 	[0] = ('P' << 8 | '1' << 0),
@@ -26,6 +30,8 @@ static uint32_t PROGMEM gpio_ro_range[] = {
 	/* Events, none available for now */
 	[10 ... 13] = 0,
 };
+
+static const int PROGMEM gpio_ro_range_length = sizeof(gpio_ro_range);
 
 static struct mcuio_function_runtime gpio_rt;
 
@@ -75,28 +81,30 @@ const struct mcuio_range_ops PROGMEM gpio_data_ops = {
 	.wr = { gpio_data_wrb, gpio_data_wrw, gpio_data_wrdw, gpio_data_wrq, },
 };
 
+static int PROGMEM gpio_data_length = 4;
+
 static const struct mcuio_range PROGMEM gpio_ranges[] = {
 	{
 		.start = 0,
-		.length = sizeof(gpio_descr),
+		.length = &gpio_descr_length,
 		.rd_target = &gpio_descr,
 		.ops = &default_mcuio_range_ro_ops,
 	},
 	{
 		.start = 8,
-		.length = sizeof(gpio_ro_range),
+		.length = &gpio_ro_range_length,
 		.rd_target = (char *)gpio_ro_range,
 		.ops = &default_mcuio_range_ro_ops,
 	},
 	{
 		.start = 0x40,
-		.length = 32,
+		.length = &gpio_configs_length,
 		.wr_target = (char *)gpio_configs,
 		.ops = &default_mcuio_range_ops,
 	},
 	{
 		.start = 0x70,
-		.length = 4,
+		.length = &gpio_data_length,
 		.wr_target = (char *)gpio_data,
 		.ops = &gpio_data_ops,
 	},
