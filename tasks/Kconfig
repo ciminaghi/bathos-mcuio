@@ -52,3 +52,20 @@ config MCUIO_GPIO_VENDOR
        hex
        depends on MCUIO_GPIO
        default 0xaaaa
+
+choice
+	prompt "Gpio names map"
+
+config MCUIO_GPIO_MAP_YUN
+       bool "arduino yun gpio map"
+       depends on MCUIO_GPIO
+       help
+         This selects a gpio map corresponding to an arduino shield
+
+config MCUIO_GPIO_MAP_ATMEGA32U4
+       bool "generic 32u4 gpio map"
+       depends on MCUIO_GPIO
+       help
+         This selects a generic map for a 32U4
+
+endchoice
