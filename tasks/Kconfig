@@ -29,3 +29,14 @@ config MCUIO_DEBUG
        depends on TASK_MCUIO
        default n
 
+config MCUIO_ZERO
+       prompt "Mcuio zero function"
+       bool
+       depends on TASK_MCUIO
+       default n
+
+config MCUIO_GPIO
+       prompt "Mcuio gpio function"
+       bool
+       depends on TASK_MCUIO
+       default n
