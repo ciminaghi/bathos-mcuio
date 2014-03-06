@@ -1,0 +1,24 @@
+#!/bin/bash
+#set -x
+
+src=$(tempfile --suffix=.c)
+out=$(tempfile)
+
+<<EOF cat > $src
+int main(void)
+{
+}
+EOF
+
+ret=0
+$CC -c -o $src.o $src  || ret=1
+if [ "$ret" = "0" ] ; then
+    $OBJDUMP -h $src.o | grep 'file\ format' | \
+	sed -e 's/.*[ \t]\([^ \t]\)/\1/' >$out 2>&1 || ret=1
+fi
+
+[ -f $out ] && cat $out
+
+rm -f $src $out
+
+exit $ret
