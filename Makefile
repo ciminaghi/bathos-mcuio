@@ -33,6 +33,14 @@ ifeq ($(TASK-y),)
   endif
 endif
 
+ifeq ($(MCUIO_GPIO_CONFIG_FILE),)
+  ifeq ($(CONFIG_MCUIO_GPIO_MAP_YUN),y)
+    MCUIO_GPIO_CONFIG_FILE=yun-gpios.cfg
+  else ifeq ($(CONFIG_MCUIO_GPIO_MAP_ATMEGA32U4),y)
+    MCUIO_GPIO_CONFIG_FILE=generic-atmega32u4-gpios.cfg
+  endif
+endif
+
 
 # Cross compiling:
 AS              = $(CROSS_COMPILE)as
@@ -44,6 +52,8 @@ NM              = $(CROSS_COMPILE)nm
 STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
+
+export CC OBJDUMP
 
 # Files that depend on the architecture (bathos.lds may be missing)
 AOBJ  += $(ADIR)/boot.o $(ADIR)/io.o
@@ -80,6 +90,13 @@ TOBJ := $(patsubst %, tasks/%, $(TASK-y))
 TOBJ := $(patsubst tasks/arch/%, tasks-$(ARCH)/%, $(TOBJ))
 VPATH := tasks-$(ARCH)
 
+ifeq ($(CONFIG_MCUIO_GPIO),y)
+GPIOS_NAMES_FILE = $(patsubst %.cfg, tasks/%-names.o, $(MCUIO_GPIO_CONFIG_FILE))
+TOBJ += $(GPIOS_NAMES_FILE)
+MCUIO_NGPIO := $(shell scripts/get_ngpios tasks/$(MCUIO_GPIO_CONFIG_FILE))
+CFLAGS += -DMCUIO_NGPIO=$(MCUIO_NGPIO)
+endif
+
 # Generic flags
 CFLAGS  += -Iinclude -I$(ADIR)
 CFLAGS  += -g -Wall -ffreestanding -Os
@@ -97,6 +114,10 @@ $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 
 bathos.o: silentoldconfig $(obj-y)
 	$(LD) -r -T bigobj.lds $(obj-y) -o $@
+
+$(GPIOS_NAMES_FILE): tasks/%-names.o: tasks/%.cfg
+	export CC=$(CC) OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
+	scripts/gen_gpios_names $$(scripts/get_bin_format) $< $@
 
 clean:
 	rm -f bathos.bin bathos *.o *~
