@@ -1,0 +1,144 @@
+#!/bin/bash
+# gen_gpios_capabilities: generate object file with gpio capabilities
+#set -x
+
+decode_cap() {
+    out=0
+    if [ "$1" = "DISABLED" ] ; then
+	echo $out
+	return 0
+    fi
+    for ((field=1; ;field++)) ; do
+	ix=$(echo $1 | cut -s -d '|' -f $field)
+	[ -z "$ix" ] && break;
+	case $ix in
+	    IN*)
+		out=$((out|1))
+		;;
+	    OUT*)
+		out=$((out|2))
+		;;
+	    PULLUP)
+		out=$((out|4))
+		;;
+	    PULLDOWN)
+		out=$((out|8))
+		;;
+	    ODRAIN)
+		out=$((out|16))
+		;;
+	    *)
+		echo "Invalid capability $ix" > /dev/stderr
+		;;
+	esac
+    done
+    echo $out
+}
+
+decode_evts() {
+    out=0
+    if ["$1" = "NOEVT"] ; then
+	echo $out
+	return 0
+    fi
+    for ((field=1; ;field++)) ; do
+	ix=$(echo $1 | cut -s -d '|' -f $field)
+	[ -z "$ix" ] && break;
+	case $ix in
+	    FALL*)
+		out=$((out|1))
+		;;
+	    RIS*)
+		out=$((out|2))
+		;;
+	    BOTH*)
+		out=$((out|4))
+		;;
+	    *)
+		echo "Invalid event $ix" > /dev/stderr
+		;;
+	esac
+    done
+    echo $out
+}
+
+create_symbols_names_file() {
+    local objf=$1
+    local str=$2
+    local f=$3
+    local s
+    for s in start end size ; do
+	echo "_binary_$(echo $objf | sed -e 's/\//_/g')_$s ${str}_${s}" >> $f
+    done
+}
+
+# $1 -> file
+# $2 -> format
+# $3 -> file with names of symbols to be renamed
+# $4 -> new section name
+# $5 -> output file
+create_obj() {
+    local f=$1
+    local fmt=$2
+    local symfile=$3
+    local sec=$4
+    local out=$5
+    ${OBJCOPY} --redefine-syms=$symfile -I binary -O $fmt $f $out || return 1
+    ${OBJCOPY} --rename-section \
+	.data=$sec,contents,alloc,load,readonly,code $out $out
+}
+
+[ $# -lt 3 ] && \
+    { echo "Use $0 <obj-format> <gpio_cfg_file> <out_file>" ; exit 1 ; }
+
+f=$(tempfile --prefix=cobj)
+g=$(tempfile --prefix=eobj)
+r=$(tempfile --prefix=csym)
+q=$(tempfile --prefix=esym)
+fmt=$1
+outcaps=$(tempfile --prefix=ocaps)
+outevts=$(tempfile --prefix=oevts)
+out=$3
+
+exec 9<$2
+
+while read -u 9 line ; do
+    # Skip comments and empty lines
+    [ -n "$(echo -n $line | grep ^#.*)" ] && continue
+    [ -n "$(echo -n $line | grep ^[[:space:]]*$)" ] && continue
+    # I/O modes have the following form:
+    # DISABLED |
+    # CAPABILITIES_LIST
+    # where CAPABILITIES_LIST is:
+    # CAP |
+    # CAP '|' CAPABILITIES_LIST
+    # and CAP is one of the following:  INPUT, OUTPUT, PULLUP, PULLDOWN, ODRAIN
+    # I/O events capabilities have the following form:
+    # DISABLED |
+    # EVENTS_LIST
+    # where EVENTS_LIST is:
+    # EVT '|' EVENTS_LIST
+    # and EVT is one of the following:  FALLEDGE,RISEDGE,BOTHEDGES
+    cap=$(echo $line | cut -d ',' -f 2)
+    [ -z "$cap" ] && continue
+    item=$(decode_cap $cap)
+    >>$f echo -n -e $(printf "\\\x%02x" $item)
+    evt=$(echo $line | cut -d ',' -f 3)
+    [ -z "$evt" ] && { echo -n -e "\x00" >>$g ; continue ; }
+    item=$(decode_evts $evt)
+    >>$g echo -n -e $(printf "\\\x%02x" $item)
+done
+
+create_symbols_names_file $f gpio_caps $r
+create_symbols_names_file $g gpio_evts_caps $q
+
+ret=0
+create_obj $f $fmt $r .text.gpio-caps $outcaps || ret=1
+[ "$ret" = "0" ] && create_obj $g $fmt $q .text.gpio-evts $outevts || ret=1
+
+# Link everything together and generate output file
+[ "$ret" = "0" ] && ${LD} -r -o ${out} $outcaps $outevts || ret=1
+
+rm -f $f $g $r $q $outcaps $outevts
+
+exit $ret
