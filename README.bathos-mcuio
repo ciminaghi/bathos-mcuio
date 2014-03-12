@@ -1,0 +1,43 @@
+
+
+This is a fork of bathos by Alessandro Rubini (git://gnudd.com/bathos.git),
+adding some features (events, pipes) and breaking many others :-( (thanks
+a lot Alessandro for your beautiful code, sorry for my ugly hacks).
+
+Presently, it only builds for the atmega architecture, mcu atmega32u4, board
+arduino yun.
+Bathos was taken as a starting point for implementing a very simple
+communication protocol between MCU's and microprocessors (MCUIO) (a Linux
+implementation for the microprocessor side is underway, a link to the sources
+will be added here as soon as possible).
+Some of the code is very ugly at present, it will be improved as soon as I
+have time. Furthermore a branch with a cleaner history shall be added and
+everything shall be documented (I know, that's a lot of work).
+
+Anyway, to build this:
+
+   make ARCH=atmega yun_defconfig
+   make CROSS_COMPILE=<your_favourite_crosscompile>
+
+Default configuration enables a bitbang console on PB4 and PB5 of the
+atmega32u4 (protocol is custom) and a driver for a usb-serial device over
+the atmega usb slave port. Standard output (the output of printf) is redirected
+to the usb-serial device and also copied over to the bitbang console.
+The atmega's uart is used to talk to the microprocessor (the yun's mips
+processor), baud rate is 250000bps.
+When the machine starts up, it just reads characters coming from the mips
+processor and sends them over the usb-serial port. As soon as the user sends
+a CTRL-] (like telnet) on the usb-serial port, mcuio mode is entered and
+characters from the mips are processed as mcuio data. A second CTRL-] restores
+the original mips-console mode.
+
+The usb-serial code was taken from http://www.pjrc.com/teensy/usb_serial.html,
+and adapted to our needs. At present the usb-serial code does build with
+avr-gcc 4.3.2 (which is included in aurduino 1.5.5), but not with avr-gcc
+4.7.2 (which is included in my debian wheezy). This too will be fixed asap.
+
+Have fun
+Davide
+
+
+
