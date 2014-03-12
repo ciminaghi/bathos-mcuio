@@ -17,10 +17,7 @@ all: bathos.bin
 ADIR = arch-$(ARCH)
 include $(ADIR)/Makefile
 
-# Task choice. This follows the -y convention, to allow use of $(CONFIG_STH) 
-# The arch may have its choice, or you can override on the command line
-TASK-y ?=
-
+# Any tasks coming from configuration ?
 ifeq ($(TASK-y),)
   ifeq ($(CONFIG_TASK_MCUIO),y)
     TASK-y+=task-mcuio.o
@@ -32,6 +29,10 @@ ifeq ($(TASK-y),)
     TASK-y+=mcuio_gpio_func.o
   endif
 endif
+
+# Task choice. This follows the -y convention, to allow use of $(CONFIG_STH) 
+# The arch may have its choice, or you can override on the command line
+TASK-y ?=
 
 ifeq ($(MCUIO_GPIO_CONFIG_FILE),)
   ifeq ($(CONFIG_MCUIO_GPIO_MAP_YUN),y)
