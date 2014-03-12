@@ -92,7 +92,8 @@ VPATH := tasks-$(ARCH)
 
 ifeq ($(CONFIG_MCUIO_GPIO),y)
 GPIOS_NAMES_FILE = $(patsubst %.cfg, tasks/%-names.o, $(MCUIO_GPIO_CONFIG_FILE))
-TOBJ += $(GPIOS_NAMES_FILE)
+GPIOS_CAPS_FILE = $(patsubst %.cfg, tasks/%-caps.o, $(MCUIO_GPIO_CONFIG_FILE))
+TOBJ += $(GPIOS_NAMES_FILE) $(GPIOS_CAPS_FILE)
 MCUIO_NGPIO := $(shell scripts/get_ngpios tasks/$(MCUIO_GPIO_CONFIG_FILE))
 CFLAGS += -DMCUIO_NGPIO=$(MCUIO_NGPIO)
 endif
@@ -118,6 +119,10 @@ bathos.o: silentoldconfig $(obj-y)
 $(GPIOS_NAMES_FILE): tasks/%-names.o: tasks/%.cfg
 	export CC=$(CC) OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
 	scripts/gen_gpios_names $$(scripts/get_bin_format) $< $@
+
+$(GPIOS_CAPS_FILE): tasks/%-caps.o: tasks/%.cfg
+	export CC=$(CC) LD=${LD} OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
+	scripts/gen_gpios_capabilities $$(scripts/get_bin_format) $< $@
 
 clean:
 	rm -f bathos.bin bathos *.o *~
