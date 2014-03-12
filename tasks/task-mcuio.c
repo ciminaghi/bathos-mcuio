@@ -441,13 +441,13 @@ int mcuio_wrq(const struct mcuio_range *r, unsigned offset, const uint32_t *in,
 	return sizeof(uint64_t);
 }
 
-const struct mcuio_range_ops default_mcuio_range_ops = {
+const struct mcuio_range_ops PROGMEM default_mcuio_range_ops = {
 	.rd = { mcuio_rdb, mcuio_rdw, mcuio_rddw, mcuio_rdq, },
 	.wr = { mcuio_wrb, mcuio_wrw, mcuio_wrdw, mcuio_wrq, },
 };
 
 
-const struct mcuio_range_ops default_mcuio_range_ro_ops = {
+const struct mcuio_range_ops PROGMEM default_mcuio_range_ro_ops = {
 	.rd = { mcuio_rdb, mcuio_rdw, mcuio_rddw, mcuio_rdq, },
 };
 
