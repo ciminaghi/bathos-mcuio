@@ -64,6 +64,17 @@ static inline struct mcuio_function *__get_function(int fn,
 	memcpy_P(f, out, sizeof(*f));
 	return f;
 }
+
+static inline const struct mcuio_range_ops *
+__get_range_ops(const struct mcuio_range *r,
+		struct mcuio_range_ops *out)
+{
+	if (!r->ops)
+		return NULL;
+	memcpy_p(out, r->ops, sizeof(*out));
+	return out;
+}
+
 #else /* !ARCH_ATMEGA */
 static inline void __get_range(const struct mcuio_function *f,
 			       int index, struct mcuio_range *out)
@@ -108,6 +119,17 @@ static inline void *memcpy_p(void *dst, const void *src, int size)
 {
 	return memcpy(dst, src, size);
 }
+
+
+static inline const struct mcuio_range_ops *
+__get_range_ops(const struct mcuio_range *r,
+		struct mcuio_range_ops *out)
+{
+	if (!r->ops)
+		return NULL;
+	memcpy(out, r->ops, sizeof(*out));
+	return out;
+}
 #endif
 
 static const struct mcuio_range *__lookup_range(struct mcuio_function *f,
@@ -137,13 +159,19 @@ static int __exec_request(struct mcuio_function *f,
 			  const struct mcuio_range *r,
 			  struct mcuio_base_packet *p)
 {
+	struct mcuio_range_ops ops;
+	const struct mcuio_range_ops *__ops;
 	mcuio_read rptr = NULL;
 	mcuio_write wptr = NULL;
 	int fill = mcuio_packet_is_fill_data(p);
+	if (!r->ops)
+		goto disabled_range;
+	__ops = __get_range_ops(r, &ops);
 	if (mcuio_packet_is_read(p))
-		rptr = r->ops->rd[(p->type & ((1 << 5) - 1)) >> 1];
+		rptr = ops.rd[(p->type & ((1 << 5) - 1)) >> 1];
 	if (mcuio_packet_is_write(p))
-		wptr = r->ops->wr[((p->type - 1) & ((1 << 5) - 1)) >> 1];
+		wptr = ops.wr[((p->type - 1) & ((1 << 5) - 1)) >> 1];
+disabled_range:
 	f->runtime->to_host = *p;
 	mcuio_packet_set_reply(&f->runtime->to_host);
 	if (rptr)
