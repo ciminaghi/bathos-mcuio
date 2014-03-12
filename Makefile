@@ -11,14 +11,8 @@ ifeq ($(ARCH),)
   ARCH = lpc1343
 endif
 
-# First: the target. After that, we can include the arch Makefile
-all: bathos.bin
-
-ADIR = arch-$(ARCH)
-include $(ADIR)/Makefile
-
 # Any tasks coming from configuration ?
-ifeq ($(TASK-y),)
+ifndef TASK-y
   ifeq ($(CONFIG_TASK_MCUIO),y)
     TASK-y+=task-mcuio.o
   endif
@@ -29,6 +23,12 @@ ifeq ($(TASK-y),)
     TASK-y+=mcuio_gpio_func.o
   endif
 endif
+
+# First: the target. After that, we can include the arch Makefile
+all: bathos.bin
+
+ADIR = arch-$(ARCH)
+include $(ADIR)/Makefile
 
 # Task choice. This follows the -y convention, to allow use of $(CONFIG_STH) 
 # The arch may have its choice, or you can override on the command line
