@@ -90,11 +90,12 @@ ifeq ($(CONFIG_MCUIO_GPIO),y)
              MCUIO_GPIO_CONFIG_FILE=generic-atmega32u4-gpios.cfg
          endif
     endif
-GPIOS_NAMES_FILE = $(patsubst %.cfg, tasks/%-names.o, $(MCUIO_GPIO_CONFIG_FILE))
-GPIOS_CAPS_FILE = $(patsubst %.cfg, tasks/%-caps.o, $(MCUIO_GPIO_CONFIG_FILE))
-TOBJ += $(GPIOS_NAMES_FILE) $(GPIOS_CAPS_FILE)
-MCUIO_NGPIO := $(shell scripts/get_ngpios tasks/$(MCUIO_GPIO_CONFIG_FILE))
-CFLAGS += -DMCUIO_NGPIO=$(MCUIO_NGPIO)
+  GPIOS_NAMES_FILE = $(patsubst %.cfg, tasks/%-names.o,\
+	$(MCUIO_GPIO_CONFIG_FILE))
+  GPIOS_CAPS_FILE = $(patsubst %.cfg, tasks/%-caps.o, $(MCUIO_GPIO_CONFIG_FILE))
+  TOBJ += $(GPIOS_NAMES_FILE) $(GPIOS_CAPS_FILE)
+  MCUIO_NGPIO := $(shell scripts/get_ngpios tasks/$(MCUIO_GPIO_CONFIG_FILE))
+  CFLAGS += -DMCUIO_NGPIO=$(MCUIO_NGPIO)
 endif
 
 # Generic flags
