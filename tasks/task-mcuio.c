@@ -214,6 +214,7 @@ static void __mcuio_send_to_host(struct mcuio_data *d,
 {
 	int stat;
 	const struct mcuio_base_packet *p = &f->runtime->to_host;
+	dump_packet(p);
 	stat = pipe_write(d->output_pipe, (const char *)p, sizeof(*p));
 	if (stat < 0)
 		printf("mcuio: error writing to output pipe\n");
