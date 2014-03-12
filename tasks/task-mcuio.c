@@ -14,11 +14,19 @@
 #ifdef CONFIG_MCUIO_DEBUG
 static void dump_packet(struct mcuio_base_packet *packet)
 {
-	printf("I: bus = %u, dev = %u, func = %u, type = %s, "
-	       "offset = 0x%04x\r\n",
+	int i;
+	uint8_t *ptr;
+	printf("%c%s%c\n", mcuio_packet_is_error(packet) ? '!' : ' ' ,
+	       mcuio_packet_is_reply(packet) ? "->" : "<-",
+	       mcuio_packet_is_fill_data(packet) ? '+' : ' ');
+	printf("\t%u:%u.%u %s o 0x%04x\n",
 	       packet->bus, packet->dev, packet->func,
 	       mcuio_packet_type_to_str(packet->type),
 	       packet->offset);
+	printf("\td: ");
+	for (i = 0, ptr = (uint8_t *)packet->data; i < sizeof(uint64_t); i++)
+		printf("0x%02x ", ptr[i]);
+	printf("\n");
 }
 #else
 static inline void dump_packet(struct mcuio_base_packet *packet)
