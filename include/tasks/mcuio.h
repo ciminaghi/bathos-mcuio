@@ -67,21 +67,21 @@ static inline const char *mcuio_packet_type_to_str(int t)
 {
 	switch(t & 0x7) {
 	case mcuio_type_rdb:
-		return "mcuio_type_rdb";
+		return "rdb";
 	case mcuio_type_wrb:
-		return "mcuio_type_wrb";
+		return "wrb";
 	case mcuio_type_rdw:
-		return "mcuio_type_rdw";
+		return "rdw";
 	case mcuio_type_wrw:
-		return "mcuio_type_wrw";
+		return "wrw";
 	case mcuio_type_rddw:
-		return "mcuio_type_rddw";
+		return "rddw";
 	case mcuio_type_wrdw:
-		return "mcuio_type_wrdw";
+		return "wrdw";
 	case mcuio_type_rdq:
-		return "mcuio_type_rdq";
+		return "rdq";
 	case mcuio_type_wrq:
-		return "mcuio_type_wrq";
+		return "wrq";
 	}
 	return "unknown";
 }
