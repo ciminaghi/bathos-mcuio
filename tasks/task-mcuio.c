@@ -199,7 +199,7 @@ static void __mcuio_send_to_host(struct mcuio_data *d,
 	dump_packet(p);
 	stat = pipe_write(d->output_pipe, (const char *)p, sizeof(*p));
 	if (stat < 0)
-		printf("mcuio: error writing to output pipe\n");
+		printf("mcuio: output error\n");
 }
 
 static void mcuio_send_request_to_host(struct mcuio_data *d,
@@ -275,7 +275,7 @@ static int mcuio_init(void *arg)
 		return -1;
 	data->input_pipe = __open_input_pipe(data);
 	if (!data->input_pipe) {
-		printf("mcuio: error opening input pipe\n");
+		printf("mcuio: in pipe err\n");
 		return -1;
 	}
 	data->output_pipe = pipe_open(CONFIG_MCUIO_PIPE_OUTPUT_PATH,
@@ -284,16 +284,15 @@ static int mcuio_init(void *arg)
 	if (!data->output_pipe)
 		data->output_pipe = bathos_stdout;
 	if (!data->output_pipe) {
-		printf("mcuio: error opening output pipe\n");
+		printf("mcuio: out pipe err\n");
 		return -1;
 	}
-	printf("mcuio init ok\n");
 	return 0;
 }
 
 static void *mcuio_alive(void *arg)
 {
-	printf("mcuio is %s\n", arg ? "alive" : "dead");
+	printf("mcuio %s\n", arg ? "alive" : "dead");
 	return arg;
 }
 
@@ -325,7 +324,6 @@ static void data_ready_handle(struct event_handler_data *ed)
 			  The other end closed the pipe (or an error occurred),
 			  reopen it
 			*/
-			printf("reopening input pipe\n");
 			pipe_close(pipe);
 			data->input_pipe = __open_input_pipe(data);
 		}
