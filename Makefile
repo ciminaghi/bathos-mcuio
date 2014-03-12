@@ -83,13 +83,15 @@ TOBJ := $(patsubst tasks/arch/%, tasks-$(ARCH)/%, $(TOBJ))
 VPATH := tasks-$(ARCH)
 
 ifeq ($(CONFIG_MCUIO_GPIO),y)
-  ifeq ($(MCUIO_GPIO_CONFIG_FILE),)
+  ifndef MCUIO_GPIO_CONFIG_FILE
     ifeq ($(CONFIG_MCUIO_GPIO_MAP_YUN),y)
       MCUIO_GPIO_CONFIG_FILE=yun-gpios.cfg
-    else ifeq ($(CONFIG_MCUIO_GPIO_MAP_ATMEGA32U4),y)
-             MCUIO_GPIO_CONFIG_FILE=generic-atmega32u4-gpios.cfg
-         endif
+    else
+	ifeq ($(CONFIG_MCUIO_GPIO_MAP_ATMEGA32U4),y)
+          MCUIO_GPIO_CONFIG_FILE=generic-atmega32u4-gpios.cfg
+        endif
     endif
+  endif
   GPIOS_NAMES_FILE = $(patsubst %.cfg, tasks/%-names.o,\
 	$(MCUIO_GPIO_CONFIG_FILE))
   GPIOS_CAPS_FILE = $(patsubst %.cfg, tasks/%-caps.o, $(MCUIO_GPIO_CONFIG_FILE))
