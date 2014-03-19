@@ -58,6 +58,9 @@ SECTIONS
 		evt_mcuio_data_ready_handlers_start = .;
 		*(.evt_mcuio_data_ready_handlers);
 		evt_mcuio_data_ready_handlers_end = .;
+		evt_mcuio_irq_handlers_start = .;
+		*(.evt_mcuio_irq_handlers);
+		evt_mcuio_irq_handlers_end = .;
 	}
 }
 

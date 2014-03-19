@@ -49,6 +49,11 @@ struct mcuio_function {
 	struct mcuio_function_runtime *runtime;
 };
 
+struct mcuio_function_irq_data {
+	unsigned int func;
+	unsigned int active;
+};
+
 #define __mcuio_func __attribute__((section(".mcuio_functions")))
 
 #define declare_mcuio_function(name, r, th, o, rt)		\
@@ -64,6 +69,7 @@ extern struct mcuio_function mcuio_functions_start[], mcuio_functions_end[];
 
 declare_extern_event(mcuio_function_request);
 declare_extern_event(mcuio_function_reply);
+declare_extern_event(mcuio_function_irq);
 
 
 extern int mcuio_rdb(const struct mcuio_range *, unsigned offset,
