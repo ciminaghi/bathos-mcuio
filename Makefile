@@ -22,6 +22,9 @@ ifndef TASK-y
   ifeq ($(CONFIG_MCUIO_GPIO),y)
     TASK-y+=mcuio_gpio_func.o
   endif
+  ifeq ($(CONFIG_MCUIO_IRQ_CONTROLLER_WIRE),y)
+    TASK-y+=mcuio_irq_controller_wire.o
+  endif
 endif
 
 # First: the target. After that, we can include the arch Makefile

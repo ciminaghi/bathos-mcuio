@@ -53,6 +53,44 @@ config MCUIO_GPIO_VENDOR
        depends on MCUIO_GPIO
        default 0xaaaa
 
+config MCUIO_IRQ_CONTROLLER_WIRE
+       prompt "Wire irq controller"
+       bool
+       depends on TASK_MCUIO
+       default n
+       help
+         This adds an mcuio function which sends interrupts to the MPU via
+	 an MCU gpio
+
+config MCUIO_IRQ_CONTROLLER_WIRE_DEVICE
+       prompt "Device id for irq controller"
+       hex
+       depends on MCUIO_IRQ_CONTROLLER_WIRE
+       default 0x1111
+
+config MCUIO_IRQ_CONTROLLER_WIRE_VENDOR
+       prompt "Vendor id for wire irq controller"
+       hex
+       depends on MCUIO_IRQ_CONTROLLER_WIRE
+       default 0xaaaa
+
+config MCUIO_IRQ_WIRE_GPIO_NUMBER
+       prompt "Gpio for irq wire"
+       int
+       depends on MCUIO_IRQ_CONTROLLER_WIRE
+       default 30
+       help
+         This selects the gpio through which interrupts shall be sent to the
+	 MPU
+
+config MCUIO_IRQ_WIRE_ACTIVE_LEVEL
+       prompt "Active level for irq wire"
+       int
+       depends on MCUIO_IRQ_CONTROLLER_WIRE
+       default 0
+       help
+         This select the active level for irqs sent to the MPU
+
 choice
 	prompt "Gpio names map"
 
