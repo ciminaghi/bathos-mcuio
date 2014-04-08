@@ -61,7 +61,7 @@ LDS   = $(wildcard $(ADIR)/bathos$(MODE).lds)
 
 # Lib objects and flags
 LOBJ = pp_printf/printf.o pp_printf/vsprintf-xint.o
-CFLAGS  += -Ipp_printf -DCONFIG_PRINT_BUFSIZE=256
+CFLAGS  += -Ipp_printf -DCONFIG_PRINT_BUFSIZE=100
 
 # Use our own linker script, if it exists
 LDFLAGS += $(patsubst %.lds, -T %.lds, $(LDS))
