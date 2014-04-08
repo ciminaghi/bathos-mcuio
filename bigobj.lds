@@ -61,6 +61,9 @@ SECTIONS
 		evt_mcuio_irq_handlers_start = .;
 		*(.evt_mcuio_irq_handlers);
 		evt_mcuio_irq_handlers_end = .;
+		evt_gpio_evt_handlers_start = .;
+		*(.evt_gpio_evt_handlers);
+		evt_gpio_evt_handlers_end = .;
 	}
 }
 
