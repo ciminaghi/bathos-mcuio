@@ -10,7 +10,8 @@ r=$(tempfile)
 fmt=$1
 out=$3
 
-cat $2 | sed -e 's/^[ \t]*#.*//' | cut -d ',' -f 1 | tr -d '\n' | tr -d '"' > $f
+cat $2 | sed -e 's/^[ \t]*#.*//' | cut -d ',' -f 1 | tr -d '\n' | tr -d '"' \
+| tr ' ' \\\000 > $f
 
 for s in start end size ; do
     echo "_binary_$(echo $f | sed -e 's/\//_/g')_$s gpio_labels_$s" >> $r
@@ -18,7 +19,9 @@ done
 
 ret=0
 
-${OBJCOPY} --redefine-syms=$r -I binary -O $fmt $f $out || ret=1
+# FIXME: reverse bytes only if the user asks to do so
+${OBJCOPY} --reverse-bytes=4 \
+    --redefine-syms=$r -I binary -O $fmt $f $out || ret=1
 ${OBJCOPY} --rename-section \
     .data=.text.gpio-labels,contents,alloc,load,readonly,code $out $out || \
     ret=1
