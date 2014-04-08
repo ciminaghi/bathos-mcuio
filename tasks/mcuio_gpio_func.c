@@ -92,7 +92,7 @@ static int __gpio_data_wr(const struct mcuio_range *r, unsigned offset,
 				default:
 					return -EINVAL;
 				}
-				gpio_set(i + j + start, in & mask);
+				gpio_set(i + j + start, (in & mask) ? 1 : 0);
 			}
 		}
 	}
@@ -140,7 +140,7 @@ static int __gpio_data_rd(const struct mcuio_range *r, unsigned offset,
 			int j;
 			uint32_t p;
 			for (j = 0, p = 0; j < width; j++)
-				p |= (gpio_get(i + j + start) << j);
+				p |= (((uint32_t)gpio_get(i + j + start)) << j);
 			switch(width) {
 			case 8:
 			    *((uint8_t *)__out + i/8) = p;
