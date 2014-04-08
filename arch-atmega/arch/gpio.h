@@ -69,8 +69,14 @@ static inline void gpio_dir(int gpio, int output, int value)
 		_SFR_IO8(data_addr) &= ~mask;
 	if (output)
 		_SFR_IO8(dir_addr) |= mask;
-	else
+	else {
+		/*
+		 * TEMPORARY HACK: ENABLE INPUT PULLUP BY SETTING DATA VALUE
+		 * TO 1
+		 */
+		_SFR_IO8(data_addr) |= mask;
 		_SFR_IO8(dir_addr) &= ~mask;
+	}
 }
 
 static inline int gpio_get(int gpio)
