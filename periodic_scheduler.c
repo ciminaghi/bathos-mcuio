@@ -29,9 +29,13 @@ rom_initcall(pts_init);
 static void pts_handle(struct event_handler_data *d)
 {
 	struct bathos_task *p = d->data;
+	unsigned long now;
 	p->arg = p->job(p->arg);
 	p->release += p->period;
-	sys_timer_enqueue_tick(p->release - jiffies, p);
+	now = jiffies;
+	if (time_before_eq(p->release, now))
+		p->release = now + 1;
+	sys_timer_enqueue_tick(p->release - now, p);
 }
 
 declare_event_handler(sys_timer_tick, NULL, pts_handle, NULL);
