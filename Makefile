@@ -27,8 +27,6 @@ ifndef TASK-y
   endif
 endif
 
-TASK-y+=arch/task-gpio.o
-
 # First: the target. After that, we can include the arch Makefile
 all: bathos.bin
 
