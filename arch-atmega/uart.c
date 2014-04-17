@@ -21,6 +21,9 @@ static struct uart_data {
 	int overrun;
 } uart_data;
 
+struct bathos_dev __uart_dev;
+
+
 static int uart_init(void)
 {
 	/* Target baud rate = 250000 */
@@ -58,6 +61,10 @@ static int uart_read(struct bathos_pipe *pipe, char *buf, int len)
 	data->cbuf.tail = (data->cbuf.tail + l) & (UART_BUF_SIZE - 1);
 	data->overrun = 0;
 
+	if (CIRC_CNT(data->cbuf.head, data->cbuf.tail, UART_BUF_SIZE))
+		pipe_dev_trigger_event(&__uart_dev, &evt_pipe_input_ready,
+				       EVT_PRIO_MAX);
+
 	return l;
 }
 
@@ -82,8 +89,6 @@ static void uart_close(struct bathos_pipe *pipe)
 	UCSR1B &= ~((1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1));
 }
 
-struct bathos_dev __uart_dev;
-
 ISR(USART1_RX_vect, __attribute__((section(".text.ISR"))))
 {
 	struct uart_data *data = &uart_data;
@@ -97,8 +102,9 @@ ISR(USART1_RX_vect, __attribute__((section(".text.ISR"))))
 		data->buf[data->cbuf.head] = c;
 		data->cbuf.head = (data->cbuf.head + 1) & (UART_BUF_SIZE - 1);
 	}
-	pipe_dev_trigger_event(&__uart_dev, &evt_pipe_input_ready,
-			       EVT_PRIO_MAX);
+	if (!cnt_prev)
+		pipe_dev_trigger_event(&__uart_dev, &evt_pipe_input_ready,
+				       EVT_PRIO_MAX);
 }
 
 static struct bathos_dev_ops uart_dev_ops = {
