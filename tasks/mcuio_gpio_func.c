@@ -47,6 +47,7 @@ static uint32_t gpio_events_status[2];
 
 static uint32_t gpio_events_falling[2];
 static uint32_t gpio_events_rising[2];
+static uint32_t gpio_events_enable[2];
 
 static uint32_t PROGMEM gpio_ro_range1[] = {
 	/* FIXME: MAKE THIS CONFIGURABLE !! */
@@ -386,6 +387,8 @@ static int __gpio_evts_rd(const struct mcuio_range *r, unsigned offset,
 			*out |= 2;
 		if (test_bit(i + start, gpio_events_rising))
 			*out |= 1;
+		if (test_bit(i + start, gpio_events_enable))
+			*out |= 0x80;
 	}
 	return ret;
 }
@@ -409,6 +412,8 @@ static int __gpio_evts_wr(const struct mcuio_range *r, unsigned offset,
 			set_bit(i + start, gpio_events_falling);
 		if (*in & 1)
 			set_bit(i + start, gpio_events_rising);
+		if (*in & 0x80)
+			set_bit(i + start, gpio_events_enable);
 		stat = gpio_request_events(i + start, *in);
 		if (stat < 0)
 			return stat;
