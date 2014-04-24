@@ -25,6 +25,9 @@ ifndef TASK-y
   ifeq ($(CONFIG_MCUIO_IRQ_CONTROLLER_WIRE),y)
     TASK-y+=mcuio_irq_controller_wire.o
   endif
+  ifeq ($(CONFIG_MCUIO_JS), y)
+    TASK-y+=mcuio_js_func.o
+  endif
 endif
 
 # First: the target. After that, we can include the arch Makefile
