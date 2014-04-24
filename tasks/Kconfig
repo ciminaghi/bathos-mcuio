@@ -99,6 +99,15 @@ config MCUIO_TEST_IRQ
        help
          This sets up a task wich sends periodic interrupts to the host.
 
+config MCUIO_JS
+       prompt "mcuio joystick shield function"
+       bool
+       depends on TASK_MCUIO
+       default n
+       help
+         This adds an mcuio function which tells the host that a joystick
+	 shield is present
+
 choice
 	prompt "Gpio names map"
 
