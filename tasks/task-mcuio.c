@@ -252,9 +252,6 @@ static void __mcuio_send_error_to_function(struct mcuio_data *d,
 static void mcuio_send_reply_to_function(struct mcuio_data *d,
 					 struct mcuio_function *f)
 {
-	f->runtime->from_host = d->input_packet;
-	if (f->ops->reply)
-		f->ops->reply(f, 0);
 }
 
 static void mcuio_request_received(struct mcuio_data *d,

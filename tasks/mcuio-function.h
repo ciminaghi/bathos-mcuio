@@ -34,7 +34,6 @@ struct mcuio_function_runtime {
 	int last_error;
 	void *priv;
 	struct mcuio_base_packet to_host;
-	struct mcuio_base_packet from_host;
 };
 
 struct mcuio_function_ops {
