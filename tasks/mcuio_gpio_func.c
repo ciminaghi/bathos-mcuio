@@ -60,8 +60,6 @@ static uint32_t PROGMEM gpio_ro_range1[] = {
 static const unsigned int PROGMEM gpio_ro_range1_length =
 	sizeof(gpio_ro_range1);
 
-static struct mcuio_function_runtime gpio_rt;
-
 /* WARNING: ASSUMES width = 8 or 16 or 32 */
 static int __gpio_data_wr(const struct mcuio_range *r, unsigned offset,
 			  const void *__in, int fill, int width)
@@ -566,7 +564,8 @@ static const struct mcuio_range PROGMEM gpio_ranges[] = {
 };
 
 
-declare_mcuio_function(gpio, gpio_ranges, NULL, NULL, &gpio_rt);
+declare_mcuio_function(gpio, gpio_ranges, NULL, NULL,
+		       &mcuio_func_common_runtime);
 
 declare_event(mcuio_irq);
 

@@ -24,8 +24,6 @@ char PROGMEM zero_rw_contents[8] = "deadbeef";
 
 const unsigned int PROGMEM zero_rw_contents_length = sizeof(zero_rw_contents);
 
-static struct mcuio_function_runtime zero_rt;
-
 static const struct mcuio_range PROGMEM zero_ranges[] = {
 	{
 		.start = 0,
@@ -49,4 +47,5 @@ static const struct mcuio_range PROGMEM zero_ranges[] = {
 };
 
 
-declare_mcuio_function(zero, zero_ranges, NULL, NULL, &zero_rt);
+declare_mcuio_function(zero, zero_ranges, NULL, NULL,
+		       &mcuio_func_common_runtime);

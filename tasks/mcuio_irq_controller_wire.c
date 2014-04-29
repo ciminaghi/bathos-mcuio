@@ -41,8 +41,6 @@ static inline void __activate_irq_line(int active)
 	gpio_set(IRQ_LINE_GPIO, l);
 }
 
-static struct mcuio_function_runtime irq_controller_wire_rt;
-
 static struct mcuio_irq_controller_wire_data {
 	uint32_t registers[4];
 	uint32_t requested_status;
@@ -163,7 +161,7 @@ static const struct mcuio_range PROGMEM irq_controller_wire_ranges[] = {
 };
 
 declare_mcuio_function(irq_controller_wire, irq_controller_wire_ranges,
-		       NULL, NULL, &irq_controller_wire_rt);
+		       NULL, NULL, &mcuio_func_common_runtime);
 
 static int mcuio_irq_init(struct event_handler_data *edata)
 {

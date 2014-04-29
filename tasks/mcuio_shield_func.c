@@ -21,8 +21,6 @@
 #define MCUIO_SHIELD_DEVICE_ID 0x0002
 #endif
 
-static struct mcuio_function_runtime js_rt;
-
 static const struct mcuio_func_descriptor PROGMEM js_descr = {
 	/* dev 1 , vendor 1 */
 	.device = MCUIO_SHIELD_DEVICE_ID,
@@ -44,4 +42,4 @@ static const struct mcuio_range PROGMEM js_ranges[] = {
 	},
 };
 
-declare_mcuio_function(js, js_ranges, NULL, NULL, &js_rt);
+declare_mcuio_function(js, js_ranges, NULL, NULL, &mcuio_func_common_runtime);

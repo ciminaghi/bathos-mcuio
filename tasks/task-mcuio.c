@@ -11,6 +11,8 @@
 
 #include "mcuio-function.h"
 
+struct mcuio_function_runtime mcuio_func_common_runtime;
+
 #ifdef CONFIG_MCUIO_DEBUG
 static void dump_packet(const struct mcuio_base_packet *packet)
 {

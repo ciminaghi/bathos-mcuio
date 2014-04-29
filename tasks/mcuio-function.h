@@ -31,10 +31,10 @@ struct mcuio_range {
 };
 
 struct mcuio_function_runtime {
-	int last_error;
-	void *priv;
 	struct mcuio_base_packet to_host;
 };
+
+extern struct mcuio_function_runtime mcuio_func_common_runtime;
 
 struct mcuio_function_ops {
 	/* reply/error notification */
