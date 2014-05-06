@@ -32,7 +32,7 @@ static int verify_lpj(int lpj)
 
 	/* did it expire? */
 	j = jiffies - j;
-	if (1)
+	if (0)
 		printf("check %i: %li\n", lpj, j);
 	return j;
 }
