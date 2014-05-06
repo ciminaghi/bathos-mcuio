@@ -139,6 +139,5 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 	trigger_event(&evt_mcuio_data_ready, NULL, EVT_PRIO_MAX);
 }
 
-declare_event_handler_with_priv(pipe_input_ready, NULL, __pipe_input_handle,
-				NULL, &uart_data);
+declare_event_handler(pipe_input_ready, NULL, __pipe_input_handle, NULL);
 
