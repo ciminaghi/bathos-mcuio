@@ -16,6 +16,58 @@ static struct list_head free_pending_events;
 
 static struct pending_event pe_array[PENDING_EVENTS_POOL_SIZE];
 
+#if defined CONFIG_ARCH_ATMEGA
+
+static inline struct event *__get_evt(struct event *dst,
+				      const struct event *src)
+{
+	memcpy_P(dst, src, sizeof(*dst));
+	return dst;
+}
+
+static inline struct event_handler_data *
+__get_evt_handler_data(struct event_handler_data *dst,
+		       const struct event_handler_data *src)
+{
+	memcpy_P(dst, src, sizeof(*dst));
+	return dst;
+}
+
+static inline struct event_handler_ops *
+__get_evt_handler_ops(struct event_handler_ops *dst,
+		      const struct event_handler_data *d)
+{
+	memcpy_P(dst, d->ops, sizeof(*dst));
+	return dst;
+}
+
+#else
+
+static inline struct event *__get_evt(struct event *dst,
+				      const struct event *src)
+{
+	*dst = *src;
+	return dst;
+}
+
+static inline struct event_handler_data *
+__get_evt_handler_data(struct event_handler_data *ehd,
+		       const struct event_handler_data *src)
+{
+	*dst = *src;
+	return dst;
+}
+
+static inline struct event_handler_ops *
+__get_evt_handler_ops(struct event_handler_ops *dst,
+		      const struct event_handler_data *d)
+{
+	*dst = *d->ops;
+	return dst;
+}
+
+#endif
+
 struct pending_event *alloc_pending_event(void)
 {
 	struct pending_event *out;
@@ -34,7 +86,7 @@ struct pending_event *alloc_pending_event(void)
 int events_init(void)
 {
 	int i;
-	struct event *e;
+	struct event *__e;
 	INIT_LIST_HEAD(&free_pending_events);
 	for (i = 0; i < ARRAY_SIZE(pe_array); i++)
 		list_add_tail(&pe_array[i].list, &free_pending_events);
@@ -42,10 +94,20 @@ int events_init(void)
 		INIT_LIST_HEAD(&pending_events_1[i]);
 		INIT_LIST_HEAD(&pending_events_2[i]);
 	}
-	for (e = events_start; e < events_end; e++) {
-		struct event_handler_data *d;
-		for (d = e->handlers_start; d != e->handlers_end; d++) {
-			d->evt = e;
+	for (__e = events_start; __e < events_end; __e++) {
+		struct event_handler_data *d, *__d;
+		static struct event evt;
+		struct event *e;
+
+		e = __get_evt(&evt, __e);
+		for (__d = e->handlers_start; __d != e->handlers_end; __d++) {
+			static struct event_handler_data ehd;
+			static struct event_handler_ops eho;
+
+			d = __get_evt_handler_data(&ehd, __d);
+			d->ops = __get_evt_handler_ops(&eho, d);
+			/* FIX THIS !!!! */
+			d->evt = __e;
 			if (d->ops->init)
 				/* FIXME: do something in case of error */
 				(void)d->ops->init(d);
@@ -54,7 +116,7 @@ int events_init(void)
 	return 0;
 }
 
-int trigger_event(struct event *e, void *data, int evt_prio)
+int trigger_event(const struct event *e, void *data, int evt_prio)
 {
 	struct pending_event *pe;
 	int flags;
@@ -75,7 +137,6 @@ void handle_events(void)
 {
 	struct pending_event *pe, *tmp;
 	struct event *e;
-	struct event_handler_data *d;
 	struct list_head *tmpl;
 	int i, empty;
 
@@ -92,14 +153,22 @@ void handle_events(void)
 		     i >= EVT_PRIO_MIN; i--) {
 			list_for_each_entry_safe(pe, tmp,
 						 &pending_events[i], list) {
-				e = pe->event;
+				static struct event evt;
+				struct event_handler_data *__d, *d;
+				static struct event_handler_data ehd;
+				static struct event_handler_ops eho;
+
+				e = __get_evt(&evt, pe->event);
 				empty--;
-				for (d = e->handlers_start;
-				     d != e->handlers_end; d++) {
+				for (__d = e->handlers_start;
+				     __d != e->handlers_end; __d++) {
+					d = __get_evt_handler_data(&ehd, __d);
+					d->ops = __get_evt_handler_ops(&eho,
+								       d);
 					d->data = pe->data;
 					if (d->ops->handle)
 						d->ops->handle(d);
-				};
+				}
 				interrupt_disable(flags);
 				list_move(&pe->list, &free_pending_events);
 				interrupt_restore(flags);

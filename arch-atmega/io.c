@@ -1,6 +1,7 @@
 #include <bathos/bathos.h>
 #include <bathos/io.h>
 #include <bathos/init.h>
+#include <bathos/pipe.h>
 #include <generated/autoconf.h>
 #include <arch/hw.h>
 

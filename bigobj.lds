@@ -20,6 +20,8 @@ SECTIONS
 	}
 	.data : {
 		*(.data);      
+	}
+	.text : {
 		. = ALIGN(2);
 		events_start = .;
 		*(.events);

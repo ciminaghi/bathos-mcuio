@@ -3,6 +3,8 @@
 #define __EVENT_H__
 
 #include <linux/list.h>
+/* PROGMEM */
+#include <arch/bathos-arch.h>
 
 /* Definitions of event priorities (8 levels by default) */
 #ifndef EVT_PRIO_MIN
@@ -38,8 +40,8 @@ struct event_handler_ops {
  * @priv: pointer to handler private data structure
  */
 struct event_handler_data {
-	struct event *evt;
-	struct event_handler_ops *ops;
+	const struct event * PROGMEM evt;
+	const struct event_handler_ops * PROGMEM ops;
 	void *data;
 	void *priv;
 };
@@ -63,7 +65,7 @@ struct event {
  * @data: data related to this instance
  */
 struct pending_event {
-	struct event *event;
+	const struct event *event;
 	struct list_head list;
 	void *data;
 };
@@ -74,13 +76,13 @@ extern int events_init(void);
 /*
  * Trigger a generic event
  */
-extern int trigger_event(struct event *, void *data, int evt_prio);
+extern int trigger_event(const struct event *, void *data, int evt_prio);
 /*
  * Invoke this from main loop
  */
 extern void handle_events(void);
 
-extern struct event events_start[], events_end[];
+extern struct event PROGMEM events_start[], events_end[];
 
 #define cat(a,b) a##b
 #define xcat(a,b) cat(a,b)
@@ -96,7 +98,8 @@ extern struct event events_start[], events_end[];
 #define declare_event(n)						\
 	extern struct event_handler_data event_handlers_start(n)[],	\
 		event_handlers_end(n)[];				\
-	struct event event_name(n) __attribute__((section(".events"))) = { \
+				const struct event event_name(n)	\
+				__attribute__((section(".events"))) = { \
 		.handlers_start = event_handlers_start(n),		\
 		.handlers_end = event_handlers_end(n),			\
 	}
@@ -104,10 +107,11 @@ extern struct event events_start[], events_end[];
 #define declare_extern_event(n)			\
 	extern struct event_handler_data event_handlers_start(n)[],	\
 	    event_handlers_end(n)[];					\
-	    extern struct event event_name(n);
+	    extern const struct event __attribute__((section(".events"))) event_name(n);
 
 #define __declare_event_handler(n, i, h, e, p)				\
-	static struct event_handler_ops event_handler_ops_struct(n) = {	\
+    static const struct event_handler_ops PROGMEM			\
+    event_handler_ops_struct(n) = {					\
 	    .init = i,							\
 	    .handle = h,						\
 	    .exit = e,							\

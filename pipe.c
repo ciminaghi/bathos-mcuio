@@ -53,7 +53,7 @@ void pipe_dev_trigger_event(struct bathos_dev *dev, struct event *evt,
 struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 {
 	struct bathos_pipe *out = NULL;
-	struct event *e;
+	const struct event *e;
 	int stat;
 	struct bathos_dev *dev;
 	if (!mode) {
@@ -87,14 +87,14 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 	}
 	list_add(&out->list, &dev->pipes);
 	e = mode == BATHOS_MODE_INPUT ? &evt_input_pipe_opened :
-		&evt_output_pipe_opened;
+	    &evt_output_pipe_opened;
 	trigger_event(e, out, EVT_PRIO_MAX);
 	return out;
 }
 
 int pipe_close(struct bathos_pipe *pipe)
 {
-	struct event *e;
+	const struct event *e;
 	if (!pipe->dev) {
 		bathos_errno = EBADF;
 		return -1;
