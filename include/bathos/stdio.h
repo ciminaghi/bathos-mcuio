@@ -7,7 +7,6 @@
 #endif
 
 #include <generated/autoconf.h>
-#include <bathos/pipe.h>
 
 /* These 4 are actually pp_printf and friends */
 extern int printf(const char *fmt, ...)
@@ -24,6 +23,8 @@ extern int vsprintf(char *buf, const char *, va_list)
 /* Puts is not actually "standard", as it doesn't add the trailing newline */
 extern void putc(int c);
 extern int puts(const char *s);
+
+struct bathos_pipe;
 
 extern struct bathos_pipe *bathos_stdout;
 extern struct bathos_pipe *bathos_stdin;
