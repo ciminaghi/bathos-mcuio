@@ -6,6 +6,8 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
+#define ARCH_NEEDS_INTERRUPTS_FOR_JIFFIES 1
+
 #define interrupt_disable(flags) \
     do {			 \
         flags = SREG;		 \
