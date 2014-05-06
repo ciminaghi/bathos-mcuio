@@ -135,7 +135,7 @@ static int bitbang_write(struct bathos_pipe *pipe, const char *buf, int len)
 	return len;
 }
 
-static struct bathos_dev_ops bitbang_dev_ops = {
+static struct bathos_dev_ops PROGMEM bitbang_dev_ops = {
 	/* Only write is implemented ! */
 	.write = bitbang_write,
 };

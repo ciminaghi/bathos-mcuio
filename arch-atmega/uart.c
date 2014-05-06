@@ -107,7 +107,7 @@ ISR(USART1_RX_vect, __attribute__((section(".text.ISR"))))
 				       EVT_PRIO_MAX);
 }
 
-static struct bathos_dev_ops uart_dev_ops = {
+const struct bathos_dev_ops PROGMEM uart_dev_ops = {
 	.open = uart_open,
 	.read = uart_read,
 	.write = uart_write,

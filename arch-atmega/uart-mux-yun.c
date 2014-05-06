@@ -65,7 +65,7 @@ static void uart_mux_yun_close(struct bathos_pipe *pipe)
 	pipe_close(uart_data.secpipe);
 }
 
-static struct bathos_dev_ops uart_mux_yun_dev_ops = {
+static const struct bathos_dev_ops PROGMEM uart_mux_yun_dev_ops = {
 	.open = uart_mux_yun_open,
 	.read = uart_mux_yun_read,
 	.write = uart_mux_yun_write,

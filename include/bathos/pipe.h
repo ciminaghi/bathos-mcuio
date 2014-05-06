@@ -28,7 +28,7 @@ struct bathos_dev_ops {
 
 struct bathos_dev {
 	const char *name;
-	struct bathos_dev_ops *ops;
+	struct bathos_dev_ops * PROGMEM ops;
 	void *priv;
 	struct list_head pipes;
 };

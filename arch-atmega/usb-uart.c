@@ -783,7 +783,7 @@ static void usb_uart_close(struct bathos_pipe *pipe)
 	UDIEN &= ~(1<<EORSTE)|(1<<SOFE);
 }
 
-static struct bathos_dev_ops uart_dev_ops = {
+static const struct bathos_dev_ops PROGMEM uart_dev_ops = {
 	.open = usb_uart_open,
 	.read = usb_uart_read,
 	.write = usb_uart_write,
