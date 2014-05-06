@@ -62,7 +62,14 @@ static int generic_udelay_init(void)
 	return 0;
 }
 
+#ifndef ARCH_NEEDS_INTERRUPTS_FOR_JIFFIES
 subsys_initcall(generic_udelay_init);
+#else
+int udelay_init(void)
+{
+	return generic_udelay_init();
+}
+#endif
 
 void generic_udelay(unsigned usec)
 {
@@ -70,6 +77,9 @@ void generic_udelay(unsigned usec)
 	const int step = 10 * 1000;
 	const int usec_per_jiffy = 1000L * 1000L / HZ;
 	const int count_per_step = udelay_lpj * step / usec_per_jiffy;
+
+	if (!count_per_step)
+		printf("WARNING: %s invoked prior to udelay init\n");
 
 	while (usec > step)  {
 		__delay(count_per_step);

@@ -1,5 +1,6 @@
 #ifndef __BATHOS_DELAY_H__
 #define __BATHOS_DELAY_H__
+#include <arch/bathos-arch.h>
 #include <arch/delay.h>
 
 #ifdef HAS_ARCH_UDELAY
@@ -18,6 +19,15 @@ static inline void udelay(int usec)
 	generic_udelay(usec);
 }
 
+#endif
+
+#ifdef ARCH_NEEDS_INTERRUPTS_FOR_JIFFIES
+/*
+ * Initcalls are run with interrupts disabled. If interrupts are needed
+ * to get the jiffies counter going, the udelay init function shall be called
+ * later on, when interrupts are enabled
+ */
+extern int udelay_init(void);
 #endif
 
 static inline void mdelay(int m)
