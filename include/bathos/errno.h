@@ -36,6 +36,7 @@
 #define	EDOM		33	/* Math argument out of domain of func */
 #define	ERANGE		34	/* Math result not representable */
 #define ENOSYS		38	/* Function not implemented */
+#define ETIMEDOUT	110	/* Timeout */
 
 extern int bathos_errno;
 
