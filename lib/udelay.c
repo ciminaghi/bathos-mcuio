@@ -79,7 +79,7 @@ void generic_udelay(unsigned usec)
 	const int count_per_step = udelay_lpj * step / usec_per_jiffy;
 
 	if (!count_per_step)
-		printf("WARNING: %s invoked prior to udelay init\n");
+		printf("W! missing udelay init\n");
 
 	while (usec > step)  {
 		__delay(count_per_step);
