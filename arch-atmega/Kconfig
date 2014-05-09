@@ -42,6 +42,11 @@ config UART
        help
          Add an UART driver
 
+config ADC
+       bool "ADC driver"
+       help
+         Add an ADC driver
+
 choice
 	prompt "Bathos console"
 
