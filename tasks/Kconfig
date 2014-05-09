@@ -146,3 +146,33 @@ config MCUIO_GPIO_MAP_ATMEGA32U4
          This selects a generic map for a 32U4
 
 endchoice
+
+config MCUIO_BITBANG_I2C
+       bool "mcuio bitbang i2c function"
+       depends on TASK_MCUIO
+       help
+	 This adds an I2C bitbang controller MCUIO function
+
+config MCUIO_BITBANG_I2C_DEVICE
+       prompt "Device id for bitbang i2c function"
+       hex
+       depends on MCUIO_BITBANG_I2C
+       default 0x1112
+
+config MCUIO_BITBANG_I2C_VENDOR
+       prompt "Vendor id for bitbang i2c function"
+       hex
+       depends on MCUIO_BITBANG_I2C
+       default 0xaaaa
+
+config MCUIO_BITBANG_I2C_SDA
+       prompt "Gpio number corresponding to I2C SDA signal"
+       int
+       depends on MCUIO_BITBANG_I2C
+       default 30
+
+config MCUIO_BITBANG_I2C_SCL
+       prompt "Gpio number corresponding to I2C SCL signal"
+       int
+       depends on MCUIO_BITBANG_I2C
+       default 31

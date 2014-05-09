@@ -66,6 +66,9 @@ SECTIONS
 		evt_gpio_evt_handlers_start = .;
 		*(.evt_gpio_evt_handlers);
 		evt_gpio_evt_handlers_end = .;
+		evt_i2c_transaction_handlers_start = .;
+		*(.evt_i2c_transaction_handlers);
+		evt_i2c_transaction_handlers_end = .;
 	}
 }
 

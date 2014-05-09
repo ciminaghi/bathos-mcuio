@@ -28,6 +28,9 @@ ifndef TASK-y
   ifeq ($(CONFIG_MCUIO_SHIELD), y)
     TASK-y+=mcuio_shield_func.o
   endif
+  ifeq ($(CONFIG_MCUIO_BITBANG_I2C), y)
+    TASK-y+=mcuio_bitbang_i2c_func.o
+  endif
 endif
 
 # First: the target. After that, we can include the arch Makefile
