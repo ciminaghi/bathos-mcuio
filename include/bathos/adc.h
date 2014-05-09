@@ -6,6 +6,8 @@
 extern const uint32_t num_adc;   /* number of supported adc's */
 extern const uint32_t min_per_us;/* minimum period, in us */
 extern const uint32_t max_mul;   /* max value for multiplier */
+extern uint32_t ch_stat;         /* channel status, to be provided
+				      externally, initialized to 0 */
 
 struct adc {
 	uint8_t nbits;
@@ -29,8 +31,6 @@ extern void adc_release(struct adc *adc);
 
 /* _adc_get and _adc_release are macros to be called by arch-specific
  * code */
-uint32_t ch_stat = 0;
-
 static inline int _adc_id(struct adc *adc)
 {
 	return adc - adcs;

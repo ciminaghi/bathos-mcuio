@@ -12,6 +12,7 @@
 const uint32_t PROGMEM num_adc = NADC;
 const uint32_t PROGMEM min_per = 4000; /* FIXME should be computed from HZ */
 const uint32_t PROGMEM max_mul = 0xffffffff;
+uint32_t ch_stat = 0;
 
 struct adc PROGMEM adcs[NADC] = {
 	[0 ... NADC - 1] = {
