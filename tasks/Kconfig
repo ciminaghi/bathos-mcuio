@@ -117,6 +117,12 @@ config MCUIO_GPIO_MAP_YUN
        help
          This selects a gpio map corresponding to an arduino shield
 
+config MCUIO_GPIO_MAP_YUN_LUCKY
+       bool "arduino yun + lucky shield gpio map"
+       depends on MCUIO_GPIO
+       help
+         This selects a gpio map corresponding to a yun board + lucky shield
+
 config MCUIO_GPIO_MAP_ATMEGA32U4
        bool "generic 32u4 gpio map"
        depends on MCUIO_GPIO

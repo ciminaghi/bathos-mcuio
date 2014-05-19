@@ -92,6 +92,8 @@ ifeq ($(CONFIG_MCUIO_GPIO),y)
   ifndef MCUIO_GPIO_CONFIG_FILE
     ifeq ($(CONFIG_MCUIO_GPIO_MAP_YUN),y)
       MCUIO_GPIO_CONFIG_FILE=yun-gpios.cfg
+    else ifeq ($(CONFIG_MCUIO_GPIO_MAP_YUN_LUCKY),y)
+      MCUIO_GPIO_CONFIG_FILE=lucky-gpios.cfg
     else
 	ifeq ($(CONFIG_MCUIO_GPIO_MAP_ATMEGA32U4),y)
           MCUIO_GPIO_CONFIG_FILE=generic-atmega32u4-gpios.cfg
