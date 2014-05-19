@@ -29,6 +29,9 @@ enum mux_mode {
 /* ^], like telnet */
 #define MODE_SWITCH 0x1d
 
+/* Switch command from mips: 0xaa */
+#define MODE_SWITCH_MIPS 0xaa
+
 static struct uart_mux_yun_data {
 	enum mux_mode mode;
 	struct bathos_pipe *secpipe;
@@ -75,6 +78,15 @@ struct bathos_dev __uart_mux_dev __attribute__((section(".bathos_devices"),
 	.ops = &uart_mux_yun_dev_ops,
 };
 
+static void __do_switch(void)
+{
+	uart_data.mode = uart_data.mode == MCUIO ?
+		MIPS_CONSOLE : MCUIO;
+	printf("\r\n%s: switched to mode %s\r\n",
+	       uart_data.secpipe->dev->name,
+	       uart_data.mode == MCUIO ?
+	       "mcuio" : "mips-console");
+}
 
 static void __pipe_input_handle(struct event_handler_data *ed)
 {
@@ -98,12 +110,7 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 		int i;
 		for (i = 0; i < l && uart_data.secpipe; i++) {
 			if (buf[i] == MODE_SWITCH) {
-				uart_data.mode = uart_data.mode == MCUIO ?
-					MIPS_CONSOLE : MCUIO;
-				printf("\r\n%s: switched to mode %s\r\n",
-				       uart_data.secpipe->dev->name,
-				       uart_data.mode == MCUIO ?
-				       "mcuio" : "mips-console");
+				__do_switch();
 				break;
 			}
 		}
@@ -116,6 +123,15 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 	}
 	/* Data coming from mips (avr-uart) */
 	if (uart_data.mode == MIPS_CONSOLE) {
+		int i;
+		for (i = 0; i < l; i++) {
+			if (buf[i] == MODE_SWITCH_MIPS) {
+				__do_switch();
+				break;
+			}
+		}
+		if (uart_data.mode == MCUIO)
+			return;
 		pipe_write(bathos_stdout, buf, l);
 		return;
 	}
