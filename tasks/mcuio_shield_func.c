@@ -9,12 +9,24 @@
 
 #include "mcuio-function.h"
 
+#ifdef CONFIG_MCUIO_SHIELD_VENDOR_ID
+#define MCUIO_SHIELD_VENDOR_ID CONFIG_MCUIO_SHIELD_VENDOR_ID
+#else
+#define MCUIO_SHIELD_VENDOR_ID 0x0001
+#endif
+
+#ifdef CONFIG_MCUIO_SHIELD_DEVICE_ID
+#define MCUIO_SHIELD_DEVICE_ID CONFIG_MCUIO_SHIELD_DEVICE_ID
+#else
+#define MCUIO_SHIELD_DEVICE_ID 0x0002
+#endif
+
 static struct mcuio_function_runtime js_rt;
 
 static const struct mcuio_func_descriptor PROGMEM js_descr = {
 	/* dev 1 , vendor 1 */
-	.device = 0x0001,
-	.vendor = 0x0001,
+	.device = MCUIO_SHIELD_DEVICE_ID,
+	.vendor = MCUIO_SHIELD_VENDOR_ID,
 	.rev = 0,
 	/* shield class */
 	.class = 0x0000000c,

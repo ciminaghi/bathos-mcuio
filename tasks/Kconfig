@@ -99,14 +99,30 @@ config MCUIO_TEST_IRQ
        help
          This sets up a task wich sends periodic interrupts to the host.
 
-config MCUIO_JS
-       prompt "mcuio joystick shield function"
+config MCUIO_SHIELD
+       prompt "generic mcuio shield function"
        bool
        depends on TASK_MCUIO
        default n
        help
-         This adds an mcuio function which tells the host that a joystick
+         This adds an mcuio function which tells the host that a
 	 shield is present
+
+config MCUIO_SHIELD_VENDOR_ID
+       prompt "Shield vendor id"
+       hex
+       depends on MCUIO_SHIELD
+       default 0x0001
+       help
+	 This defines an mcuio vendor id for an arduino shield.
+
+config MCUIO_SHIELD_DEVICE_ID
+       prompt "Shield device id"
+       hex
+       depends on MCUIO_SHIELD
+       default 0x0001
+       help
+	 This defines an mcuio vendor id for an arduino shield.
 
 choice
 	prompt "Gpio names map"
