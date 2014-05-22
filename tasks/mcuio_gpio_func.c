@@ -337,8 +337,11 @@ static int __gpio_modes_rd(const struct mcuio_range *r, unsigned offset,
 	if (fill)
 		n = min(MCUIO_NGPIO, sizeof(uint64_t)/8);
 	ret = n;
-	for (i = 0; i < n && ret > 0; i++)
+	for (i = 0; i < n && ret > 0; i++) {
+		uint8_t *out = &((uint8_t *)__out)[i];
 		gpio_get_dir_af(i + start, &dir, NULL, NULL);
+		*out = dir ? OUTPUT : INPUT;
+	}
 	return ret;
 }
 
