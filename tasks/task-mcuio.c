@@ -12,7 +12,7 @@
 #include "mcuio-function.h"
 
 #ifdef CONFIG_MCUIO_DEBUG
-static void dump_packet(struct mcuio_base_packet *packet)
+static void dump_packet(const struct mcuio_base_packet *packet)
 {
 	int i;
 	uint8_t *ptr;
@@ -23,8 +23,8 @@ static void dump_packet(struct mcuio_base_packet *packet)
 	       packet->bus, packet->dev, packet->func,
 	       mcuio_packet_type_to_str(packet->type),
 	       packet->offset);
-	printf("\td: ");
-	for (i = 0, ptr = (uint8_t *)packet->data; i < sizeof(uint64_t); i++)
+	printf("\tp: ");
+	for (i = 0, ptr = (uint8_t *)packet->data; i < 2*sizeof(uint64_t); i++)
 		printf("0x%02x ", ptr[i]);
 	printf("\n");
 }
