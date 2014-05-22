@@ -131,7 +131,7 @@ static inline int gpio_get_dir_af(int gpio, int *output, int *value, int *afnum)
 		*afnum = 0;
 	if (value)
 		*value = gpio_get(gpio);
-	if (*output)
+	if (output)
 		*output = _SFR_IO8(addr) & (1 << pin) ? 1 : 0;
 	return 0;
 }
