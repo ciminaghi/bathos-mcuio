@@ -11,6 +11,7 @@
 #include <bathos/string.h>
 #include <bathos/jiffies.h>
 #include <bathos/delay.h>
+#include <bathos/circ_buf.h>
 #include <tasks/mcuio.h>
 
 #include "mcuio-function.h"
@@ -23,10 +24,12 @@ enum i2c_transaction_state {
 	START_SENT,
 	ADDR_SENT,
 	SENDING_DATA,
+	AWAITING_OUTPUT_DATA,
 	DATA_SENT,
 	REPEATED_START_SENT,
 	ADDR_SENT_2,
 	RECEIVING_DATA,
+	AWAITING_INPUT_SPACE,
 	DATA_RECEIVED,
 	ERROR,
 };
@@ -36,15 +39,22 @@ enum i2c_event {
 	I2C_RESET,
 };
 
+#define OBUF_LOW_WATERMARK 4
+#define IBUF_HI_WATERMARK  (32 - 4)
+
 static struct mcuio_i2c_data {
 	int udelay;
 	int timeout;
 	uint16_t slave_address;
+	uint16_t buf_len;
+	uint16_t data_cnt;
 	uint8_t  status;
 	uint8_t  int_enable;
 	uint8_t buffer[32];
-	uint8_t buf_len;
-	uint8_t data_cnt;
+	uint8_t ibuf_head;
+	uint8_t ibuf_tail;
+	uint8_t obuf_head;
+	uint8_t obuf_tail;
 	enum i2c_transaction_state state;
 } i2c_data;
 
@@ -76,6 +86,10 @@ static struct mcuio_i2c_data {
 #define I2C_MCUIO_BUF_SIZE 0x020
 #define I2C_MCUIO_OBUF_LEN 0x024
 #define I2C_MCUIO_IBUF_LEN 0x028
+#define I2C_MCUIO_OBUF_HEAD 0x02c
+#define I2C_MCUIO_OBUF_TAIL 0x030
+#define I2C_MCUIO_IBUF_HEAD 0x034
+#define I2C_MCUIO_IBUF_TAIL 0x038
 #define I2C_MCUIO_OBUF	   0x040
 #define I2C_MCUIO_IBUF	   (I2C_MCUIO_OBUF + I2C_MCUIO_OBUF_MAX_SIZE)
 
@@ -91,7 +105,7 @@ static const unsigned int PROGMEM i2c_bitbang_descr_length =
     sizeof(i2c_bitbang_descr);
 
 static const unsigned int PROGMEM i2c_bitbang_registers_length =
-	I2C_MCUIO_IBUF_LEN + sizeof(uint32_t) - I2C_MCUIO_SADDR;
+	I2C_MCUIO_IBUF_TAIL + sizeof(uint32_t) - I2C_MCUIO_SADDR;
 
 static const unsigned int PROGMEM i2c_bitbang_obuf_length =
 	sizeof(i2c_data.buffer);
@@ -468,6 +482,18 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 			/* Buffer size */
 			*out = sizeof(i2c_data.buffer);
 			break;
+		case I2C_MCUIO_OBUF_HEAD:
+			*out = i2c_data.obuf_head;
+			break;
+		case I2C_MCUIO_OBUF_TAIL:
+			*out = i2c_data.obuf_tail;
+			break;
+		case I2C_MCUIO_IBUF_HEAD:
+			*out = i2c_data.ibuf_head;
+			break;
+		case I2C_MCUIO_IBUF_TAIL:
+			*out = i2c_data.ibuf_tail;
+			break;
 		case I2C_MCUIO_OBUF_LEN:
 		case I2C_MCUIO_IBUF_LEN:
 			*out = i2c_data.buf_len;
@@ -518,7 +544,13 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 		case I2C_MCUIO_OBUF_LEN:
 		case I2C_MCUIO_IBUF_LEN:
 			i2c_data.buf_len = in;
-			break;			
+			break;
+		case I2C_MCUIO_OBUF_HEAD:
+			i2c_data.obuf_head = in;
+			break;
+		case I2C_MCUIO_IBUF_TAIL:
+			i2c_data.ibuf_tail = in;
+			break;
 		default:
 			return -EPERM;
 		}
