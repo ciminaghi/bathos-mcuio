@@ -23,7 +23,7 @@ struct adc PROGMEM adcs[NADC] = {
 		.tresp_ns = 8000},
 };
 
-void adc_init()
+int adc_init()
 {
 	/* set reference to external AREF pin */
 	adc_set_ref(ADMUX_AREF);
@@ -34,6 +34,8 @@ void adc_init()
 	/* disable all */
 	adc_dis();
 	adc_dis_in_all();
+
+	return 0;
 }
 
 struct adc *adc_get(unsigned adc_id)
