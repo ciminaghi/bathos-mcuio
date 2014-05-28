@@ -34,7 +34,7 @@ ifndef TASK-y
 endif
 
 # First: the target. After that, we can include the arch Makefile
-all: bathos.bin
+all: bathos.bin bathos.hex
 
 ADIR = arch-$(ARCH)
 include $(ADIR)/Makefile
