@@ -25,8 +25,8 @@ struct adc PROGMEM adcs[NADC] = {
 
 int adc_init()
 {
-	/* set reference to external AREF pin */
-	adc_set_ref(ADMUX_AREF);
+	/* set reference to Vcc */
+	adc_set_ref(ADMUX_AVCC);
 
 	/* set ADC prescalar to 128 - max resolution */
 	adc_set_ps(0x7);
