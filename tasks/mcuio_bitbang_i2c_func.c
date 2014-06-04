@@ -278,7 +278,8 @@ static void __i2c_bitbang_next_state(enum i2c_transaction_state s)
 {
 	int stat;
 	i2c_data.state = s;
-	if (s == IDLE)
+	if (s == IDLE || s == AWAITING_OUTPUT_DATA ||
+	    s == AWAITING_INPUT_SPACE)
 		return;
 	stat = trigger_event(&event_name(i2c_transaction),
 			     (void *)I2C_GO, EVT_PRIO_MAX);
@@ -286,23 +287,27 @@ static void __i2c_bitbang_next_state(enum i2c_transaction_state s)
 		__i2c_bitbang_trig_evt_error();
 }
 
-static void __i2c_bitbang_end_transaction(uint8_t s)
+static void __i2c_bitbang_trigger_irq(void)
 {
 	static struct mcuio_function_irq_data idata;
 	int f;
 
-	/* send stop */
-	__i2c_bitbang_send_stop();
-
 	f = &mcuio_bitbang_i2c - mcuio_functions_start;
 	idata.func = f;
 	idata.active = 1;
-	i2c_data.status = s;
-	i2c_data.state = s != TRANSACTION_OK ? ERROR : IDLE;
 	if (trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX))
 		printf("%s: evt error\n", __func__);
 }
 
+static void __i2c_bitbang_end_transaction(uint8_t s)
+{
+	/* send stop */
+	__i2c_bitbang_send_stop();
+
+	i2c_data.status = s;
+	i2c_data.state = s != TRANSACTION_OK ? ERROR : IDLE;
+	__i2c_bitbang_trigger_irq();
+}
 
 static void __i2c_handle_reset(void)
 {
@@ -344,16 +349,35 @@ static void __i2c_handle_go(void)
 		break;
 	case SENDING_DATA:
 	{
-		int done;
-		uint8_t c = i2c_data.buffer[i2c_data.data_cnt++];
+		int done, count;
+		uint8_t c = i2c_data.buffer[i2c_data.obuf_tail];
 		/* Send a single byte */
 		if (__i2c_bitbang_send_byte(c) < 0) {
 			__i2c_bitbang_end_transaction(NAK_RECEIVED);
 			return;
 		}
+		i2c_data.data_cnt++;
+		i2c_data.obuf_tail = (i2c_data.obuf_tail + 1) &
+			(sizeof(i2c_data.buffer) - 1);
 		/* Set next state */
 		done = i2c_data.data_cnt == i2c_data.buf_len;
-		__i2c_bitbang_next_state(done ? DATA_SENT : SENDING_DATA);
+		if (done) {
+			/* equalize tail to head: the host always writes
+			   dwords, maybe 1 to 3 bytes are in eccess
+			*/
+			i2c_data.obuf_tail = i2c_data.obuf_head;
+			__i2c_bitbang_next_state(DATA_SENT);
+			break;
+		}
+		count = CIRC_CNT(i2c_data.obuf_head, i2c_data.obuf_tail,
+				 sizeof(i2c_data.buffer));
+		if (count == OBUF_LOW_WATERMARK)
+			/* Trigger out low watermark interrupt */
+			__i2c_bitbang_trigger_irq();
+
+		__i2c_bitbang_next_state(count ?
+					 SENDING_DATA :
+					 AWAITING_OUTPUT_DATA);
 		break;
 	}
 	case DATA_SENT:
@@ -382,20 +406,32 @@ static void __i2c_handle_go(void)
 		break;
 	case RECEIVING_DATA:
 	{
-		int done = 0;
+		int done, space;
 		/* Read byte */
 		__i2c_bitbang_recv_byte(&i2c_data.buffer[i2c_data.data_cnt++]);
-		if (i2c_data.data_cnt == i2c_data.buf_len)
-			done = 1;
+		done = i2c_data.data_cnt == i2c_data.buf_len;
 		__i2c_bitbang_send_acknak(!done);
-		__i2c_bitbang_next_state(done ? DATA_RECEIVED :
-					 RECEIVING_DATA);
+		if (done) {
+			__i2c_bitbang_next_state(DATA_RECEIVED);
+			break;
+		}
+		space = CIRC_SPACE(i2c_data.ibuf_head,
+				   i2c_data.ibuf_tail,
+				   sizeof(i2c_data.buffer));
+		if (space == IBUF_HI_WATERMARK)
+			__i2c_bitbang_trigger_irq();
+
+		__i2c_bitbang_next_state(space ?
+					 RECEIVING_DATA :
+					 AWAITING_INPUT_SPACE);
 		break;
 	}
 	case DATA_RECEIVED:
 		/* All done, end transaction */
 		__i2c_bitbang_end_transaction(TRANSACTION_OK);
 		break;
+	case AWAITING_OUTPUT_DATA:
+	case AWAITING_INPUT_SPACE:
 	case ERROR:
 		/* Error state, ignore go events */
 		break;
@@ -459,10 +495,13 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 				if (trigger_event(&event_name(mcuio_irq),
 						  &idata, EVT_PRIO_MAX))
 					printf("%s: evt error\n", __func__);
-				if (trigger_event(&event_name(i2c_transaction),
-						  (void *)I2C_RESET,
-						  EVT_PRIO_MAX))
-					printf("%s: rst error\n", __func__);
+				if (i2c_data.state != AWAITING_OUTPUT_DATA &&
+				    i2c_data.state != AWAITING_INPUT_SPACE) {
+					trigger_event(&event_name(
+							      i2c_transaction),
+						      (void *)I2C_RESET,
+						      EVT_PRIO_MAX);
+				}
 			}
 			break;
 		case I2C_MCUIO_CFG:
@@ -547,9 +586,13 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 			break;
 		case I2C_MCUIO_OBUF_HEAD:
 			i2c_data.obuf_head = in;
+			if (i2c_data.state == AWAITING_OUTPUT_DATA)
+				__i2c_bitbang_next_state(SENDING_DATA);
 			break;
 		case I2C_MCUIO_IBUF_TAIL:
 			i2c_data.ibuf_tail = in;
+			if (i2c_data.state == AWAITING_INPUT_SPACE)
+				__i2c_bitbang_next_state(RECEIVING_DATA);
 			break;
 		default:
 			return -EPERM;
