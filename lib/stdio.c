@@ -5,6 +5,8 @@ struct bathos_pipe *bathos_stdin;
 
 void __attribute__((weak)) putc(int c)
 {
+	if (c == '\n')
+		putc('\r');
 #ifdef CONFIG_COPY_STDOUT_TO_CONSOLE
 	console_putc(c);
 #endif
