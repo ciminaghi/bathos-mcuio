@@ -27,7 +27,7 @@ static void dump_packet(const struct mcuio_base_packet *packet)
 	       mcuio_packet_type_to_str(packet->type),
 	       packet->offset);
 	printf("\tp: ");
-	for (i = 0, ptr = (uint8_t *)packet->data; i < 2*sizeof(uint64_t); i++)
+	for (i = 0, ptr = (uint8_t *)packet; i < 2*sizeof(uint64_t); i++)
 		printf("0x%02x ", ptr[i]);
 	printf("\n");
 }
