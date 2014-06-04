@@ -8,6 +8,7 @@
 #include <bathos/string.h>
 #include <bathos/errno.h>
 #include <tasks/mcuio.h>
+#include <bathos/jiffies.h>
 
 #include "mcuio-function.h"
 
@@ -310,7 +311,20 @@ static void data_ready_handle(struct event_handler_data *ed)
 	struct mcuio_data *data = ed->priv;
 	struct mcuio_function __f;
 	struct mcuio_function *f;
+	static int initialized;
+	static unsigned long last;
 
+	if (!initialized)
+		initialized = 1;
+	else {
+		if (data->curr_len) {
+			if (time_after(jiffies, last + HZ/20)) {
+				printf("%s %d to\n", __func__, __LINE__);
+				data->curr_len = 0;
+			}
+		}
+	}
+	last = jiffies;
 
 	pipe = data->input_pipe;
 
