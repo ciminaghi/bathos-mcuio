@@ -34,35 +34,36 @@ enum mux_mode {
 
 static struct uart_mux_yun_data {
 	enum mux_mode mode;
-	struct bathos_pipe *secpipe;
+	struct bathos_pipe *uartpipe;
 } uart_data;
 
 declare_event(mcuio_data_ready);
 
 static int uart_mux_yun_open(struct bathos_pipe *pipe)
 {
-	uart_data.secpipe = pipe_open("avr-uart", BATHOS_MODE_INPUT_OUTPUT,
+	uart_data.uartpipe = pipe_open("avr-uart", BATHOS_MODE_INPUT_OUTPUT,
 				      NULL);
-	if (!uart_data.secpipe)
+	if (!uart_data.uartpipe)
 		return -ENODEV;
+
 	uart_data.mode = MIPS_CONSOLE;
 	return 0;
 }
 
 static int uart_mux_yun_read(struct bathos_pipe *pipe, char *buf, int len)
 {
-	return pipe_read(uart_data.secpipe, buf, len);
+	return pipe_read(uart_data.uartpipe, buf, len);
 }
 
 static int uart_mux_yun_write(struct bathos_pipe *pipe, const char *buf,
 			      int len)
 {
-	return pipe_write(uart_data.secpipe, buf, len);
+	return pipe_write(uart_data.uartpipe, buf, len);
 }
 
 static void uart_mux_yun_close(struct bathos_pipe *pipe)
 {
-	pipe_close(uart_data.secpipe);
+	pipe_close(uart_data.uartpipe);
 }
 
 static const struct bathos_dev_ops PROGMEM uart_mux_yun_dev_ops = {
@@ -83,7 +84,7 @@ static void __do_switch(void)
 	uart_data.mode = uart_data.mode == MCUIO ?
 		MIPS_CONSOLE : MCUIO;
 	printf("\r\n%s: switched to mode %s\r\n",
-	       uart_data.secpipe->dev->name,
+	       uart_data.uartpipe->dev->name,
 	       uart_data.mode == MCUIO ?
 	       "mcuio" : "mips-console");
 }
@@ -98,7 +99,7 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 		/* Not opened */
 		return;
 
-	if (pipe != uart_data.secpipe && pipe != bathos_stdin)
+	if (pipe != uart_data.uartpipe && pipe != bathos_stdin)
 		return;
 
 	if (uart_data.mode == MIPS_CONSOLE || pipe == bathos_stdin) {
@@ -108,7 +109,7 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 	}
 	if (pipe == bathos_stdin) {
 		int i;
-		for (i = 0; i < l && uart_data.secpipe; i++) {
+		for (i = 0; i < l && uart_data.uartpipe; i++) {
 			if (buf[i] == MODE_SWITCH) {
 				__do_switch();
 				break;
@@ -117,8 +118,8 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 		if (uart_data.mode == MCUIO)
 			return;
 		/* Console mode, send input to mips */
-		if (uart_data.secpipe)
-			pipe_write(uart_data.secpipe, buf, l);
+		if (uart_data.uartpipe)
+			pipe_write(uart_data.uartpipe, buf, l);
 		return;
 	}
 	/* Data coming from mips (avr-uart) */
