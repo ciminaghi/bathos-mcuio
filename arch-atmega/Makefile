@@ -54,6 +54,10 @@ ifeq ($(CONFIG_ADC),y)
 AOBJ += $(ADIR)/adc.o
 endif
 
+ifeq ($(CONFIG_SPI),y)
+AOBJ += $(ADIR)/spi.o
+endif
+
 # and the load target, not there in other architectures
 load: bathos.hex
 	avrdude -p $(word 2, $(BATHOS_MCU)) \

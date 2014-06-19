@@ -61,7 +61,11 @@
 	rjmp __vector_23 /* 5c */
 	nop /* 5e */
 	nop /* 60 */
-	nop /* 62 */
+#if defined CONFIG_SPI
+	rjmp __vector_24 /* 62 */
+#else
+	nop
+#endif
 #if defined CONFIG_UART
 	rjmp __vector_25 /* 64 */
 #else

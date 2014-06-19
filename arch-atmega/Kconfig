@@ -47,6 +47,11 @@ config ADC
        help
          Add an ADC driver
 
+config SPI
+       bool "SPI driver"
+       help
+         Add a SPI driver
+
 choice
 	prompt "Bathos console"
 

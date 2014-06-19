@@ -16,10 +16,12 @@
 #include <bathos/circ_buf.h>
 #include <bathos/string.h>
 #include <bathos/errno.h>
+#include <bathos/types.h>
 #include <arch/hw.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <arch/spi.h>
 
 enum mux_mode {
 	MIPS_CONSOLE = 0,
@@ -35,6 +37,8 @@ enum mux_mode {
 static struct uart_mux_yun_data {
 	enum mux_mode mode;
 	struct bathos_pipe *uartpipe;
+	struct bathos_pipe *spipipe;
+	u8 spiactive;
 } uart_data;
 
 declare_event(mcuio_data_ready);
@@ -47,6 +51,12 @@ static int uart_mux_yun_open(struct bathos_pipe *pipe)
 		return -ENODEV;
 
 	uart_data.mode = MIPS_CONSOLE;
+
+	uart_data.spipipe = pipe_open("avr-spi", BATHOS_MODE_INPUT_OUTPUT,
+				      NULL);
+	if (!uart_data.spipipe)
+		return -ENODEV;
+
 	return 0;
 }
 
@@ -89,11 +99,39 @@ static void __do_switch(void)
 	       "mcuio" : "mips-console");
 }
 
+static void __spi_pipe_input_handle(struct event_handler_data *ed)
+{
+	struct bathos_pipe *pipe = ed->data;
+	char buf[20];
+	int l = 0;
+
+	if (pipe != uart_data.spipipe)
+		return;
+
+	/* If at least one byte is received from MIPS, spi is marked
+	 * as 'active' and all stdin coming from usb-uart is redirected
+	 * to MIPS */
+	uart_data.spiactive = 1;
+
+	l = pipe_read(pipe, buf, sizeof(buf));
+	if (l <= 0)
+		return;
+
+	pipe_write(bathos_stdout, buf, l);
+}
+
 static void __pipe_input_handle(struct event_handler_data *ed)
 {
 	struct bathos_pipe *pipe = ed->data;
 	char buf[20];
 	int l = 0;
+
+	/* FIXME: __spi_pipe_input_handle should be registered as handler
+	 * for pipe_input_ready, so that it is directly called */
+	if (pipe == uart_data.spipipe) {
+		__spi_pipe_input_handle(ed);
+		return;
+	}
 
 	if (list_empty(&pipe->dev->pipes))
 		/* Not opened */
@@ -115,6 +153,13 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 				break;
 			}
 		}
+
+		if (uart_data.spiactive) {
+			/* spi on MIPS is active */
+			if (uart_data.spipipe)
+				pipe_write(uart_data.spipipe, buf, l);
+		}
+
 		if (uart_data.mode == MCUIO)
 			return;
 		/* Console mode, send input to mips */
