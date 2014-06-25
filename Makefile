@@ -56,6 +56,10 @@ OBJDUMP         = $(CROSS_COMPILE)objdump
 
 export CC OBJDUMP
 
+# host gcc
+HOSTCC ?= gcc
+HOST_CFLAGS ?= -Iinclude
+
 # Files that depend on the architecture (bathos.lds may be missing)
 AOBJ  += $(ADIR)/boot.o $(ADIR)/io.o
 
