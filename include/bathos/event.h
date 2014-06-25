@@ -61,12 +61,10 @@ struct event {
  * This structure represents a pending instance of an event
  *
  * @event: pointer to relevant event structure
- * @list: this is used to link this instance to the list of pending events
  * @data: data related to this instance
  */
 struct pending_event {
 	const struct event *event;
-	struct list_head list;
 	void *data;
 };
 
