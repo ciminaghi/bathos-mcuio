@@ -17,7 +17,7 @@ struct adc {
 	uint32_t tresp_ns;
 };
 
-extern struct adc adcs[];
+extern const struct adc adcs[];
 
 /* To be called at startup */
 extern int adc_init();
@@ -43,12 +43,10 @@ static inline int _adc_id(struct adc *adc)
 	return adc - adcs;
 }
 
-static inline struct adc *_adc_get(unsigned adc_id)
+static inline const struct adc *_adc_get(unsigned adc_id)
 {
-	struct adc *adc;
 	if (adc_id >= num_adc)
 		return NULL;
-	adc = &adcs[adc_id];
 	if (ch_stat & (1 << adc_id))
 		return NULL;
 	ch_stat |= (1 << adc_id);
