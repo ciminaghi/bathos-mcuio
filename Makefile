@@ -75,6 +75,11 @@ LDFLAGS += $(patsubst %.lds, -T %.lds, $(LDS))
 # Each architecture can have specific drivers
 LDFLAGS += $(LIBARCH)
 
+# This is currently needed by the bathos allocator
+# Default value of BITS_PER_LONG is 32, can be overridden in arch makefile
+BITS_PER_LONG ?= 32
+CFLAGS += -DBITS_PER_LONG=$(BITS_PER_LONG)
+
 # We have drivers too, let its Makefile do it all
 include drivers/Makefile
 
