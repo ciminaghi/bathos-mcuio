@@ -54,6 +54,10 @@ ifeq ($(CONFIG_ADC),y)
 AOBJ += $(ADIR)/adc.o
 endif
 
+ifeq ($(CONFIG_PWM),y)
+AOBJ += $(ADIR)/pwm.o
+endif
+
 ifeq ($(CONFIG_SPI),y)
 AOBJ += $(ADIR)/spi.o
 endif

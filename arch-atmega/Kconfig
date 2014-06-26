@@ -47,6 +47,11 @@ config ADC
        help
          Add an ADC driver
 
+config PWM
+       bool "PWM driver"
+       help
+         Add a PWM driver
+
 config SPI
        bool "SPI driver"
        help
