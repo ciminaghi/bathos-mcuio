@@ -32,13 +32,13 @@ extern int adc_enabled();
  * defined here (see _adc_get and _adc_release) and partially
  * arch-specific */
 
-extern uint32_t adc_sample(struct adc *adc);
-extern struct adc *adc_get(unsigned adc_id);
-extern void adc_release(struct adc *adc);
+extern uint32_t adc_sample(const struct adc *adc);
+extern const struct adc *adc_get(unsigned adc_id);
+extern void adc_release(const struct adc *adc);
 
 /* _adc_get and _adc_release are macros to be called by arch-specific
  * code */
-static inline int _adc_id(struct adc *adc)
+static inline int _adc_id(const struct adc *adc)
 {
 	return adc - adcs;
 }
@@ -53,7 +53,7 @@ static inline const struct adc *_adc_get(unsigned adc_id)
 	return &adcs[adc_id];
 }
 
-static inline void _adc_release(struct adc *adc)
+static inline void _adc_release(const struct adc *adc)
 {
 	ch_stat &= ~(1 << _adc_id(adc));
 }

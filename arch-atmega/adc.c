@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <bathos/bathos.h>
 #include <bathos/pipe.h>
+#include <bathos/init.h>
 #include <bathos/adc.h>
 #include <bathos/bitops.h>
 #include <bathos/errno.h>
@@ -38,9 +39,11 @@ int adc_init()
 	return 0;
 }
 
-struct adc *adc_get(unsigned adc_id)
+rom_initcall(adc_init);
+
+const struct adc *adc_get(unsigned adc_id)
 {
-	struct adc *adc = _adc_get(adc_id);
+	const struct adc *adc = _adc_get(adc_id);
 	if (!adc)
 		return NULL;
 	adc_en_in(adc_id);
@@ -48,14 +51,14 @@ struct adc *adc_get(unsigned adc_id)
 	return adc;
 }
 
-void adc_release(struct adc *adc)
+void adc_release(const struct adc *adc)
 {
 	int adc_id = _adc_id(adc);
 	_adc_release(adc);
 	adc_dis_in(adc_id);
 }
 
-uint32_t adc_sample(struct adc *adc)
+uint32_t adc_sample(const struct adc *adc)
 {
 	adc_start();
 	while (ADCSRA & (1 << ADSC));

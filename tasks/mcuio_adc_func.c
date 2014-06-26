@@ -16,8 +16,6 @@
 static const unsigned int PROGMEM u32_length = 4;
 static const unsigned int PROGMEM adcs_ctrl_length = 0xfc0;
 
-rom_initcall(adc_init);
-
 static const struct mcuio_func_descriptor PROGMEM adc_descr = {
 	.device = MCUIO_ADC_DEVICE,
 	.vendor = MCUIO_ADC_VENDOR,
@@ -36,7 +34,7 @@ static int adc_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 {
 	unsigned idx = offset / 0x40;
 	unsigned reg = offset % 0x40;
-	struct adc *adc = &adcs[idx];
+	const struct adc *adc = &adcs[idx];
 	uint8_t id[4];
 
 	switch(reg) {
