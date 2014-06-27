@@ -13,8 +13,6 @@ declare_event(pipe_input_ready);
 declare_event(pipe_output_ready);
 declare_event(pipe_really_closed);
 
-static struct bathos_pipe pipes[MAX_BATHOS_PIPES];
-
 #ifdef CONFIG_ARCH_ATMEGA
 static inline struct bathos_dev_ops *__get_dev_ops(struct bathos_dev_ops *ops,
 						   struct bathos_dev *dev)
@@ -38,11 +36,7 @@ static void __do_free_pipe(struct bathos_pipe *p)
 
 static struct bathos_pipe *__find_free_pipe(void)
 {
-	int i;
-	for (i = 0; i < ARRAY_SIZE(pipes); i++)
-		if (!pipes[i].dev)
-			return &pipes[i];
-	return NULL;
+	return bathos_alloc_buffer(sizeof(struct bathos_pipe));
 }
 
 struct bathos_dev * __attribute__((weak)) bathos_find_dev(struct bathos_pipe *p)
