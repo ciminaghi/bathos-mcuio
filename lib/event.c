@@ -119,13 +119,20 @@ int events_init(void)
 int trigger_event(const struct event *e, void *data, int evt_prio)
 {
 	struct pending_event *pe;
+	int h;
+	unsigned long flags;
 
-	if (!CIRC_SPACE(pe_head, pe_tail, pe_buffer_nevts))
+	interrupt_disable(flags);
+	if (!CIRC_SPACE(pe_head, pe_tail, pe_buffer_nevts)) {
+		interrupt_restore(flags);
 		return -ENOMEM;
-	pe = &pe_buffer[pe_head];
+	}
+	h = pe_head;
+	pe_head = (pe_head + 1) & (pe_buffer_nevts - 1);
+	interrupt_restore(flags);
+	pe = &pe_buffer[h];
 	pe->data = data;
 	pe->event = e;
-	pe_head = (pe_head + 1) & (pe_buffer_nevts - 1);
 	return 0;
 }
 
