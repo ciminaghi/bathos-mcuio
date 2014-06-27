@@ -9,14 +9,12 @@
 #include <bathos/types.h>
 #include <bathos/jiffies.h>
 #include <bathos/sys_timer.h>
+#include <bathos/allocator.h>
 #include <linux/list.h>
-
-#define MAX_SCHEDULED_TICKS 32
 
 declare_event(hw_timer_tick);
 
 static struct list_head scheduled_ticks;
-static struct list_head free_ticks;
 
 struct scheduled_tick {
 	unsigned long when;
@@ -24,17 +22,10 @@ struct scheduled_tick {
 	struct list_head list;
 };
 
-/* Avoid malloc */
-static struct scheduled_tick ticks[MAX_SCHEDULED_TICKS];
-
 static int system_timer_init(void)
 {
-	int i;
 	printf("%s\n", __func__);
 	INIT_LIST_HEAD(&scheduled_ticks);
-	INIT_LIST_HEAD(&free_ticks);
-	for (i = 0; i < MAX_SCHEDULED_TICKS; i++)
-		list_add_tail(&ticks[i].list, &free_ticks);
 	return 0;
 }
 
@@ -42,17 +33,16 @@ rom_initcall(system_timer_init);
 
 static struct scheduled_tick *alloc_tick(void)
 {
-	struct scheduled_tick *out = NULL;
-	if (list_empty(&free_ticks))
-		return out;
-	out = list_entry(free_ticks.next, struct scheduled_tick, list);
-	list_del_init(&out->list);
+	struct scheduled_tick *out;
+
+	out = bathos_alloc_buffer(sizeof(*out));
 	return out;
 }
 
 static void free_tick(struct scheduled_tick *t)
 {
-	list_move(&t->list, &free_ticks);
+	list_del(&t->list);
+	bathos_free_buffer(t, sizeof(*t));
 }
 
 int sys_timer_enqueue_tick(unsigned long evt_jiffies, void *data)
