@@ -30,17 +30,24 @@ static inline int __copy_byte(uint8_t *dst, const uint8_t *src)
 	return 0;
 }
 
+#define __copy_char(a, b) __copy_byte((uint8_t *)a, (uint8_t *)b)
+
 static inline int __copy_word(uint16_t *dst, const uint16_t *src)
 {
 	*dst = pgm_read_word_near(src);
 	return 0;
 }
 
+#define __copy_int(a, b) __copy_word((uint16_t *)a, (uint16_t *)b)
+
 static inline int __copy_dword(uint32_t *dst, const uint32_t *src)
 {
 	*dst = pgm_read_dword_near(src);
 	return 0;
 }
+
+#define __copy_long(a, b) __copy_dword((unit32_t *)a, (uint32_t *)b)
+#define __copy_ulong(a, b) __copy_dword(a, b)
 
 static inline void *memcpy_p(void *dst, const void *src, int size)
 {
