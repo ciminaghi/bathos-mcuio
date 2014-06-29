@@ -4,12 +4,14 @@
  * Alessandro Rubini for CERN, 2011 -- public domain
  * (please note that the vsprintf is not public domain but GPL)
  */
+
 #include <stdarg.h>
+#include <arch/bathos-arch.h>
 #include <pp-printf.h>
 
 static char print_buf[CONFIG_PRINT_BUFSIZE];
 
-int pp_vprintf(const char *fmt, va_list args)
+int pp_vprintf(const char * PROGMEM fmt, va_list args)
 {
 	int ret;
 
@@ -18,7 +20,7 @@ int pp_vprintf(const char *fmt, va_list args)
 	return ret;
 }
 
-int pp_sprintf(char *s, const char *fmt, ...)
+int pp_sprintf(char *s, const char * PROGMEM fmt, ...)
 {
 	va_list args;
 	int ret;
@@ -30,7 +32,7 @@ int pp_sprintf(char *s, const char *fmt, ...)
 }
 
 
-int pp_printf(const char *fmt, ...)
+int pp_printf(const char * PROGMEM fmt, ...)
 {
 	va_list args;
 	int ret;

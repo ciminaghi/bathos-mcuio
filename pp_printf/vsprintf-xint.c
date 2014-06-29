@@ -6,6 +6,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <arch/bathos-arch.h>
+#include <pp-printf.h>
+
 static const char hex[] = "0123456789abcdef";
 
 static int number(char *out, unsigned value, int base, int lead, int wid)
@@ -38,14 +41,14 @@ static int number(char *out, unsigned value, int base, int lead, int wid)
 	return ret;
 }
 
-int pp_vsprintf(char *buf, const char *fmt, va_list args)
+int pp_vsprintf(char *buf, const char * PROGMEM fmt, va_list args)
 {
-	char *s, *str = buf;
+	char *s, *str = buf, c;
 	int base, lead, wid;
 
-	for (; *fmt ; ++fmt) {
-		if (*fmt != '%') {
-			*str++ = *fmt;
+	for (; (c = __get_fmt_char(fmt)); ++fmt) {
+		if (c != '%') {
+			*str++ = c;
 			continue;
 		}
 
@@ -54,7 +57,7 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 		wid = 1;
 	repeat:
 		fmt++;		/* Skip '%' initially, other stuff later */
-		switch(*fmt) {
+		switch((c = __get_fmt_char(fmt))) {
 		case '\0':
 			goto ret;
 		case '0':
@@ -66,8 +69,8 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 			base = va_arg(args, int);
 			/* fall through: discard unknown stuff */
 		default:
-			if (*fmt >= '1' && *fmt <= '9')
-				wid = *fmt - '0';
+			if (c >= '1' && c <= '9')
+				wid = c - '0';
 			goto repeat;
 
 			/* Special cases for conversions */

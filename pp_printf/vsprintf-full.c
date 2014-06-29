@@ -67,11 +67,11 @@ static inline char *pack_hex_byte(char *buf, u8 byte)
 /* we use this so that we can do without the ctype library */
 #define is_digit(c)	((c) >= '0' && (c) <= '9')
 
-static int skip_atoi(const char **s)
+static int skip_atoi(const char * PROGMEM *s)
 {
 	int i=0;
 
-	while (is_digit(**s))
+	while (is_digit(__get_fmt_char(*s)))
 		i = i*10 + *((*s)++) - '0';
 	return i;
 }
@@ -371,30 +371,11 @@ static char *ip4_addr_string(char *buf, u8 *addr, int field_width,
  * function pointers are really function descriptors, which contain a
  * pointer to the real address.
  */
-static char *pointer(const char *fmt, char *buf, void *ptr, int field_width, int precision, int flags)
+static char *pointer(const char * PROGMEM fmt, char *buf, void *ptr, int field_width, int precision, int flags)
 {
 	if (!ptr)
 		return string(buf, "(null)", field_width, precision, flags);
 
-#ifdef CONFIG_CMD_NET
-	switch (*fmt) {
-	case 'm':
-		flags |= SPECIAL;
-		/* Fallthrough */
-	case 'M':
-		return mac_address_string(buf, ptr, field_width, precision, flags);
-	case 'i':
-		flags |= SPECIAL;
-		/* Fallthrough */
-	case 'I':
-		if (fmt[1] == '6')
-			return ip6_addr_string(buf, ptr, field_width, precision, flags);
-		if (fmt[1] == '4')
-			return ip4_addr_string(buf, ptr, field_width, precision, flags);
-		flags &= ~SPECIAL;
-		break;
-	}
-#endif
 	flags |= SMALL;
 	if (field_width == -1) {
 		field_width = 2*sizeof(void *);
@@ -420,11 +401,11 @@ static char *pointer(const char *fmt, char *buf, void *ptr, int field_width, int
  * Call this function if you are already dealing with a va_list.
  * You probably want sprintf() instead.
  */
-int pp_vsprintf(char *buf, const char *fmt, va_list args)
+int pp_vsprintf(char *buf, const char * PROGMEM fmt, va_list args)
 {
 	unsigned long num;
 	int base;
-	char *str;
+	char *str, c;
 
 	int flags;		/* flags to number() */
 
@@ -438,9 +419,9 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 
 	str = buf;
 
-	for (; *fmt ; ++fmt) {
-		if (*fmt != '%') {
-			*str++ = *fmt;
+	for (; (c = __get_fmt_char(fmt)) ; ++fmt) {
+		if (c != '%') {
+			*str++ = c;
 			continue;
 		}
 
@@ -448,7 +429,7 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 		flags = 0;
 		repeat:
 			++fmt;		/* this also skips first '%' */
-			switch (*fmt) {
+			switch ((c = __get_fmt_char(fmt))) {
 				case '-': flags |= LEFT; goto repeat;
 				case '+': flags |= PLUS; goto repeat;
 				case ' ': flags |= SPACE; goto repeat;
@@ -458,9 +439,9 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 
 		/* get field width */
 		field_width = -1;
-		if (is_digit(*fmt))
+		if (is_digit(c))
 			field_width = skip_atoi(&fmt);
-		else if (*fmt == '*') {
+		else if (__get_fmt_char(fmt) == '*') {
 			++fmt;
 			/* it's the next argument */
 			field_width = va_arg(args, int);
@@ -472,11 +453,11 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 
 		/* get the precision */
 		precision = -1;
-		if (*fmt == '.') {
+		if ((c = __get_fmt_char(fmt)) == '.') {
 			++fmt;
-			if (is_digit(*fmt))
+			if (is_digit((c = __get_fmt_char(fmt))))
 				precision = skip_atoi(&fmt);
-			else if (*fmt == '*') {
+			else if (c == '*') {
 				++fmt;
 				/* it's the next argument */
 				precision = va_arg(args, int);
@@ -487,11 +468,12 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 
 		/* get the conversion qualifier */
 		qualifier = -1;
-		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L' ||
-		    *fmt == 'Z' || *fmt == 'z' || *fmt == 't') {
-			qualifier = *fmt;
+		c = __get_fmt_char(fmt);
+		if (c == 'h' || c == 'l' || c == 'L' ||
+		    c == 'Z' || c == 'z' || c == 't') {
+			qualifier = c;
 			++fmt;
-			if (qualifier == 'l' && *fmt == 'l') {
+			if (qualifier == 'l' && c == 'l') {
 				qualifier = 'L';
 				++fmt;
 			}
@@ -500,7 +482,8 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 		/* default base */
 		base = 10;
 
-		switch (*fmt) {
+		c = __get_fmt_char(fmt);
+		switch (c) {
 		case 'c':
 			if (!(flags & LEFT))
 				while (--field_width > 0)
@@ -519,7 +502,8 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 					va_arg(args, void *),
 					field_width, precision, flags);
 			/* Skip all alphanumeric pointer suffixes */
-			while (isalnum(fmt[1]))
+			c = __get_fmt_char(fmt + 1);
+			while (isalnum(c))
 				fmt++;
 			continue;
 
@@ -556,8 +540,9 @@ int pp_vsprintf(char *buf, const char *fmt, va_list args)
 
 		default:
 			*str++ = '%';
-			if (*fmt)
-				*str++ = *fmt;
+			c = __get_fmt_char(fmt);
+			if (c)
+				*str++ = c;
 			else
 				--fmt;
 			continue;
