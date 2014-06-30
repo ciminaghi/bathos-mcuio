@@ -25,6 +25,9 @@ ifndef TASK-y
   ifeq ($(CONFIG_ADC), y)
     TASK-y+= mcuio_adc_func.o
   endif
+  ifeq ($(CONFIG_PWM), y)
+    TASK-y+= mcuio_pwm_func.o
+  endif
   ifeq ($(CONFIG_MCUIO_IRQ_CONTROLLER_WIRE),y)
     TASK-y+=mcuio_irq_controller_wire.o
   endif

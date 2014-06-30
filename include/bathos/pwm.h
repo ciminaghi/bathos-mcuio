@@ -21,4 +21,7 @@ extern int pwm_enabled(int idx);
  * val must be pwms[idx].nbits bits value */
 extern int pwm_set(int idx, uint32_t val);
 
+/* Read current duty cycle value */
+extern uint32_t pwm_get(int idx);
+
 #endif

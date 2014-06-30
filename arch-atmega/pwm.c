@@ -11,6 +11,10 @@
 
 #define NPWM 2
 
+#define pwm_warn_no_device(i) \
+	printf("%s warning: no such pwm device, idx=%d\n", __func__, i);
+
+
 const uint32_t PROGMEM num_pwm = NPWM;
 
 /* Status (enabled/disabled) of each pwm (max 32) */
@@ -28,8 +32,10 @@ const struct pwm PROGMEM pwms[NPWM] = {
 
 int pwm_en(int idx)
 {
-	if (idx >= NPWM)
+	if (idx >= NPWM) {
+		pwm_warn_no_device(idx);
 		return -ENODEV;
+	}
 
 
 	switch (idx) {
@@ -59,8 +65,10 @@ int pwm_en(int idx)
 
 int pwm_dis(int idx)
 {
-	if (idx >= NPWM)
+	if (idx >= NPWM) {
+		pwm_warn_no_device(idx);
 		return -ENODEV;
+	}
 
 	switch (idx) {
 		case 0:
@@ -88,16 +96,20 @@ int pwm_dis(int idx)
 
 int pwm_enabled(int idx)
 {
-	if (idx >= NPWM)
-		return -ENODEV;
+	if (idx >= NPWM) {
+		pwm_warn_no_device(idx);
+		return 0;
+	}
 
 	return (pwm_stat & (1 << idx)) ? 1 : 0;
 }
 
 int pwm_set(int idx, uint32_t val)
 {
-	if (idx >= NPWM)
+	if (idx >= NPWM) {
+		pwm_warn_no_device(idx);
 		return -ENODEV;
+	}
 
 	switch (idx) {
 		case 0:
@@ -111,4 +123,27 @@ int pwm_set(int idx, uint32_t val)
 	}
 
 	return 0;
+}
+
+extern uint32_t pwm_get(int idx)
+{
+	uint32_t ret = 0;
+
+	if (idx >= NPWM) {
+		pwm_warn_no_device(idx);
+		return -ENODEV;
+	}
+
+	switch (idx) {
+		case 0:
+			ret = OCR0A;
+			break;
+		case 1:
+			ret = OCR0B;
+			break;
+		default:
+			break;
+	}
+
+	return ret;
 }
