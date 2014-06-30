@@ -9,6 +9,7 @@
 #include <bathos/errno.h>
 #include <tasks/mcuio.h>
 #include <bathos/jiffies.h>
+#include <bathos/stdio.h>
 
 #include "mcuio-function.h"
 
@@ -19,8 +20,8 @@ static void dump_packet(const struct mcuio_base_packet *packet)
 {
 	int i;
 	uint8_t *ptr;
-	printf("%c%s%c\n", mcuio_packet_is_error(packet) ? '!' : ' ' ,
-	       mcuio_packet_is_reply(packet) ? "->" : "<-",
+	printf("%c %c %c\n", mcuio_packet_is_error(packet) ? '!' : ' ' ,
+	       mcuio_packet_is_reply(packet) ? '>' : '<',
 	       mcuio_packet_is_fill_data(packet) ? '+' : ' ');
 	printf("\t%u:%u.%u %s o 0x%04x\n",
 	       packet->bus, packet->dev, packet->func,
@@ -292,7 +293,8 @@ static int mcuio_init(void *arg)
 
 static void *mcuio_alive(void *arg)
 {
-	printf("mcuio %s\n", arg ? "alive" : "dead");
+	printf("mcuio ");
+	arg ? printf("alive\n") : printf("dead\n");
 	return arg;
 }
 
@@ -319,7 +321,7 @@ static void data_ready_handle(struct event_handler_data *ed)
 	else {
 		if (data->curr_len) {
 			if (time_after(jiffies, last + HZ/20)) {
-				printf("%s %d to\n", __func__, __LINE__);
+				printf("data_ready_handle to\n");
 				data->curr_len = 0;
 			}
 		}
