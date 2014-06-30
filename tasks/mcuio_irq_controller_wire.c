@@ -172,7 +172,7 @@ static void mcuio_irq_handle(struct event_handler_data *edata)
 {
 	struct mcuio_function_irq_data *idata = edata->data;
 	uint32_t old_requested_status, new_status;
-	printf("%s, idata = %p\n", __func__, idata);
+	printf("mcuio_irq_handle: idata = %p\n", idata);
 	if (idata->func > 31)
 		return;
 	old_requested_status = data.requested_status;
@@ -181,7 +181,7 @@ static void mcuio_irq_handle(struct event_handler_data *edata)
 		data.requested_status |= (1 << idata->func);
 	if (!(old_requested_status ^ data.requested_status)) {
 		/* No change in requested status, return immediately */
-		printf("%s %d\n", __func__, __LINE__);
+		printf("mcuio_irq_handle %d\n", __LINE__);
 		return;
 	}
 	new_status = data.requested_status &
@@ -189,7 +189,7 @@ static void mcuio_irq_handle(struct event_handler_data *edata)
 	printf("r = 0x%08x\n", data.requested_status);
 	printf("m = 0x%08x\n", ~data.registers[MASK_OFFSET/sizeof(uint32_t)]);
 	if (!(new_status ^ data.registers[STATUS_OFFSET/sizeof(uint32_t)])) {
-		printf("%s %d\n", __func__, __LINE__);
+		printf("mcuio_irq_handle %d\n", __LINE__);
 		return;
 	}
 	data.registers[STATUS_OFFSET/sizeof(uint32_t)] = new_status;
