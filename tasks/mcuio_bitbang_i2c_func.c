@@ -3,6 +3,7 @@
  * drivers/i2c/algos/i2c-algo-bit.c
  */
 #include <arch/hw.h>
+#include <bathos/stdio.h>
 #include <bathos/gpio.h>
 #include <bathos/bathos.h>
 #include <bathos/pipe.h>
@@ -271,7 +272,7 @@ static int __i2c_bitbang_send_acknak(int is_ack)
 
 static void __i2c_bitbang_trig_evt_error(void)
 {
-	printf("%s!\n", __func__);
+	printf("__i2c_bitbang_trig_evt_error\n");
 }
 
 static void __i2c_bitbang_next_state(enum i2c_transaction_state s)
@@ -296,7 +297,7 @@ static void __i2c_bitbang_trigger_irq(void)
 	idata.func = f;
 	idata.active = 1;
 	if (trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX))
-		printf("%s: evt error\n", __func__);
+		printf("__i2c_bitbang_trigger_irq: evt error\n");
 }
 
 static void __i2c_bitbang_end_transaction(uint8_t s)
@@ -450,7 +451,7 @@ static void __i2c_bitbang_do_transaction(struct event_handler_data *ed)
 		__i2c_handle_go();
 		break;
 	default:
-		printf("%s ! %d\n", __func__, evt);
+		printf("__i2c_bitbang_do_transaction ! %d\n", evt);
 		break;
 	}
 }
@@ -460,7 +461,7 @@ declare_event_handler(i2c_transaction, NULL,
 
 static int __i2c_bitbang_start_transaction(void)
 {
-	printf("%s %d s %d\n", __func__, __LINE__, i2c_data.status);
+	printf("__i2c_bitbang_start_transaction %d s %d\n", i2c_data.status);
 	if (i2c_data.status & BUSY)
 		return -EBUSY;
 	i2c_data.status |= BUSY;
@@ -494,7 +495,8 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 				idata.active = 0;
 				if (trigger_event(&event_name(mcuio_irq),
 						  &idata, EVT_PRIO_MAX))
-					printf("%s: evt error\n", __func__);
+					printf("i2c_bitbang_registers_rddw: "
+					       "evt error\n");
 				if (i2c_data.state != AWAITING_OUTPUT_DATA &&
 				    i2c_data.state != AWAITING_INPUT_SPACE) {
 					trigger_event(&event_name(
@@ -565,7 +567,7 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 		case I2C_MCUIO_CMD:
 		{
 			int stat;
-			printf("%s %d c %u\n", __func__, __LINE__, in);
+			printf("i2c_bitbang_registers_wrdw c %u\n", in);
 			if (in & START_TRANSACTION) {
 				stat = __i2c_bitbang_start_transaction();
 				if (stat < 0)
