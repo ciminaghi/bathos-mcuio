@@ -11,6 +11,12 @@
 #include <bathos/jiffies.h>
 #include <bathos/init.h>
 
+#ifndef DEBUG
+#define pr_debug(a, args...)
+#else
+#define pr_debug(a, args...) printf(a, ##args)
+#endif
+
 static int udelay_lpj; /* loops per jiffy */
 
 static inline void __delay(int count)
@@ -32,8 +38,7 @@ static int verify_lpj(int lpj)
 
 	/* did it expire? */
 	j = jiffies - j;
-	if (0)
-		printf("check %i: %li\n", lpj, j);
+	pr_debug("check %i: %li\n", lpj, j);
 	return j;
 }
 
@@ -58,7 +63,7 @@ static int generic_udelay_init(void)
 		step /= 2;
 	}
 	udelay_lpj = lpj;
-	printf("Loops per jiffy: %i\n", lpj);
+	pr_debug("Loops per jiffy: %i\n", lpj);
 	return 0;
 }
 
@@ -79,7 +84,7 @@ void generic_udelay(unsigned usec)
 	const int count_per_step = udelay_lpj * step / usec_per_jiffy;
 
 	if (!count_per_step)
-		printf("W! missing udelay init\n");
+		pr_debug("W! missing udelay init\n");
 
 	while (usec > step)  {
 		__delay(count_per_step);
