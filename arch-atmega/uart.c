@@ -16,6 +16,7 @@
 #include <bathos/errno.h>
 #include <bathos/shell.h>
 #include <bathos/stdlib.h>
+#include <bathos/allocator.h>
 #include <arch/hw.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -25,7 +26,7 @@
 
 static struct uart_data {
 	struct circ_buf cbuf;
-	char buf[UART_BUF_SIZE];
+	char *buf;
 	int overrun;
 } uart_data;
 
@@ -58,13 +59,19 @@ rom_initcall(uart_init);
 
 static int uart_open(struct bathos_pipe *pipe)
 {
-	return 0;
+	if (uart_data.buf)
+		return 0;
+	uart_data.buf = bathos_alloc_buffer(UART_BUF_SIZE);
+	return uart_data.buf ? 0 : -ENOMEM;
 }
 
 static int uart_read(struct bathos_pipe *pipe, char *buf, int len)
 {
 	struct uart_data *data = &uart_data;
 	int l;
+
+	if (!uart_data.buf)
+		return -EINVAL;
 
 	l = min(len, CIRC_CNT_TO_END(data->cbuf.head, data->cbuf.tail,
 				     UART_BUF_SIZE));
@@ -101,6 +108,12 @@ static void uart_close(struct bathos_pipe *pipe)
 {
 	/* Disable everything */
 	UCSR1B &= ~((1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1));
+	/* And free buffer */
+	if (!uart_data.buf) {
+		printf("WARNING: !uart_data.buf on uart_close\n");
+		return;
+	}
+	bathos_free_buffer(uart_data.buf, UART_BUF_SIZE);
 }
 
 ISR(USART1_RX_vect, __attribute__((section(".text.ISR"))))
@@ -108,6 +121,11 @@ ISR(USART1_RX_vect, __attribute__((section(".text.ISR"))))
 	struct uart_data *data = &uart_data;
 	int cnt_prev;
 	uint8_t c;
+
+	if (!uart_data.buf) {
+		printf("WARNING: !uart_data.buf on UART interrupt\n");
+		return;
+	}
 	cnt_prev = CIRC_CNT(data->cbuf.head, data->cbuf.tail, UART_BUF_SIZE);
 	if (!CIRC_SPACE(data->cbuf.head, data->cbuf.tail, UART_BUF_SIZE)) {
 		pr_debug("USART BUFFER OVERRUN\n");
