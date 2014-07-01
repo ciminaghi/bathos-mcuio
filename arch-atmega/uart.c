@@ -26,8 +26,8 @@ struct bathos_dev __uart_dev;
 
 static int uart_init(void)
 {
-	/* Target baud rate = 125000 */
-	UBRR1 = THOS_QUARTZ/(16*125000) - 1;
+	/* Target baud rate = 250000 */
+	UBRR1 = THOS_QUARTZ/(16*250000) - 1;
 	uart_data.cbuf.head = uart_data.cbuf.tail = 0;
 	UCSR1B = (1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1);
 	return 0;
