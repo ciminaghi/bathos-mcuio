@@ -17,143 +17,112 @@
 #include <bathos/shell.h>
 #include <bathos/stdlib.h>
 #include <bathos/allocator.h>
+#include <bathos/dev_ops.h>
 #include <arch/hw.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
-#define UART_BUF_SIZE 64
+static uint8_t initialized;
+static struct bathos_dev __uart_dev;
 
-static struct uart_data {
-	struct circ_buf cbuf;
-	char *buf;
-	int overrun;
-} uart_data;
-
-struct bathos_dev __uart_dev;
-
-static int uart_set_baudrate(uint32_t baud)
+static int atmega_uart_rx_enable(void *priv)
 {
-	UBRR1 = (THOS_QUARTZ / 16) / baud - 1;
+	UCSR1B |= (1 << RXEN1) | (1 << RXCIE1);
 	return 0;
 }
 
-static int uart_init(void)
+static int atmega_uart_tx_enable(void *priv)
 {
-	/* Target baud rate = 250000 */
-	uint32_t baud = 250000;
-	uart_set_baudrate(baud);
-	uart_data.cbuf.head = uart_data.cbuf.tail = 0;
-	UCSR1B = (1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1);
+	UCSR1B |= (1 << TXEN1);
 	return 0;
 }
 
-#if defined CONFIG_CONSOLE_UART && CONFIG_EARLY_CONSOLE
-int console_early_init(void)
+static int atmega_uart_rx_disable(void *priv)
 {
-	return uart_init();
-}
-#else
-rom_initcall(uart_init);
-#endif
-
-static int uart_open(struct bathos_pipe *pipe)
-{
-	if (uart_data.buf)
-		return 0;
-	uart_data.buf = bathos_alloc_buffer(UART_BUF_SIZE);
-	return uart_data.buf ? 0 : -ENOMEM;
+	UCSR1B &= ~((1 << RXEN1) | (1 << RXCIE1));
+	return 0;
 }
 
-static int uart_read(struct bathos_pipe *pipe, char *buf, int len)
+static int atmega_uart_tx_disable(void *priv)
 {
-	struct uart_data *data = &uart_data;
-	int l;
-
-	if (!uart_data.buf)
-		return -EINVAL;
-
-	l = min(len, CIRC_CNT_TO_END(data->cbuf.head, data->cbuf.tail,
-				     UART_BUF_SIZE));
-	if (!l)
-		return -EAGAIN;
-
-	memcpy(buf, &data->buf[data->cbuf.tail], l);
-	data->cbuf.tail = (data->cbuf.tail + l) & (UART_BUF_SIZE - 1);
-	data->overrun = 0;
-
-	if (CIRC_CNT(data->cbuf.head, data->cbuf.tail, UART_BUF_SIZE))
-		pipe_dev_trigger_event(&__uart_dev, &evt_pipe_input_ready,
-				       EVT_PRIO_MAX);
-
-	return l;
+	UCSR1B &= ~(1 << TXEN1);
+	return 0;
 }
 
-static int __uart_putc(const char c)
+static int atmega_uart_putc(void *priv, const char c)
 {
 	while (!(UCSR1A & (1 << UDRE1)));
 	UDR1 = c;
 	return 1;
 }
 
-static int uart_write(struct bathos_pipe *pipe, const char *buf, int len)
+static const struct bathos_ll_dev_ops PROGMEM atmega_uart_ops = {
+	.putc = atmega_uart_putc,
+	.rx_disable = atmega_uart_rx_disable,
+	.rx_enable = atmega_uart_rx_enable,
+	.tx_disable = atmega_uart_tx_disable,
+	.tx_enable = atmega_uart_tx_enable,
+};
+
+static int atmega_uart_set_baudrate(uint32_t baud)
 {
-	int i;
-	for (i = 0; i < len; i++)
-		__uart_putc(buf[i]);
-	return len;
+	UBRR1 = (THOS_QUARTZ / 16) / baud - 1;
+	return 0;
 }
 
-static void uart_close(struct bathos_pipe *pipe)
+static int atmega_uart_init(void)
 {
-	/* Disable everything */
-	UCSR1B &= ~((1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1));
-	/* And free buffer */
-	if (!uart_data.buf) {
-		printf("WARNING: !uart_data.buf on uart_close\n");
-		return;
-	}
-	bathos_free_buffer(uart_data.buf, UART_BUF_SIZE);
+	void *udata;
+	uint32_t baud = 250000; /* Target baud rate */
+	if (initialized)
+		return 0;
+	atmega_uart_set_baudrate(baud);
+	udata = bathos_dev_init(&atmega_uart_ops, NULL);
+	if (!udata)
+		return -ENODEV;
+	__uart_dev.priv = udata;
+	initialized = 1;
+	return 0;
 }
+
+#if defined CONFIG_CONSOLE_UART && CONFIG_EARLY_CONSOLE
+int console_early_init(void)
+{
+	return atmega_uart_init();
+}
+#else
+rom_initcall(atmega_uart_init);
+#endif
+
 
 ISR(USART1_RX_vect, __attribute__((section(".text.ISR"))))
 {
-	struct uart_data *data = &uart_data;
-	int cnt_prev;
-	uint8_t c;
+	char c = UDR1;
 
-	if (!uart_data.buf) {
-		printf("WARNING: !uart_data.buf on UART interrupt\n");
-		return;
-	}
-	cnt_prev = CIRC_CNT(data->cbuf.head, data->cbuf.tail, UART_BUF_SIZE);
-	if (!CIRC_SPACE(data->cbuf.head, data->cbuf.tail, UART_BUF_SIZE)) {
-		pr_debug("USART BUFFER OVERRUN\n");
-		data->overrun = 1;
-	}
-#ifdef DEBUG
-	if (UCSR1A & (1 << DOR1))
-		printf("USART OVERRUN\n");
-#endif
-	c = UDR1;
-	if (!data->overrun) {
-		data->buf[data->cbuf.head] = c;
-		data->cbuf.head = (data->cbuf.head + 1) & (UART_BUF_SIZE - 1);
-	}
-	if (!cnt_prev)
-		pipe_dev_trigger_event(&__uart_dev, &evt_pipe_input_ready,
-				       EVT_PRIO_MAX);
+	(void)bathos_dev_push_chars(&__uart_dev, &c, 1);
+}
+
+static int atmega_uart_open(struct bathos_pipe *pipe)
+{
+	int stat = 0;
+
+	if (!initialized)
+		stat = atmega_uart_init();
+	if (stat)
+		return stat;
+	return bathos_dev_open(pipe);
 }
 
 const struct bathos_dev_ops PROGMEM uart_dev_ops = {
-	.open = uart_open,
-	.read = uart_read,
-	.write = uart_write,
-	.close = uart_close,
-	/* ioctl not implemented */
+	.open = atmega_uart_open,
+	.read = bathos_dev_read,
+	.write = bathos_dev_write,
+	.close = bathos_dev_close,
+	.ioctl = bathos_dev_ioctl,
 };
 
-struct bathos_dev __uart_dev __attribute__((section(".bathos_devices"),
+static struct bathos_dev __uart_dev __attribute__((section(".bathos_devices"),
 					    aligned(2))) = {
 	.name = "avr-uart",
 	.ops = &uart_dev_ops,
