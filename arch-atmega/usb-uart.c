@@ -24,8 +24,8 @@
 #define LSB(n) (n & 255)
 #define MSB(n) ((n >> 8) & 255)
 
-#define VENDOR_ID		0x16C0
-#define PRODUCT_ID		0x047A
+#define VENDOR_ID		0x2a03
+#define PRODUCT_ID		0x8001
 
 #define STR_MANUFACTURER	L"Dog Hunter"
 #define STR_PRODUCT		L"YUN"
