@@ -69,7 +69,7 @@ extern const int PROGMEM __bitmap_mask_ffs[BATHOS_NORDERS];
 unsigned long __bitmap[BATHOS_MAP_NBITS/(BITS_PER_LONG)];
 
 /* Memory managed by this allocator */
-static uint8_t mem[BATHOS_ALLOCATOR_MEMORY];
+uint8_t __attribute__ ((aligned (4))) mem[BATHOS_ALLOCATOR_MEMORY];
 
 static char __initialized;
 
