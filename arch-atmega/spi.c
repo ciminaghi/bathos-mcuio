@@ -9,6 +9,7 @@
 #include <bathos/init.h>
 #include <bathos/errno.h>
 #include <bathos/types.h>
+#include <bathos/stdio.h>
 #include <arch/hw.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -33,19 +34,8 @@ static int spi_init(void)
 {
 	/* Enable pull-up on SS signal */
 	PORTB |= 0x1;
-
-	/* Enable SPI (in slave mode) and its interrupt */
-	DDRB = (1 << 6);
-	SPCR = (1 << SPE);
-	SPCR |= (1 << SPIE);
-	memset(&spi_data, 0, sizeof(spi_data));
-
 	/* MISO output (PB3) */
-	DDRB = (1 << 3);
-
-	spi_data.cbufrx.head = spi_data.cbufrx.tail = 0;
-	spi_data.cbuftx.head = spi_data.cbuftx.tail = 0;
-
+	DDRB |= (1 << 3);
 	return 0;
 }
 
@@ -53,12 +43,16 @@ rom_initcall(spi_init);
 
 static int spi_open(struct bathos_pipe *pipe)
 {
+	/* Enable SPI (in slave mode) and its interrupt */
+	SPCR = (1 << SPE);
+	SPCR |= (1 << SPIE);
 	return 0;
 }
 
 static void spi_close(struct bathos_pipe *pipe)
 {
-	/* Nothing to do */
+	SPCR &= ~(1 << SPIE);
+	SPCR &= ~(1 << SPE);
 }
 
 static int spi_read(struct bathos_pipe *pipe, char *buf, int len)
