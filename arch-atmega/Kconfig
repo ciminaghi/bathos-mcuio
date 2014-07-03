@@ -79,6 +79,11 @@ config CONSOLE_USB_UART
        help
 	 This option selects a console via USB
 
+config CONSOLE_NULL
+       bool "Null console"
+       help
+	 Select this when you don't want any console
+
 endchoice
 
 config CONSOLE
