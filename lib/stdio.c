@@ -3,6 +3,14 @@
 struct bathos_pipe *bathos_stdout;
 struct bathos_pipe *bathos_stdin;
 
+/*
+ * Dummy console (used when no console is selected and console_putc()
+ * is not available
+ */
+void __attribute__((weak)) console_putc(int c)
+{
+}
+
 void __attribute__((weak)) putc(int c)
 {
 	if (c == '\n')
