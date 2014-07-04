@@ -587,7 +587,6 @@ static int usb_uart_init(void)
 	__data.usb_configuration = 0;
 	__data.cdc_line_rtsdtr = 0;
 	UDIEN = (1<<EORSTE)|(1<<SOFE);
-	while (!(UDINT & EORSTI));
 	return 0;
 }
 rom_initcall(usb_uart_init);
