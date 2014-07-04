@@ -22,7 +22,8 @@ void __attribute__((weak)) idle(void)
 
 int bathos_main(void)
 {
-	printf("Hello, Bathos is speaking (built on " __DATE__ " \n");
+	printf("Hello, Bathos is speaking (%s built on " __DATE__ ")\n",
+	       BATHOS_GIT);
 	while(1) {
 		handle_events();
 		idle();

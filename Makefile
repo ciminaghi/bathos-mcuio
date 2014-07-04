@@ -4,6 +4,7 @@
 ARCH ?= $(patsubst "%",%,$(CONFIG_ARCH))
 CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
 MODE ?= $(patsubst "%",%,$(CONFIG_MEMORY_MODE))
+BATHOS_GIT=$(shell ./scripts/get_version)
 
 # if no .config is there, ARCH is still empty, this would prevent a simple
 # "make config"
@@ -70,7 +71,7 @@ HOST_CFLAGS ?= -Iinclude
 AOBJ  += $(ADIR)/boot.o $(ADIR)/io.o
 
 # The user can pass USER_CFLAGS if needed
-CFLAGS += $(USER_CFLAGS) -DMODULE_NAME=$(subst -,_,$(subst /,_,$(subst .o,,$@)))
+CFLAGS += $(USER_CFLAGS) -DBATHOS_GIT=\"$(BATHOS_GIT)\" -DMODULE_NAME=$(subst -,_,$(subst /,_,$(subst .o,,$@)))
 
 # There may or may not be a linker script (arch-unix doesn't)
 LDS   = $(wildcard $(ADIR)/bathos$(MODE).lds)

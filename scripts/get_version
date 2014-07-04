@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# From Linux kernel sources, scripts/setlocalversion
+r=$(git rev-parse --verify --short HEAD)
+
+[ -z "$(git diff)" ] || r="$r+"
+
+echo $r
