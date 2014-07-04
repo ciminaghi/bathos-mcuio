@@ -5,7 +5,6 @@
 #include <bathos/bathos.h>
 #include <linux/list.h>
 
-#define MAX_BATHOS_PIPES 32
 
 #define BATHOS_MODE_INPUT  1
 #define BATHOS_MODE_OUTPUT 2
