@@ -13,7 +13,6 @@ static int pts_init(void)
 	unsigned long now = jiffies;
 	struct bathos_task *p;
 	for (p = __task_begin; p < __task_end; p++) {
-		printf("Task: %s\n", p->name);
 		if (p->init) p->init(p->arg);
 	}
 	for (p = __task_begin; p < __task_end; p++) {
