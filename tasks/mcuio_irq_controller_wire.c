@@ -9,6 +9,12 @@
 
 #include "mcuio-function.h"
 
+#ifndef DEBUG
+#define pr_debug(a, args...)
+#else
+#define pr_debug(a, args...) printf(a, ##args)
+#endif
+
 #ifndef CONFIG_MCUIO_IRQ_WIRE_GPIO_NUMBER
 #define IRQ_LINE_GPIO 30
 #else
@@ -37,7 +43,7 @@
 static inline void __activate_irq_line(int active)
 {
 	int l = active ? IRQ_ACTIVE_LEVEL : IRQ_INACTIVE_LEVEL;
-	printf("gpio%d->%d\n", IRQ_LINE_GPIO, l);
+	pr_debug("gpio%d->%d\n", IRQ_LINE_GPIO, l);
 	gpio_set(IRQ_LINE_GPIO, l);
 }
 
@@ -172,7 +178,7 @@ static void mcuio_irq_handle(struct event_handler_data *edata)
 {
 	struct mcuio_function_irq_data *idata = edata->data;
 	uint32_t old_requested_status, new_status;
-	printf("mcuio_irq_handle: idata = %p\n", idata);
+	pr_debug("mcuio_irq_handle: idata = %p\n", idata);
 	if (idata->func > 31)
 		return;
 	old_requested_status = data.requested_status;
@@ -181,15 +187,15 @@ static void mcuio_irq_handle(struct event_handler_data *edata)
 		data.requested_status |= (1 << idata->func);
 	if (!(old_requested_status ^ data.requested_status)) {
 		/* No change in requested status, return immediately */
-		printf("mcuio_irq_handle %d\n", __LINE__);
+		pr_debug("mcuio_irq_handle %d\n", __LINE__);
 		return;
 	}
 	new_status = data.requested_status &
 		~(data.registers[MASK_OFFSET/sizeof(uint32_t)]);
-	printf("r = 0x%08x\n", data.requested_status);
-	printf("m = 0x%08x\n", ~data.registers[MASK_OFFSET/sizeof(uint32_t)]);
+	pr_debug("r = 0x%08x\n", data.requested_status);
+	pr_debug("m = 0x%08x\n", ~data.registers[MASK_OFFSET/sizeof(uint32_t)]);
 	if (!(new_status ^ data.registers[STATUS_OFFSET/sizeof(uint32_t)])) {
-		printf("mcuio_irq_handle %d\n", __LINE__);
+		pr_debug("mcuio_irq_handle %d\n", __LINE__);
 		return;
 	}
 	data.registers[STATUS_OFFSET/sizeof(uint32_t)] = new_status;
