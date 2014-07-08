@@ -58,7 +58,7 @@ static struct mcuio_i2c_data {
 	uint16_t data_cnt;
 	uint8_t  status;
 	uint8_t  int_enable;
-	uint8_t buffer[32];
+	uint8_t buffer[128];
 	uint8_t ibuf_head;
 	uint8_t ibuf_tail;
 	uint8_t obuf_head;
