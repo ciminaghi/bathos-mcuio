@@ -17,6 +17,13 @@
 
 #include "mcuio-function.h"
 
+#ifndef DEBUG
+#define pr_debug(a, args...)
+#else
+#define pr_debug(a, args...) printf(a, ##args)
+#endif
+
+
 extern struct mcuio_function mcuio_bitbang_i2c;
 declare_extern_event(mcuio_irq);
 
@@ -272,16 +279,18 @@ static int __i2c_bitbang_send_acknak(int is_ack)
 
 static void __i2c_bitbang_trig_evt_error(void)
 {
-	printf("__i2c_bitbang_trig_evt_error\n");
+	pr_debug("__i2c_bitbang_trig_evt_error\n");
 }
 
 static void __i2c_bitbang_next_state(enum i2c_transaction_state s)
 {
 	int stat;
 	i2c_data.state = s;
+	pr_debug("__i2c_bitbang_next_state %d\n", s);
 	if (s == IDLE || s == AWAITING_OUTPUT_DATA ||
 	    s == AWAITING_INPUT_SPACE)
 		return;
+	pr_debug("triggering evt I2C_GO\n");
 	stat = trigger_event(&event_name(i2c_transaction),
 			     (void *)I2C_GO, EVT_PRIO_MAX);
 	if (stat < 0)
@@ -296,6 +305,7 @@ static void __i2c_bitbang_trigger_irq(void)
 	f = &mcuio_bitbang_i2c - mcuio_functions_start;
 	idata.func = f;
 	idata.active = 1;
+	pr_debug("__i2c_bitbang_trigger_irq()\n");
 	if (trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX))
 		printf("__i2c_bitbang_trigger_irq: evt error\n");
 }
@@ -303,6 +313,7 @@ static void __i2c_bitbang_trigger_irq(void)
 static void __i2c_bitbang_end_transaction(uint8_t s)
 {
 	/* send stop */
+	pr_debug("__i2c_bitbang_end_transaction()\n");
 	__i2c_bitbang_send_stop();
 
 	i2c_data.status = s;
@@ -312,7 +323,7 @@ static void __i2c_bitbang_end_transaction(uint8_t s)
 
 static void __i2c_handle_reset(void)
 {
-	printf("rst s%d\n", i2c_data.state);
+	pr_debug("__i2c_handle_reset s%d\n", i2c_data.state);
 	i2c_data.status = 0;
 	__i2c_bitbang_next_state(IDLE);
 }
@@ -320,25 +331,32 @@ static void __i2c_handle_reset(void)
 static void __i2c_handle_go(void)
 {
 	i2c_data.timeout = HZ;
-	i2c_data.udelay = 100;
+	i2c_data.udelay = 10;
+	pr_debug("__i2c_handle_go, s%d\n", i2c_data.state);
 	switch (i2c_data.state) {
 	case IDLE:
+		pr_debug("sending start\n");
 		/* Send start condition */
 		__i2c_bitbang_send_start();
 		/* -> START_SENT */
+		pr_debug("start sent\n");
 		__i2c_bitbang_next_state(START_SENT);
 		break;
 	case START_SENT:
+		pr_debug("sending slave address\n");
 		/* Send slave address + w bit */
 		if (__i2c_bitbang_send_slave_addr(0) < 0) {
+			pr_debug("error sending slave address\n");
 			__i2c_bitbang_end_transaction(NAK_RECEIVED);
 			return;
 		}
 		/* -> ADDR_SENT */
+		pr_debug("address send\n");
 		__i2c_bitbang_next_state(ADDR_SENT);
 		break;
 	case ADDR_SENT:
 		if (!i2c_data.buf_len) {
+			pr_debug("no data, switching to DATA_SENT state\n");
 			/* No data */
 			__i2c_bitbang_next_state(DATA_SENT);
 			break;
@@ -352,8 +370,11 @@ static void __i2c_handle_go(void)
 	{
 		int done, count;
 		uint8_t c = i2c_data.buffer[i2c_data.obuf_tail];
+
+		pr_debug("SENDING_DATA state, c = %u\n", c);
 		/* Send a single byte */
 		if (__i2c_bitbang_send_byte(c) < 0) {
+			pr_debug("NAK received sending byte\n");
 			__i2c_bitbang_end_transaction(NAK_RECEIVED);
 			return;
 		}
@@ -372,9 +393,12 @@ static void __i2c_handle_go(void)
 		}
 		count = CIRC_CNT(i2c_data.obuf_head, i2c_data.obuf_tail,
 				 sizeof(i2c_data.buffer));
-		if (count == OBUF_LOW_WATERMARK)
+		pr_debug("count = %d\n", count);
+		if (count == OBUF_LOW_WATERMARK) {
+			pr_debug("hit lower watermark\n");
 			/* Trigger out low watermark interrupt */
 			__i2c_bitbang_trigger_irq();
+		}
 
 		__i2c_bitbang_next_state(count ?
 					 SENDING_DATA :
@@ -383,23 +407,29 @@ static void __i2c_handle_go(void)
 	}
 	case DATA_SENT:
 		if (is_i2c_write()) {
+			pr_debug("DATA_SENT state, transaction ok\n");
 			__i2c_bitbang_end_transaction(TRANSACTION_OK);
 			return;
 		}
 		/* Send repeated start */
+		pr_debug("sending repeated start\n");
 		__i2c_bitbang_send_repstart();
 		__i2c_bitbang_next_state(REPEATED_START_SENT);
 		break;
 	case REPEATED_START_SENT:
 		/* Send slave address + r bit */
+		pr_debug("REPEATED_START_SENT state\n");
 		if (__i2c_bitbang_send_slave_addr(1) < 0) {
+			pr_debug("NAK received\n");
 			__i2c_bitbang_end_transaction(NAK_RECEIVED);
 			return;
 		}
 		/* -> ADDR_SENT_2 */
+		pr_debug("address + r sent\n");
 		__i2c_bitbang_next_state(ADDR_SENT_2);
 		break;
 	case ADDR_SENT_2:
+		pr_debug("ADDR_SENT_2 state\n");
 		/* Reset counter */
 		i2c_data.data_cnt = 0;
 		/* -> RECEIVING_DATA */
@@ -409,18 +439,23 @@ static void __i2c_handle_go(void)
 	{
 		int done, space;
 		/* Read byte */
+		pr_debug("RECEIVING_DATA state\n");
 		__i2c_bitbang_recv_byte(&i2c_data.buffer[i2c_data.data_cnt++]);
 		done = i2c_data.data_cnt == i2c_data.buf_len;
 		__i2c_bitbang_send_acknak(!done);
 		if (done) {
+			pr_debug("done\n");
 			__i2c_bitbang_next_state(DATA_RECEIVED);
 			break;
 		}
 		space = CIRC_SPACE(i2c_data.ibuf_head,
 				   i2c_data.ibuf_tail,
 				   sizeof(i2c_data.buffer));
-		if (space == IBUF_HI_WATERMARK)
+		pr_debug("space = %d\n", space);
+		if (space == IBUF_HI_WATERMARK) {
+			pr_debug("triggering irq\n");
 			__i2c_bitbang_trigger_irq();
+		}
 
 		__i2c_bitbang_next_state(space ?
 					 RECEIVING_DATA :
@@ -429,6 +464,7 @@ static void __i2c_handle_go(void)
 	}
 	case DATA_RECEIVED:
 		/* All done, end transaction */
+		pr_debug("DATA_RECEIVED state, tranaction ok\n");
 		__i2c_bitbang_end_transaction(TRANSACTION_OK);
 		break;
 	case AWAITING_OUTPUT_DATA:
@@ -461,7 +497,7 @@ declare_event_handler(i2c_transaction, NULL,
 
 static int __i2c_bitbang_start_transaction(void)
 {
-	printf("__i2c_bitbang_start_transaction %d s %d\n", i2c_data.status);
+	pr_debug("__i2c_bitbang_start_transaction s%d\n", i2c_data.status);
 	if (i2c_data.status & BUSY)
 		return -EBUSY;
 	i2c_data.status |= BUSY;
@@ -567,7 +603,7 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 		case I2C_MCUIO_CMD:
 		{
 			int stat;
-			printf("i2c_bitbang_registers_wrdw c %u\n", in);
+			pr_debug("i2c_bitbang_registers_wrdw c %u\n", in);
 			if (in & START_TRANSACTION) {
 				stat = __i2c_bitbang_start_transaction();
 				if (stat < 0)
