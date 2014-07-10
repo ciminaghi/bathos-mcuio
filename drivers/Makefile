@@ -8,6 +8,7 @@ DRV_OBJS += drivers/w1.o
 DRV_OBJS += drivers/w1-gpio.o
 DRV_OBJS += drivers/w1-temp.o
 DRV_OBJS += drivers/w1-eeprom.o
+DRV_OBJS += drivers/dev.o
 
 ifeq ($(CONFIG_DEBUG_BITBANG),y)
 DRV_OBJS += drivers/debug_bitbang.o
