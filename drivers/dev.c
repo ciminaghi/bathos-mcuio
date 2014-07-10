@@ -65,7 +65,33 @@ bathos_dev_init(const struct bathos_ll_dev_ops * PROGMEM ops, void *priv)
 
 int bathos_dev_push_chars(struct bathos_dev *dev, const char *buf, int len)
 {
-	return -ENOMEM;
+	int cnt_prev, l, s, out;
+	struct bathos_dev_data *data = dev->priv;
+
+	cnt_prev = CIRC_CNT(data->d.cb.head, data->d.cb.tail,
+			    data->d.cb.size);
+
+	s = CIRC_SPACE(data->d.cb.head, data->d.cb.tail, data->d.cb.size);
+	if (!s)
+		return -ENOMEM;
+	/* Copy to the end of the buffer */
+	l = min(len, CIRC_SPACE_TO_END(data->d.cb.head, data->d.cb.tail,
+				       data->d.cb.size));
+	memcpy(&data->d.cb.buf[data->d.cb.head], buf, l);
+	data->d.cb.head = (data->d.cb.head + l) & (data->d.cb.size - 1);
+	len -= l;
+	if (!l)
+		goto end;
+	out = l;
+	/* And finally copy the rest */
+	l = min(len, s);
+	memcpy(&data->d.cb.buf[data->d.cb.head], buf, l);
+	data->d.cb.head = (data->d.cb.head + l) & (data->d.cb.size - 1);
+end:
+	if (!cnt_prev)
+		pipe_dev_trigger_event(dev, &evt_pipe_input_ready,
+				       EVT_PRIO_MAX);
+	return out + l;
 }
 
 
