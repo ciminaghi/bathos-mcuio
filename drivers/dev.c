@@ -106,7 +106,27 @@ int bathos_dev_open(struct bathos_pipe *pipe)
 
 int bathos_dev_read(struct bathos_pipe *pipe, char *buf, int len)
 {
-	return -ENODEV;
+	int l;
+	struct bathos_dev_data *data = pipe->dev->priv;
+
+	if (data->mode != CIRC_BUF)
+		return -EINVAL;
+	if (!data->d.cb.buf || !data->d.cb.size)
+		return -EINVAL;
+
+	l = min(len, CIRC_CNT_TO_END(data->d.cb.head, data->d.cb.tail,
+				     data->d.cb.size));
+	if (!l)
+		return -EAGAIN;
+
+	memcpy(buf, &data->d.cb.buf[data->d.cb.tail], l);
+	data->d.cb.tail = (data->d.cb.tail + l) & (data->d.cb.size - 1);
+
+	if (CIRC_CNT(data->d.cb.head, data->d.cb.tail, data->d.cb.size))
+		pipe_dev_trigger_event(pipe->dev, &evt_pipe_input_ready,
+				       EVT_PRIO_MAX);
+
+	return l;
 }
 
 int bathos_dev_write(struct bathos_pipe *pipe, const char *buf, int len)
