@@ -29,6 +29,8 @@ struct bathos_dev_data {
 
 		} pk;
 	} d;
+	/* rx high watermark */
+	int rx_hwm;
 	const struct bathos_ll_dev_ops * PROGMEM ops;
 	void *ll_priv;
 };
@@ -65,11 +67,8 @@ bathos_dev_init(const struct bathos_ll_dev_ops * PROGMEM ops, void *priv)
 
 int bathos_dev_push_chars(struct bathos_dev *dev, const char *buf, int len)
 {
-	int cnt_prev, l, s, out;
+	int l, s, out = 0;
 	struct bathos_dev_data *data = dev->priv;
-
-	cnt_prev = CIRC_CNT(data->d.cb.head, data->d.cb.tail,
-			    data->d.cb.size);
 
 	s = CIRC_SPACE(data->d.cb.head, data->d.cb.tail, data->d.cb.size);
 	if (!s)
@@ -88,7 +87,8 @@ int bathos_dev_push_chars(struct bathos_dev *dev, const char *buf, int len)
 	memcpy(&data->d.cb.buf[data->d.cb.head], buf, l);
 	data->d.cb.head = (data->d.cb.head + l) & (data->d.cb.size - 1);
 end:
-	if (!cnt_prev)
+	if (CIRC_CNT(data->d.cb.head, data->d.cb.tail, data->d.cb.size) >
+	    data->rx_hwm)
 		pipe_dev_trigger_event(dev, &evt_pipe_input_ready,
 				       EVT_PRIO_MAX);
 	return out + l;
@@ -191,7 +191,21 @@ int bathos_dev_close(struct bathos_pipe *pipe)
 	return 0;
 }
 
-int bathos_dev_ioctl(struct bathos_pipe *pipe, struct bathos_ioctl_data *data)
+int bathos_dev_ioctl(struct bathos_pipe *pipe,
+		     struct bathos_ioctl_data *iocdata)
 {
+	struct bathos_dev_data *data = pipe->dev->priv;
+	
+	switch (iocdata->code) {
+	case DEV_IOC_RX_SET_HIGH_WATERMARK:
+		if (!iocdata->data)
+			return -EINVAL;
+		data->rx_hwm = *(int *)iocdata->data;
+		return 0;
+		
+	default:
+		return -EINVAL;
+	}
+	/* NEVER REACHED */
 	return -EINVAL;
 }
