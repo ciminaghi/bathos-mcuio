@@ -54,7 +54,12 @@ static inline struct bathos_ll_dev_ops *__get_ops(struct bathos_dev_data *data,
 struct bathos_dev_data *
 bathos_dev_init(const struct bathos_ll_dev_ops * PROGMEM ops, void *priv)
 {
-	struct bathos_dev_data *out = bathos_alloc_buffer(sizeof(*out));
+	struct bathos_dev_data *out;
+
+	if (!ops || !ops->rx_enable || !ops->tx_enable || !ops->rx_disable ||
+	    !ops->tx_disable)
+		return NULL;
+	out = bathos_alloc_buffer(sizeof(*out));
 	if (!out)
 		return out;
 
@@ -117,12 +122,12 @@ int bathos_dev_open(struct bathos_pipe *pipe)
 	}
 	data->d.cb.head = data->d.cb.tail = 0;
 	ops = __get_ops(data, &__ops);
-	if (pipe->mode & BATHOS_MODE_INPUT && ops && ops->rx_enable) {
+	if (pipe->mode & BATHOS_MODE_INPUT) {
 		stat = ops->rx_enable(data->ll_priv);
 		if (stat)
 			return stat;
 	}
-	if (pipe->mode & BATHOS_MODE_OUTPUT && ops && ops->tx_enable) {
+	if (pipe->mode & BATHOS_MODE_OUTPUT) {
 		stat = ops->tx_enable(data->ll_priv);
 		if (stat)
 			return stat;
@@ -178,12 +183,12 @@ int bathos_dev_close(struct bathos_pipe *pipe)
 
 	struct bathos_ll_dev_ops *ops, __ops;
 	ops = __get_ops(data, &__ops);
-	if (pipe->mode & BATHOS_MODE_INPUT && ops && ops->rx_disable) {
+	if (pipe->mode & BATHOS_MODE_INPUT) {
 		stat = ops->rx_disable(data->ll_priv);
 		if (stat)
 			return stat;
 	}
-	if (pipe->mode & BATHOS_MODE_OUTPUT && ops && ops->tx_disable) {
+	if (pipe->mode & BATHOS_MODE_OUTPUT) {
 		stat = ops->tx_disable(data->ll_priv);
 		if (stat)
 			return stat;
