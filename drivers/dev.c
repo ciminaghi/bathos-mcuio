@@ -131,7 +131,18 @@ int bathos_dev_read(struct bathos_pipe *pipe, char *buf, int len)
 
 int bathos_dev_write(struct bathos_pipe *pipe, const char *buf, int len)
 {
-	return -ENODEV;
+	struct bathos_dev_data *data = pipe->dev->priv;
+	struct bathos_ll_dev_ops *ops, __ops;
+	int i, stat = 0;
+
+	ops = __get_ops(data, &__ops);
+	if (!ops || (!ops->putc && !ops->write))
+		return -EPERM;
+	if (ops->write)
+		return ops->write(data->ll_priv, buf, len);
+	for (i = 0; i < len && stat >= 0; i++)
+		stat = ops->putc(data->ll_priv, buf[i]);
+	return stat < 0 ? stat : len;
 }
 
 int bathos_dev_close(struct bathos_pipe *pipe)
