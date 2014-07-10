@@ -67,7 +67,7 @@ struct dev_ioc_set_rx_sync_seq_data {
 #define DEV_IOC_RX_ENABLE		7
 /* set sync sequence for packet mode */
 #define DEV_IOC_SET_RX_SYNC_SEQ		8
-/* set sync silence time for packet mode */
+/* set sync silence time for packet mode (1 arg: silence time in jiffies) */
 #define DEV_IOC_SET_RX_SYNC_SIL_TIME	9
 
 /*
