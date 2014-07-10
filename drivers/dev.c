@@ -196,6 +196,32 @@ int bathos_dev_close(struct bathos_pipe *pipe)
 	return 0;
 }
 
+static int __switch_to_cbuf(struct bathos_dev_data *data, int bufsize)
+{
+	struct bathos_ll_dev_ops *ops, __ops;
+	int stat;
+
+	ops = __get_ops(data, &__ops);
+	/* Disable rx first */
+	stat = ops->rx_disable(data->ll_priv);
+	if (stat)
+		return stat;
+	data->mode = CIRC_BUF;
+	/* Forget about any external buffer */
+	data->d.cb.ext_buf = NULL;
+	/* Free current buffer first */
+	if (data->d.cb.buf)
+		bathos_free_buffer(data->d.cb.buf, data->d.cb.size);
+	/* and get another one */
+	data->d.cb.size = bufsize;
+	data->d.cb.buf = bathos_alloc_buffer(data->d.cb.size);
+	if (!data->d.cb.buf)
+		return -ENOMEM;
+	/* reset head and tail */
+	data->d.cb.head = data->d.cb.tail = 0;
+	return stat;
+}
+
 int bathos_dev_ioctl(struct bathos_pipe *pipe,
 		     struct bathos_ioctl_data *iocdata)
 {
@@ -207,7 +233,12 @@ int bathos_dev_ioctl(struct bathos_pipe *pipe,
 			return -EINVAL;
 		data->rx_hwm = *(int *)iocdata->data;
 		return 0;
-		
+	case DEV_IOC_RX_SET_CBUF_MODE:
+		if (data->mode == CIRC_BUF)
+			return 0;
+		if (!iocdata->data)
+			return -EINVAL;
+		return __switch_to_cbuf(data, *(int *)iocdata->data);
 	default:
 		return -EINVAL;
 	}
