@@ -353,6 +353,23 @@ int bathos_dev_ioctl(struct bathos_pipe *pipe,
 		return iocdata->code == DEV_IOC_RX_DEQUEUE_BUFFER ?
 			__dequeue_buf(data, (char **)iocdata->data) :
 			__peek_buf(data, (char **)iocdata->data);
+	case DEV_IOC_RX_ENABLE:
+	{
+		struct bathos_ll_dev_ops *ops, __ops;
+
+		if (data->mode == PACKET) {
+			enum pk_node_event e;
+			e = RX_ENABLED_NO_SYNC;
+			if (data->d.pk.sync_silence_time ||
+			    data->d.pk.sync_seq_len)
+				e = data->d.pk.sync_seq_len ?
+					RX_ENABLED_SYNC_COMPLETE :
+					RX_ENABLED_SYNC_SILENCE;
+			feed_statemachine(&__pk_sync_sm, &data->d.pk.smr, e);
+		}
+		ops = __get_ops(data, &__ops);
+		return ops->rx_enable(data->ll_priv);
+	}
 	default:
 		return -EINVAL;
 	}
