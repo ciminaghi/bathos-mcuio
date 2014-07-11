@@ -25,8 +25,12 @@ struct bathos_dev_data {
 			char *ext_buf;
 		} cb;
 		struct {
-
-
+			int bhead;
+			int btail;
+			int bnum;
+			int bsize;
+			int curr_index;
+			char **bufs;
 		} pk;
 	} d;
 	/* rx high watermark */
@@ -70,7 +74,7 @@ bathos_dev_init(const struct bathos_ll_dev_ops * PROGMEM ops, void *priv)
 	return out;
 }
 
-int bathos_dev_push_chars(struct bathos_dev *dev, const char *buf, int len)
+int bathos_dev_cb_push_chars(struct bathos_dev *dev, const char *buf, int len)
 {
 	int l, s, out = 0;
 	struct bathos_dev_data *data = dev->priv;
@@ -97,6 +101,50 @@ end:
 		pipe_dev_trigger_event(dev, &evt_pipe_input_ready,
 				       EVT_PRIO_MAX);
 	return out + l;
+}
+
+int bathos_dev_pk_push_chars(struct bathos_dev *dev, const char *buf, int len)
+{
+	struct bathos_dev_data *data = dev->priv;
+	int s = data->d.pk.bsize - data->d.pk.curr_index, l;
+	char *dst;
+
+	l = min(s, len);
+	if (!l)
+		return len ? -ENOMEM : l;
+	dst = &(data->d.pk.bufs[data->d.pk.bhead])[data->d.pk.curr_index];
+	memcpy(dst, buf, l);
+	data->d.pk.curr_index += l;
+	if (data->d.pk.curr_index < data->rx_hwm)
+		/* Below watermark, just return */
+		return l;
+	pipe_dev_trigger_event(dev, &evt_pipe_input_ready, EVT_PRIO_MAX);
+	if (data->d.pk.curr_index < (data->d.pk.bsize - 1))
+		/* Still space in buffer, just return */
+		return l;
+	if (!CIRC_SPACE(data->d.pk.bhead, data->d.pk.btail, data->d.pk.bnum))
+		return l;
+	/* Still space in queue, take next input buffer and reset curr_index */
+	data->d.pk.bhead = (data->d.pk.bhead + 1) & (data->d.pk.bnum - 1);
+	data->d.pk.curr_index = 0;
+	return l;
+}
+
+
+int bathos_dev_push_chars(struct bathos_dev *dev, const char *buf, int len)
+{
+	struct bathos_dev_data *data = dev->priv;
+
+	switch (data->mode) {
+	case CIRC_BUF:
+		return bathos_dev_cb_push_chars(dev, buf, len);
+	case PACKET:
+		return bathos_dev_pk_push_chars(dev, buf, len);
+	default:
+		return -EINVAL;
+	}
+	/* NEVER REACHED */
+	return -EINVAL;
 }
 
 
@@ -196,6 +244,15 @@ int bathos_dev_close(struct bathos_pipe *pipe)
 	return 0;
 }
 
+static void __release_cbuf(struct bathos_dev_data *data)
+{
+	/* Forget about any external buffer */
+	data->d.cb.ext_buf = NULL;
+	/* Free current buffer first */
+	if (data->d.cb.buf)
+		bathos_free_buffer(data->d.cb.buf, data->d.cb.size);
+}
+
 static int __switch_to_cbuf(struct bathos_dev_data *data, int bufsize)
 {
 	struct bathos_ll_dev_ops *ops, __ops;
@@ -207,11 +264,8 @@ static int __switch_to_cbuf(struct bathos_dev_data *data, int bufsize)
 	if (stat)
 		return stat;
 	data->mode = CIRC_BUF;
-	/* Forget about any external buffer */
-	data->d.cb.ext_buf = NULL;
-	/* Free current buffer first */
-	if (data->d.cb.buf)
-		bathos_free_buffer(data->d.cb.buf, data->d.cb.size);
+	/* Release circular buffer */
+	__release_cbuf(data);
 	/* and get another one */
 	data->d.cb.size = bufsize;
 	data->d.cb.buf = bathos_alloc_buffer(data->d.cb.size);
@@ -220,6 +274,51 @@ static int __switch_to_cbuf(struct bathos_dev_data *data, int bufsize)
 	/* reset head and tail */
 	data->d.cb.head = data->d.cb.tail = 0;
 	return stat;
+}
+
+static int __switch_to_pckt(struct bathos_dev_data *data, void *iocdata)
+{
+	struct bathos_ll_dev_ops *ops, __ops;
+	struct dev_ioc_set_bqueue_data *bqdata = iocdata;
+	int stat;
+
+	if (!bqdata->bufs)
+		return -EINVAL;
+	ops = __get_ops(data, &__ops);
+	/* Disable rx first */
+	stat = ops->rx_disable(data->ll_priv);
+	if (stat)
+		return stat;
+	data->mode = PACKET;
+	/* Release circular buffer */
+	__release_cbuf(data);
+	data->d.pk.bhead = data->d.pk.btail = 0;
+	data->d.pk.bsize = bqdata->bufsize;
+	data->d.pk.bnum = bqdata->nbufs;
+	data->d.pk.bufs = bqdata->bufs;
+	data->d.pk.curr_index = 0;
+	/* Send an interrupt when a buffer is full */
+	data->rx_hwm = bqdata->bufsize - 1;
+	return stat;
+}
+
+static int __peek_buf(struct bathos_dev_data *data, char **out)
+{
+	*out = NULL;
+	if (!CIRC_CNT(data->d.pk.bhead, data->d.pk.btail, data->d.pk.bnum))
+		return -EAGAIN;
+	*out = data->d.pk.bufs[data->d.pk.btail];
+	return 0;
+}
+
+static int __dequeue_buf(struct bathos_dev_data *data, char **out)
+{
+	int ret = __peek_buf(data, out);
+
+	if (ret)
+		return ret;
+	data->d.pk.btail = (data->d.pk.btail + 1) & (data->d.pk.bnum - 1);
+	return 0;
 }
 
 int bathos_dev_ioctl(struct bathos_pipe *pipe,
@@ -238,7 +337,22 @@ int bathos_dev_ioctl(struct bathos_pipe *pipe,
 			return 0;
 		if (!iocdata->data)
 			return -EINVAL;
-		return __switch_to_cbuf(data, *(int *)iocdata->data);
+		return __switch_to_cbuf(data, *(char *)iocdata->data);
+	case DEV_IOC_RX_SET_BQUEUE_MODE:
+		if (data->mode == PACKET)
+			return 0;
+		if (!iocdata->data)
+			return -EINVAL;
+		return __switch_to_pckt(data, iocdata->data);
+	case DEV_IOC_RX_DEQUEUE_BUFFER:
+	case DEV_IOC_RX_PEEK_BUFFER:
+		if (data->mode == CIRC_BUF)
+			return -EINVAL;
+		if (!iocdata->data)
+			return -EINVAL;
+		return iocdata->code == DEV_IOC_RX_DEQUEUE_BUFFER ?
+			__dequeue_buf(data, (char **)iocdata->data) :
+			__peek_buf(data, (char **)iocdata->data);
 	default:
 		return -EINVAL;
 	}
