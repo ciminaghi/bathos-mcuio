@@ -134,7 +134,7 @@ ISR(SPI_STC_vect, __attribute__((section(".text.ISR"))))
 
 }
 
-static struct bathos_dev_ops PROGMEM spi_dev_ops = {
+static const struct bathos_dev_ops PROGMEM spi_dev_ops = {
 	.open = spi_open,
 	.read = spi_read,
 	.write = spi_write,

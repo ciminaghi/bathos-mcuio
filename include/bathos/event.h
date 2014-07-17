@@ -80,7 +80,7 @@ extern int trigger_event(const struct event *, void *data, int evt_prio);
  */
 extern void handle_events(void);
 
-extern struct event PROGMEM events_start[], events_end[];
+extern const struct event PROGMEM events_start[], events_end[];
 
 #define cat(a,b) a##b
 #define xcat(a,b) cat(a,b)
