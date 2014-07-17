@@ -283,7 +283,7 @@ static const uint8_t PROGMEM config1_descriptor[CONFIG1_DESC_SIZE] = {
 struct usb_string_descriptor_struct {
 	uint8_t bLength;
 	uint8_t bDescriptorType;
-	int16_t wString[];
+	wchar_t wString[];
 };
 static const struct usb_string_descriptor_struct PROGMEM string0 = {
 	4,

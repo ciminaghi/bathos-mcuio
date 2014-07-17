@@ -14,7 +14,7 @@ declare_extern_event(gpio_evt);
 declare_extern_event(mcuio_irq);
 
 
-extern unsigned int PROGMEM gpio_labels_size;
+extern const unsigned int PROGMEM gpio_labels_size;
 extern const char PROGMEM gpio_labels_start[];
 extern const unsigned int PROGMEM gpio_caps_size;
 extern const uint32_t PROGMEM gpio_caps_start[];
@@ -49,7 +49,7 @@ static uint32_t gpio_events_falling[2];
 static uint32_t gpio_events_rising[2];
 static uint32_t gpio_events_enable[2];
 
-static uint32_t PROGMEM gpio_ro_range1[] = {
+static const uint32_t PROGMEM gpio_ro_range1[] = {
 	/* FIXME: MAKE THIS CONFIGURABLE !! */
     [0] = 'T' | (((unsigned long)'E') << 8) | (((unsigned long)'S') << 16) | \
     (((unsigned long)'T') << 24),

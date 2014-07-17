@@ -50,7 +50,7 @@ static int atmega_uart_putc(void *priv, const char c)
 	return 1;
 }
 
-static struct bathos_ll_dev_ops PROGMEM atmega_uart_ops = {
+static const struct bathos_ll_dev_ops PROGMEM atmega_uart_ops = {
 	.putc = atmega_uart_putc,
 	.rx_disable = atmega_uart_rx_disable,
 	.rx_enable = atmega_uart_rx_enable,
