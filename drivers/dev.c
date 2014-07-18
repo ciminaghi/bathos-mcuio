@@ -11,8 +11,157 @@
 #include <bathos/pipe.h>
 #include <bathos/allocator.h>
 #include <bathos/circ_buf.h>
+#include <bathos/statemachine.h>
+#include <bathos/jiffies.h>
 
 #define UART_DEFAULT_BUF_SIZE 16
+
+/*
+  Packet synchronization state machine
+
+            RESET                             SYNC_SEQUENCE_RECEIVED
+     +-------------------------\     +----------------------------------+
+     |                          \    |                                  |
+     V      RX_ENABLED_NO_SYNC   \   V                                  |
+  STOPPED ----------------------> RUNNING <----------------------+      |
+     |  |                                                        |      |
+     |  |  RX_ENABLED_SYNC_SILENCE             SIL_TIME_EXPIRED  |      |
+     |  +--------------------------> STARTED_2 ------------------+      |
+     |                                                                  |
+     |  RX_ENABLED_SYNC_COMPLETE             SIL_TIME_EXPIRED           |
+     +---------------------------> STARTED_1 -----------------> SYNCHRONIZING
+
+*/
+
+
+enum pk_mode_state {
+	/* rx is disabled, waiting for rx enable */
+	STOPPED,
+	/* rx enabled, waiting for sync silence time to expire */
+	STARTED_1,
+	/* as above, but no sync sequence has been defined */
+	STARTED_2,
+	/* sync silence time elapsed, waiting for sync sequence */
+	SYNCHRONIZING,
+	/* sync sequence done */
+	RUNNING,
+	PK_SYNC_NEVENTS,
+};
+
+enum pk_node_event {
+	/* rx enable, no sync required */
+	RX_ENABLED_NO_SYNC,
+	/* rx enable, silence time sync required */
+	RX_ENABLED_SYNC_SILENCE,
+	/* rx enable, silence time + char sequence sync required */
+	RX_ENABLED_SYNC_COMPLETE,
+	/* silence time expired */
+	SIL_TIME_EXPIRED,
+	/* sync sequence received */
+	SYNC_SEQUENCE_RECEIVED,
+	/* reset received */
+	RESET
+};
+
+static const int PROGMEM stopped_next_states[] = {
+	[RX_ENABLED_NO_SYNC] = RUNNING,
+	[RX_ENABLED_SYNC_SILENCE] = STARTED_2,
+	[RX_ENABLED_SYNC_COMPLETE] = STARTED_1,
+	[SIL_TIME_EXPIRED] = STOPPED,
+	[SYNC_SEQUENCE_RECEIVED] = STOPPED,
+	[RESET] = STOPPED,
+};
+
+static state_outfunc * PROGMEM const stopped_outfunc[] = {
+	/* Moore machine */
+	[0] = NULL,
+};
+
+static const int PROGMEM started_1_next_states[] = {
+	[RX_ENABLED_NO_SYNC] = RUNNING,
+	[RX_ENABLED_SYNC_SILENCE] = STARTED_2,
+	[RX_ENABLED_SYNC_COMPLETE] = STARTED_1,
+	[SIL_TIME_EXPIRED] = SYNCHRONIZING,
+	[SYNC_SEQUENCE_RECEIVED] = STARTED_1,
+	[RESET] = STOPPED,
+};
+
+static state_outfunc * PROGMEM const started_1_outfunc[] = {
+	/* Moore machine */
+	[0] = NULL,
+};
+
+static const int PROGMEM started_2_next_states[] = {
+	[RX_ENABLED_NO_SYNC] = RUNNING,
+	[RX_ENABLED_SYNC_SILENCE] = STARTED_2,
+	[RX_ENABLED_SYNC_COMPLETE] = STARTED_1,
+	[SIL_TIME_EXPIRED] = RUNNING,
+	[SYNC_SEQUENCE_RECEIVED] = STARTED_2,
+	[RESET] = STOPPED,
+};
+
+static state_outfunc * PROGMEM const started_2_outfunc[] = {
+	/* Moore machine */
+	[0] = NULL,
+};
+
+static const int PROGMEM synchronizing_next_states[] = {
+	[RX_ENABLED_NO_SYNC] = SYNCHRONIZING,
+	[RX_ENABLED_SYNC_SILENCE] = SYNCHRONIZING,
+	[RX_ENABLED_SYNC_COMPLETE] = SYNCHRONIZING,
+	[SIL_TIME_EXPIRED] = SYNCHRONIZING,
+	[SYNC_SEQUENCE_RECEIVED] = RUNNING,
+	[RESET] = STOPPED,
+};
+
+static state_outfunc * PROGMEM const synchronizing_outfunc[] = {
+	/* Moore machine */
+	[0] = NULL,
+};
+
+static const int PROGMEM running_next_states[] = {
+	[RX_ENABLED_NO_SYNC] = RUNNING,
+	[RX_ENABLED_SYNC_SILENCE] = RUNNING,
+	[RX_ENABLED_SYNC_COMPLETE] = RUNNING,
+	[SIL_TIME_EXPIRED] = RUNNING,
+	[SYNC_SEQUENCE_RECEIVED] = RUNNING,
+	[RESET] = STOPPED,
+};
+
+static state_outfunc * PROGMEM const running_outfunc[] = {
+	/* Moore machine */
+	[0] = NULL,
+};
+
+static const struct statemachine_state PROGMEM sync_states[] = {
+	[STOPPED] = {
+		.next_states = stopped_next_states,
+		.out = stopped_outfunc,
+	},
+	[STARTED_1] = {
+		.next_states = started_1_next_states,
+		.out = started_1_outfunc,
+	},
+	[STARTED_2] = {
+		.next_states = started_2_next_states,
+		.out = started_2_outfunc,
+	},
+	[SYNCHRONIZING] = {
+		.next_states = synchronizing_next_states,
+		.out = synchronizing_outfunc,
+	},
+	[RUNNING] = {
+		.next_states = running_next_states,
+		.out = running_outfunc,
+	},
+};
+
+static const struct statemachine PROGMEM __pk_sync_sm = {
+	.type = MOORE,
+	.nstates = ARRAY_SIZE(sync_states),
+	.states = sync_states,
+	.nevents = PK_SYNC_NEVENTS,
+};
 
 struct bathos_dev_data {
 	enum bathos_dev_mode mode;
@@ -30,7 +179,12 @@ struct bathos_dev_data {
 			int bnum;
 			int bsize;
 			int curr_index;
+			int sync_silence_time;
+			int sync_seq_len;
+			const char *sync_seq;
 			char **bufs;
+			unsigned long last_rx_time;
+			struct statemachine_runtime smr;
 		} pk;
 	} d;
 	/* rx high watermark */
@@ -38,6 +192,8 @@ struct bathos_dev_data {
 	const struct bathos_ll_dev_ops * PROGMEM ops;
 	void *ll_priv;
 };
+
+
 
 #if defined ARCH_IS_HARVARD
 static inline struct bathos_ll_dev_ops *__get_ops(struct bathos_dev_data *data,
@@ -103,7 +259,8 @@ end:
 	return out + l;
 }
 
-int bathos_dev_pk_push_chars(struct bathos_dev *dev, const char *buf, int len)
+int
+bathos_dev_pk_do_push_chars(struct bathos_dev *dev, const char *buf, int len)
 {
 	struct bathos_dev_data *data = dev->priv;
 	int s = data->d.pk.bsize - data->d.pk.curr_index, l;
@@ -130,6 +287,80 @@ int bathos_dev_pk_push_chars(struct bathos_dev *dev, const char *buf, int len)
 	return l;
 }
 
+/*
+ * Search for sync sequence in input buffer
+ * When entering this function, we're looking for a sync sequence and curr_index
+ * is equal to the index of the char of the sequence we're looking for at
+ * the moment.
+ *
+ * @data: pointer to driver data
+ * @buf: pointer to received chars
+ * @len: number of chars in @buf
+ *
+ * If all chars in @buf belong to the searched sync sequence, store them
+ * into the current packet buffer, update current buffer index and return
+ * the number of chars in current packet buffer.
+ * Otherwise, return 0 and reset current buffer index.
+ */
+static int __sync_seq_ok(struct bathos_dev_data *data, const char *buf, int len)
+{
+	int i;
+	char *dst = &(data->d.pk.bufs[data->d.pk.bhead])[data->d.pk.curr_index];
+
+	for (i = data->d.pk.curr_index; i < data->d.pk.sync_seq_len; i++, dst++,
+		     data->d.pk.curr_index++) {
+		if (buf[i] != data->d.pk.sync_seq[i]) {
+			data->d.pk.curr_index = 0;
+			return 0;
+		}
+		*dst = buf[i];
+	}
+	return data->d.pk.curr_index;
+}
+
+static int
+bathos_dev_pk_push_chars(struct bathos_dev *dev, const char *buf, int len)
+{
+	struct bathos_dev_data *data = dev->priv;
+
+	switch(statemachine_get_state(&data->d.pk.smr))
+	{
+	case RUNNING:
+		return bathos_dev_pk_do_push_chars(dev, buf, len);
+	case SYNCHRONIZING:
+	{
+		int l = len;
+
+		/* Waiting for sync sequence */
+		l = __sync_seq_ok(data, buf, len);
+		if (l) {
+			if (feed_statemachine(&__pk_sync_sm,
+					      &data->d.pk.smr,
+					      SYNC_SEQUENCE_RECEIVED))
+				return -EINVAL;
+			return bathos_dev_pk_push_chars(dev, &buf[l], len - l);
+		}
+		data->d.pk.last_rx_time = jiffies;
+		feed_statemachine(&__pk_sync_sm, &data->d.pk.smr, RESET);
+		return len;
+	}
+	case STARTED_1:
+	case STARTED_2:
+		if (!time_after(jiffies, (long)data->d.pk.last_rx_time +
+				data->d.pk.sync_silence_time)) {
+			data->d.pk.last_rx_time = jiffies;
+			break;
+		}
+		feed_statemachine(&__pk_sync_sm,
+				  &data->d.pk.smr, SIL_TIME_EXPIRED);
+		break;
+	default:
+		/* Ignore chars in any other case */
+		return len;
+	}
+	/* NEVER REACHED */
+	return len;
+}
 
 int bathos_dev_push_chars(struct bathos_dev *dev, const char *buf, int len)
 {
@@ -299,7 +530,8 @@ static int __switch_to_pckt(struct bathos_dev_data *data, void *iocdata)
 	data->d.pk.curr_index = 0;
 	/* Send an interrupt when a buffer is full */
 	data->rx_hwm = bqdata->bufsize - 1;
-	return stat;
+	/* Init packet sync statemachine */
+	return init_statemachine(&__pk_sync_sm, &data->d.pk.smr, STOPPED);
 }
 
 static int __peek_buf(struct bathos_dev_data *data, char **out)
