@@ -602,6 +602,17 @@ int bathos_dev_ioctl(struct bathos_pipe *pipe,
 		ops = __get_ops(data, &__ops);
 		return ops->rx_enable(data->ll_priv);
 	}
+	case DEV_IOC_SET_RX_SYNC_SEQ:
+	{
+		struct dev_ioc_set_rx_sync_seq_data *ssdata;
+
+		if (!iocdata->data)
+			return -EINVAL;
+		ssdata = iocdata->data;
+		data->d.pk.sync_seq = ssdata->seq;
+		data->d.pk.sync_seq_len = ssdata->seqsize;
+		break;
+	}
 	default:
 		return -EINVAL;
 	}
