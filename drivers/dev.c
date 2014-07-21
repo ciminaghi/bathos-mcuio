@@ -613,6 +613,11 @@ int bathos_dev_ioctl(struct bathos_pipe *pipe,
 		data->d.pk.sync_seq_len = ssdata->seqsize;
 		break;
 	}
+	case DEV_IOC_SET_RX_SYNC_SIL_TIME:
+		if (!iocdata->data)
+			return -EINVAL;
+		data->d.pk.sync_silence_time = *(int *)iocdata->data;
+		break;
 	default:
 		return -EINVAL;
 	}
