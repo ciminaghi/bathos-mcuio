@@ -49,7 +49,7 @@ struct bathos_dev * __attribute__((weak)) bathos_find_dev(struct bathos_pipe *p)
 	return NULL;
 }
 
-void pipe_dev_trigger_event(struct bathos_dev *dev, struct event *evt,
+void pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt,
 			    int prio)
 {
 	struct bathos_pipe *p;

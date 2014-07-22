@@ -33,7 +33,7 @@ static void dump_packet(const struct mcuio_base_packet *packet)
 	printf("\n");
 }
 #else
-static inline void dump_packet(struct mcuio_base_packet *packet)
+static inline void dump_packet(const struct mcuio_base_packet *packet)
 {
 }
 #endif

@@ -93,7 +93,7 @@ __get_evt_handler_ops(struct event_handler_ops *dst,
 
 int events_init(void)
 {
-	struct event *__e;
+	const struct event *__e;
 	for (__e = events_start; __e < events_end; __e++) {
 		struct event_handler_data *d, *__d;
 		static struct event evt;
