@@ -2,6 +2,7 @@
 #include <bathos/errno.h>
 #include <bathos/pipe.h>
 #include <bathos/string.h>
+#include <bathos/allocator.h>
 
 extern struct bathos_dev bathos_devices_start[], bathos_devices_end[];
 

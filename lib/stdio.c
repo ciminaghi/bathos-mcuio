@@ -1,4 +1,5 @@
 #include <bathos/stdio.h>
+#include <bathos/pipe.h>
 
 struct bathos_pipe *bathos_stdout;
 struct bathos_pipe *bathos_stdin;

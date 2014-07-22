@@ -5,7 +5,7 @@
 #include <arch/hw.h>
 #include <generated/autoconf.h>
 #include <bathos/delay.h>
-
+#include <bathos/bathos.h>
 
 int avr_bathos_main(void)
 {
