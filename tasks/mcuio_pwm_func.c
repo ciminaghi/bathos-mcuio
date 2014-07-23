@@ -78,7 +78,7 @@ static int pwm_ctrl_wrdw(const struct mcuio_range *r, unsigned offset,
 	switch(reg) {
 
 		case 0x08: /* current value */
-			ret = pwm_set(idx, *((uint8_t*)__in));
+			ret = pwm_set(idx, *__in);
 			break;
 
 		case 0x0c: /* status and ctrl */
