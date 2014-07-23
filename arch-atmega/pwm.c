@@ -21,9 +21,24 @@ const uint32_t PROGMEM num_pwm = NPWM;
 uint32_t pwm_stat = 0;
 
 const struct pwm PROGMEM pwms[NPWM] = {
-	[0 ... NPWM - 1] = {
+	[0 ... 1] = { /* OC0A, OC0B */
 		.nbits = 8},
 };
+
+static void init_timer0(void)
+{
+	/* Enable Fast PWM Mode and clock on Timer 0. Period = 16ms */
+	TCCR0A |= (1 << WGM00) | (1 << WGM01);
+	TCCR0B |= (1 << CS00) | (1 << CS02);
+	TCCR0B &= ~(1 << CS01);
+}
+
+static void deinit_timer0(void)
+{
+	/* Disable Fast PWM Mode and clock on timer0 */
+	TCCR0A &= ~((1 << WGM00) | (1 << WGM01));
+	TCCR0B &= ~(1 << CS00);
+}
 
 /* Warning: these functions are now generic to all pwms (only 2), and use a
  * switch to choose which pwm output is to be handled; they should
@@ -40,22 +55,19 @@ int pwm_en(int idx)
 
 	switch (idx) {
 		case 0:
+			if (!(pwm_stat & 0x3))
+				init_timer0();
 			TCCR0A |= (1 << COM0A1);
 			DDRB |= (1 << DDB7);
 			break;
 		case 1:
+			if (!(pwm_stat & 0x3))
+				init_timer0();
 			TCCR0A |= (1 << COM0B1);
 			DDRD |= (1 << DDD0);
 			break;
 		default:
 			return -ENODEV;
-	}
-
-	/* If is first enabled output, enable Fast PWM Mode and
-	 * clock (no prescaling) */
-	if (!pwm_stat) {
-		TCCR0A |= (1 << WGM00) | (1 << WGM01);
-		TCCR0B |= (1 << CS00);
 	}
 
 	pwm_stat |= (1 << idx);
@@ -70,25 +82,23 @@ int pwm_dis(int idx)
 		return -ENODEV;
 	}
 
+	pwm_stat &= ~(1 << idx);
+
 	switch (idx) {
 		case 0:
 			TCCR0A &= ~(1 << COM0A1);
 			DDRB &= ~(1 << DDB7);
+			if (!(pwm_stat & 0x3))
+				deinit_timer0();
 			break;
 		case 1:
 			TCCR0A &= ~(1 << COM0B1);
 			DDRD &= ~(1 << DDD0);
+			if (!(pwm_stat & 0x3))
+				deinit_timer0();
 			break;
 		default:
 			return -ENODEV;
-	}
-
-	pwm_stat &= ~(1 << idx);
-
-	/* If no more enabled outputs, disable Fast PWM Mode and clock */
-	if (!pwm_stat) {
-		TCCR0A &= ~((1 << WGM00) | (1 << WGM01));
-		TCCR0B &= ~(1 << CS00);
 	}
 
 	return 0;
