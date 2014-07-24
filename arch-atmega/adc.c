@@ -26,6 +26,7 @@ const struct adc PROGMEM adcs[NADC] = {
 
 int adc_init()
 {
+	int i;
 	/* set reference to Vcc */
 	adc_set_ref(ADMUX_AVCC);
 
@@ -34,7 +35,8 @@ int adc_init()
 
 	/* disable all */
 	adc_dis();
-	adc_dis_in_all();
+	for (i = 0; i < NADC; i++)
+		adc_dis_in(i);
 
 	return 0;
 }
