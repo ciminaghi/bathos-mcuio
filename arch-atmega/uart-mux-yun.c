@@ -3,11 +3,15 @@
  * currently:
  *
  *     +----------+  spi   +-------------+             +----------+
- *     |          |<-------|---->\ mux2  | usb-serial  |          |
- *     | MPU      |        |      |<------------------>|          |
- *     | (mips)   |        |  -->/       |             |   PC     |
+ *     |          |<-------|----->\      | usb-serial  |          |
+ *     |          |        |       \mux2 |             |          |
+ *     |          |        +-----+  \    |             |          |
+ *     | MPU      |        |shell|<->|<--------------->|          |
+ *     |          |        +-----+  /    |             |          |
+ *     |          |        |       /     |             |          |
+ *     | (mips)   |        |  --->/      |             |   PC     |
  *     |          |  uart  | /     +-----+             |          |
- *     |          |<------>||mux1  |mcuio|             |          |
+ *     |          |<------->|mux1  |mcuio|             |          |
  *     |          |        | \---->|     |             |          |
  *     +----------+        +-------+-----+             +----------+
  *
@@ -25,16 +29,18 @@
  * On boot, the atmega must take whatever comes from the MIPS and throw it
  * to the PC via the usb-serial link (mips-console mode: this is for the user
  * to be able to interact with u-boot running on the MPU and to see the
- * kernel's early console output). Characters coming from the usb-serial
- * interface must be redirected to the uart link.
+ * kernel's early console output).
  *
  * On reception of a non-printable char (0xaa) via the uart-link, the atmega
  * shall switch its uart to mcuio mode. In mcuio mode, chars received via uart
  * are just passed on to the mcuio subsystem.
  *
- * Chars coming from the usb-serial must go to the uart while the spi interface
- * is not active yet, and to the spi otherwise. The spi interface becomes
- * active when at least one byte has been received from it.
+ * Chars coming from the usb-serial must go:
+ *    + To a local shell if active. The usb-uart toggles between normal and
+ *    local-shell mode when receiving the ^] char via usb-serial.
+ *    + To the uart while the spi interface and the shell is not active yet
+ *    + To the spi otherwise. The spi interface becomes active when at least
+ *    one byte has been received from it.
  *
  * On the other hand, strings coming in from the spi link are just routed to
  * the usb-serial.
