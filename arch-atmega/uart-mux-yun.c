@@ -1,14 +1,44 @@
 /* 
- * On the arduino yun board, the atmega32u4 UART port is connected to
- * the first UART of the ath331 MIPS CPU, used both as Linux console port
- * and as an mcuio bus. This device lets the user switch between "console"
- * mode and "mcuio" mode. In console mode, characters coming from the atheros
- * UART are redirected to bathos_stdout (a pipe attached to the usb-uart
- * device). On the other hand, in mcuio mode, data coming from the atheros can
- * be read from the device via pipe_read() (task-mcuio uses this method to
- * receive input data).
- * When working in console mode, characters coming from bathos_stdin (an
- * usb-uart based pipe again) are redirected to the mips console.
+ * On the arduino yun board, we have the following configuration,
+ * currently:
+ *
+ *     +----------+  spi   +-------------+             +----------+
+ *     |          |<-------|---->\ mux2  | usb-serial  |          |
+ *     | MPU      |        |      |<------------------>|          |
+ *     | (mips)   |        |  -->/       |             |   PC     |
+ *     |          |  uart  | /     +-----+             |          |
+ *     |          |<------>||mux1  |mcuio|             |          |
+ *     |          |        | \---->|     |             |          |
+ *     +----------+        +-------+-----+             +----------+
+ *
+ *
+ * mux1: uart-mux, mux2: usb-serial-mux
+ *
+ * On the uart link we have:
+ *   + messages from u-boot and early kernel console
+ *   + mcuio messages after boot
+ *
+ * On the spi link we have:
+ *   + kernel console (after early console has been closed)
+ *   + commands to programs (typically a UNIX shell) running on /dev/tty-spi0
+ *
+ * On boot, the atmega must take whatever comes from the MIPS and throw it
+ * to the PC via the usb-serial link (mips-console mode: this is for the user
+ * to be able to interact with u-boot running on the MPU and to see the
+ * kernel's early console output). Characters coming from the usb-serial
+ * interface must be redirected to the uart link.
+ *
+ * On reception of a non-printable char (0xaa) via the uart-link, the atmega
+ * shall switch its uart to mcuio mode. In mcuio mode, chars received via uart
+ * are just passed on to the mcuio subsystem.
+ *
+ * Chars coming from the usb-serial must go to the uart while the spi interface
+ * is not active yet, and to the spi otherwise. The spi interface becomes
+ * active when at least one byte has been received from it.
+ *
+ * On the other hand, strings coming in from the spi link are just routed to
+ * the usb-serial.
+ *
  */
 
 #include <bathos/bathos.h>
