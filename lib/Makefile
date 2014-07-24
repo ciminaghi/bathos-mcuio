@@ -11,6 +11,7 @@ LIB_OBJS += lib/event.o
 LIB_OBJS += lib/statemachine.o
 LIB_OBJS += lib/allocator.o
 LIB_OBJS += lib/allocator-tables.o
+LIB_OBJS += lib/shell.o
 
 $(LIBBATHOS): $(LIB_OBJS)
 	$(AR) r $@ $(LIB_OBJS)

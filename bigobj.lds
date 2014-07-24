@@ -26,6 +26,9 @@ SECTIONS
 		events_start = .;
 		*(.events);
 		events_end = .;
+		cmds_start = .;
+		*(.shell_cmds);
+		cmds_end = .;
 		. = ALIGN(64);
 		evt_sys_timer_tick_handlers_start = .;
 		*(.evt_sys_timer_tick_handlers);
@@ -69,6 +72,15 @@ SECTIONS
 		evt_i2c_transaction_handlers_start = .;
 		*(.evt_i2c_transaction_handlers);
 		evt_i2c_transaction_handlers_end = .;
+		evt_shell_input_ready_handlers_start = .;
+		*(.evt_shell_input_ready_handlers);
+		evt_shell_input_ready_handlers_end = .;
+		evt_shell_start_handlers_start = .;
+		*(.evt_shell_start_handlers);
+		evt_shell_start_handlers_end = .;
+		evt_shell_termination_handlers_start = .;
+		*(.evt_shell_termination_handlers);
+		evt_shell_termination_handlers_end = .;
 	}
 }
 
