@@ -59,19 +59,26 @@
 #include <avr/pgmspace.h>
 #include <arch/spi.h>
 
-enum mux_mode {
+enum uart_mux_mode {
 	MIPS_CONSOLE = 0,
 	MCUIO = 1
 };
 
+enum usb_uart_mux_mode {
+	SPI = 0,
+	SHELL = 1,
+	UART = 2,
+};
+
 /* ^], like telnet */
-#define MODE_SWITCH 0x1d
+#define USB_UART_MODE_SWITCH 0x1d
 
 /* Switch command from mips: 0xaa */
-#define MODE_SWITCH_MIPS 0xaa
+#define UART_MODE_SWITCH_MIPS 0xaa
 
 static struct uart_mux_yun_data {
-	enum mux_mode mode;
+	enum uart_mux_mode uart_mode;
+	enum usb_uart_mux_mode usb_uart_mode;
 	struct bathos_pipe *uartpipe;
 	struct bathos_pipe *spipipe;
 	u8 spiactive;
@@ -86,7 +93,8 @@ static int uart_mux_yun_open(struct bathos_pipe *pipe)
 	if (!uart_data.uartpipe)
 		return -ENODEV;
 
-	uart_data.mode = MIPS_CONSOLE;
+	uart_data.uart_mode = MIPS_CONSOLE;
+	uart_data.usb_uart_mode = UART;
 
 	uart_data.spipipe = pipe_open("avr-spi", BATHOS_MODE_INPUT_OUTPUT,
 				      NULL);
@@ -125,14 +133,31 @@ struct bathos_dev __uart_mux_dev __attribute__((section(".bathos_devices"),
 	.ops = &uart_mux_yun_dev_ops,
 };
 
-static void __do_switch(void)
+static void __do_switch_uart(void)
 {
-	uart_data.mode = uart_data.mode == MCUIO ?
+	uart_data.uart_mode = uart_data.uart_mode == MCUIO ?
 		MIPS_CONSOLE : MCUIO;
-	printf("\r\n%s: switched to mode %s\r\n",
+	printf("\r\n%s: switched to uart mode: %s\r\n",
 	       uart_data.uartpipe->dev->name,
-	       uart_data.mode == MCUIO ?
+	       uart_data.uart_mode == MCUIO ?
 	       "mcuio" : "mips-console");
+}
+
+static void __do_switch_usb_uart(void)
+{
+	const char *m;
+
+	switch (uart_data.usb_uart_mode) {
+	case SHELL:
+		uart_data.usb_uart_mode = uart_data.spiactive ? SPI : UART;
+		m = uart_data.usb_uart_mode == SPI ? "spi" : "uart";
+		break;
+	default:
+		uart_data.usb_uart_mode = SHELL;
+		m = "shell";
+		break;
+	}
+	printf("\r\nswitched to usb_uart mode: %s\r\n", m);
 }
 
 static void __spi_pipe_input_handle(struct event_handler_data *ed)
@@ -148,6 +173,8 @@ static void __spi_pipe_input_handle(struct event_handler_data *ed)
 	 * as 'active' and all stdin coming from usb-uart is redirected
 	 * to MIPS */
 	uart_data.spiactive = 1;
+	if (uart_data.usb_uart_mode != SHELL)
+		uart_data.usb_uart_mode = SPI;
 
 	l = pipe_read(pipe, buf, sizeof(buf));
 	if (l <= 0)
@@ -176,48 +203,53 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 	if (pipe != uart_data.uartpipe && pipe != bathos_stdin)
 		return;
 
-	if (uart_data.mode == MIPS_CONSOLE || pipe == bathos_stdin) {
+	if ((uart_data.uart_mode == MIPS_CONSOLE || pipe == bathos_stdin) &&
+	    uart_data.usb_uart_mode != SHELL) {
 		l = pipe_read(pipe, buf, sizeof(buf));
 		if (l <= 0)
-			return;
+		    return;
 	}
 	if (pipe == bathos_stdin) {
 		int i;
 		for (i = 0; i < l && uart_data.uartpipe; i++) {
-			if (buf[i] == MODE_SWITCH) {
-				__do_switch();
+			if (buf[i] == USB_UART_MODE_SWITCH) {
+				__do_switch_usb_uart();
 				break;
 			}
 		}
 
-		if (uart_data.spiactive) {
+		if (uart_data.usb_uart_mode == SHELL)
+			/* Let the shell read the chars */
+			return;
+
+		if (uart_data.usb_uart_mode == SPI) {
 			/* spi on MIPS is active */
 			if (uart_data.spipipe)
 				pipe_write(uart_data.spipipe, buf, l);
 		}
 
-		if (uart_data.mode == MCUIO)
+		if (uart_data.uart_mode == MCUIO)
 			return;
-		/* Console mode, send input to mips */
+		/* Console uart_mode, send input to mips */
 		if (uart_data.uartpipe)
 			pipe_write(uart_data.uartpipe, buf, l);
 		return;
 	}
 	/* Data coming from mips (avr-uart) */
-	if (uart_data.mode == MIPS_CONSOLE) {
+	if (uart_data.uart_mode == MIPS_CONSOLE) {
 		int i;
 		for (i = 0; i < l; i++) {
-			if (buf[i] == MODE_SWITCH_MIPS) {
-				__do_switch();
+			if (buf[i] == UART_MODE_SWITCH_MIPS) {
+				__do_switch_uart();
 				break;
 			}
 		}
-		if (uart_data.mode == MCUIO)
+		if (uart_data.uart_mode == MCUIO)
 			return;
 		pipe_write(bathos_stdout, buf, l);
 		return;
 	}
-	/* MCUIO mode, trigger event for mcuio */
+	/* MCUIO uart_mode, trigger event for mcuio */
 	trigger_event(&evt_mcuio_data_ready, NULL, EVT_PRIO_MAX);
 }
 
