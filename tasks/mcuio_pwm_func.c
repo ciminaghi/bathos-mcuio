@@ -35,16 +35,12 @@ static int pwm_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 	unsigned idx = offset / 0x40;
 	unsigned reg = offset % 0x40;
 	const struct pwm *pwm = &pwms[idx];
-	uint8_t id[4];
 
 	switch(reg) {
 
-		case 0x00: /* identifier, return PWXX */
-			id[0] = 'P';
-			id[1] = 'W';
-			id[2] = '0' + (idx / 10);
-			id[3] = '0' + (idx % 10);
-			memcpy(out, id, sizeof(id));
+		case 0x00: /* label */
+			memcpy_p(out, pwm->label, sizeof(*out));
+			flip4((uint8_t*)out);
 			break;
 
 		case 0x04: /* capabilities

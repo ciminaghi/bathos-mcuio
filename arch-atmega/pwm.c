@@ -20,11 +20,13 @@ const uint32_t PROGMEM num_pwm = NPWM;
 /* Status (enabled/disabled) of each pwm (max 32) */
 uint32_t pwm_stat = 0;
 
+/* FIXME: labels should be configurable. Here, yun board mapping is
+ * temporarly fixed in the src */
 const struct pwm PROGMEM pwms[NPWM] = {
-	[0 ... 1] = { /* OC0A, OC0B */
-		.nbits = 8},
-	[2 ... 3] = { /* OC1A, OC1B */
-		.nbits = 16},
+	{ .nbits = 8,  .label = "D11"}, /* OC0A */
+	{ .nbits = 8,  .label = "D3"},  /* OC0B */
+	{ .nbits = 16, .label = "D9"},  /* OC1A */
+	{ .nbits = 16, .label = "D10"}, /* OC1B */
 };
 
 static void init_timer0(void)
