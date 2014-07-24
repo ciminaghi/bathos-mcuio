@@ -54,4 +54,11 @@ static inline void *memcpy_p(void *dst, const void *src, int size)
 	return memcpy_P(dst, src, size);
 }
 
+static inline void flip4(uint8_t *x)
+{
+	uint8_t t;
+	t = x[0]; x[0] = x[3]; x[3] = t;
+	t = x[1]; x[1] = x[2]; x[2] = t;
+}
+
 #endif /* __BATHOS_ARCH_H__ */
