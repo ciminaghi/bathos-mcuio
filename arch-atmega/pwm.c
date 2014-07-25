@@ -23,7 +23,7 @@ uint32_t pwm_stat = 0;
 /* FIXME: labels should be configurable. Here, yun board mapping is
  * temporarly fixed in the src */
 const struct pwm PROGMEM pwms[NPWM] = {
-	{ .nbits = 8,  .label = "D11"}, /* OC0A */
+	{ .nbits = 16, .label = "D11"}, /* OC1C */
 	{ .nbits = 8,  .label = "D3"},  /* OC0B */
 	{ .nbits = 16, .label = "D9"},  /* OC1A */
 	{ .nbits = 16, .label = "D10"}, /* OC1B */
@@ -74,25 +74,25 @@ int pwm_en(int idx)
 
 	switch (idx) {
 		case 0:
-			if (!(pwm_stat & 0x3))
-				init_timer0();
-			TCCR0A |= (1 << COM0A1);
+			if (!(pwm_stat & 0xd))
+				init_timer1();
+			TCCR1A |= (1 << COM1C1);
 			DDRB |= (1 << DDB7);
 			break;
 		case 1:
-			if (!(pwm_stat & 0x3))
+			if (!(pwm_stat & 0x2))
 				init_timer0();
 			TCCR0A |= (1 << COM0B1);
 			DDRD |= (1 << DDD0);
 			break;
 		case 2:
 			TCCR1A |= (1 << COM1A1);
-			if (!(pwm_stat & 0x0c))
+			if (!(pwm_stat & 0x0d))
 				init_timer1();
 			DDRB |= (1 << DDB5);
 			break;
 		case 3:
-			if (!(pwm_stat & 0x0c))
+			if (!(pwm_stat & 0x0d))
 				init_timer1();
 			TCCR1A |= (1 << COM1B1);
 			DDRB |= (1 << DDB6);
@@ -117,27 +117,27 @@ int pwm_dis(int idx)
 
 	switch (idx) {
 		case 0:
-			TCCR0A &= ~(1 << COM0A1);
+			TCCR1A &= ~(1 << COM1C1);
 			DDRB &= ~(1 << DDB7);
-			if (!(pwm_stat & 0x3))
-				deinit_timer0();
+			if (!(pwm_stat & 0xd))
+				deinit_timer1();
 			break;
 		case 1:
 			TCCR0A &= ~(1 << COM0B1);
 			DDRD &= ~(1 << DDD0);
-			if (!(pwm_stat & 0x3))
+			if (!(pwm_stat & 0x1))
 				deinit_timer0();
 			break;
 		case 2:
 			TCCR1A &= ~(1 << COM1A1);
 			DDRB &= ~(1 << DDB5);
-			if (!(pwm_stat & 0x0c))
+			if (!(pwm_stat & 0x0d))
 				deinit_timer1();
 			break;
 		case 3:
 			TCCR1A &= ~(1 << COM1B1);
 			DDRB &= ~(1 << DDB6);
-			if (!(pwm_stat & 0x0c))
+			if (!(pwm_stat & 0x0d))
 				deinit_timer1();
 			break;
 
@@ -167,7 +167,8 @@ int pwm_set(int idx, uint32_t val)
 
 	switch (idx) {
 		case 0:
-			OCR0A = *((uint8_t*)&val);
+			OCR1CH = val >> 8;
+			OCR1CL = val & 0xff;
 			break;
 		case 1:
 			OCR0B = *((uint8_t*)&val);
@@ -198,7 +199,7 @@ extern uint32_t pwm_get(int idx)
 
 	switch (idx) {
 		case 0:
-			ret = OCR0A;
+			ret = OCR1C;
 			break;
 		case 1:
 			ret = OCR0B;
