@@ -88,6 +88,20 @@ static void check_deinit_timer1(int id)
 		deinit_timer1();
 }
 
+/* Warning: since timer1 is shared by 1A, 1B and 1C outputs, a set
+ * of period in each of them causes a change of period for the
+ * other outputs */
+static int pwm_set_period_timer1(struct pwm *pwm, uint32_t val)
+{
+	ICR1 = val;
+	return 0;
+}
+
+static uint32_t pwm_get_period_timer1(struct pwm *pwm)
+{
+	return ICR1;
+}
+
 /* OC0B output */
 static int pwm_en_0b(struct pwm *pwm)
 {
@@ -108,15 +122,23 @@ static void pwm_dis_0b(struct pwm *pwm)
 	pwm_stat &= ~(1 << id);
 }
 
-static int pwm_set_0b(struct pwm *pwm, uint32_t val)
+static int pwm_set_duty_0b(struct pwm *pwm, uint32_t val)
 {
 	OCR0B = *((uint8_t*)&val);
 	return 0;
 }
 
-static uint32_t pwm_get_0b(struct pwm *pwm)
+static uint32_t pwm_get_duty_0b(struct pwm *pwm)
 {
 	return OCR0B;
+}
+
+static uint32_t pwm_get_period_default(struct pwm *pwm)
+{
+	uint32_t max, res;
+	__copy_dword(&max, &pwm->tim_max_mul);
+	__copy_dword(&res, &pwm->tim_res_ns);
+	return res * (max + 1);
 }
 
 /* OC1A output */
@@ -139,14 +161,14 @@ static void pwm_dis_1a(struct pwm *pwm)
 	pwm_stat &= ~(1 << id);
 }
 
-static int pwm_set_1a(struct pwm *pwm, uint32_t val)
+static int pwm_set_duty_1a(struct pwm *pwm, uint32_t val)
 {
 	OCR1AH = val >> 8;
 	OCR1AL = val & 0xff;
 	return 0;
 }
 
-static uint32_t pwm_get_1a(struct pwm *pwm)
+static uint32_t pwm_get_duty_1a(struct pwm *pwm)
 {
 	return OCR1A;
 }
@@ -171,14 +193,14 @@ static void pwm_dis_1b(struct pwm *pwm)
 	pwm_stat &= ~(1 << id);
 }
 
-static int pwm_set_1b(struct pwm *pwm, uint32_t val)
+static int pwm_set_duty_1b(struct pwm *pwm, uint32_t val)
 {
 	OCR1BH = val >> 8;
 	OCR1BL = val & 0xff;
 	return 0;
 }
 
-static uint32_t pwm_get_1b(struct pwm *pwm)
+static uint32_t pwm_get_duty_1b(struct pwm *pwm)
 {
 	return OCR1B;
 }
@@ -203,14 +225,14 @@ static void pwm_dis_1c(struct pwm *pwm)
 	pwm_stat &= ~(1 << id);
 }
 
-static int pwm_set_1c(struct pwm *pwm, uint32_t val)
+static int pwm_set_duty_1c(struct pwm *pwm, uint32_t val)
 {
 	OCR1CH = val >> 8;
 	OCR1CL = val & 0xff;
 	return 0;
 }
 
-static uint32_t pwm_get_1c(struct pwm *pwm)
+static uint32_t pwm_get_duty_1c(struct pwm *pwm)
 {
 	return OCR1C;
 }
@@ -222,43 +244,47 @@ const uint32_t PROGMEM num_pwm = NPWM;
  * temporarly fixed in the src */
 const struct pwm PROGMEM pwms[NPWM] = {
 	{ /* OC0B */
-		.nbits = 8,
 		.label = "D3",
 		.tim_res_ns = 62500,
 		.tim_max_mul = 255,
 		.ops = {pwm_en_0b,
 				pwm_dis_0b,
-				pwm_set_0b,
-				pwm_get_0b},
+				pwm_get_period_default,
+				pwm_get_duty_0b,
+				NULL,
+				pwm_set_duty_0b}
 	},
 	{ /* OC1A */
-		.nbits = 16,
 		.label = "D9",
 		.tim_res_ns = 500,
 		.tim_max_mul = 65535,
 		.ops = {pwm_en_1a,
 				pwm_dis_1a,
-				pwm_set_1a,
-				pwm_get_1a},
+				pwm_get_period_timer1,
+				pwm_get_duty_1a,
+				pwm_set_period_timer1,
+				pwm_set_duty_1a,}
 	},
 	{ /* OC1B */
-		.nbits = 16,
 		.label = "D10",
 		.tim_res_ns = 500,
 		.tim_max_mul = 65535,
 		.ops = {pwm_en_1b,
 				pwm_dis_1b,
-				pwm_set_1b,
-				pwm_get_1b},
+				pwm_get_period_timer1,
+				pwm_get_duty_1b,
+				pwm_set_period_timer1,
+				pwm_set_duty_1b,}
 	},
 	{ /* OC1C */
-		.nbits = 16,
 		.label = "D11",
 		.tim_res_ns = 500,
 		.tim_max_mul = 65535,
 		.ops = {pwm_en_1c,
 				pwm_dis_1c,
-				pwm_set_1c,
-				pwm_get_1c},
+				pwm_get_period_timer1,
+				pwm_get_duty_1c,
+				pwm_set_period_timer1,
+				pwm_set_duty_1c,}
 	},
 };

@@ -54,18 +54,25 @@ static int pwm_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 			flip4((uint8_t*)out);
 			break;
 
-		case 0x04: /* capabilities
-			    * bit 7-0: #nbits */
-			*out = pwm->nbits;
+		case 0x04: /* timing resolution (ns) */
+			__copy_dword(out, &pwm->tim_res_ns);
 			break;
 
 		case 0x08: /* max multiplier */
-			*out = ops.get(pwm);
+			__copy_dword(out, &pwm->tim_max_mul);
 			break;
 
 		case 0x0c: /* status and ctrl */
 			/* bit 0 of this reg is 'enabled' bit */
 			*out = pwm_enabled(idx) ? 0x1 : 0x0;
+			break;
+
+		case 0x10: /* period multiplier */
+			*out = ops.get_period(pwm);
+			break;
+
+		case 0x14: /* duty multiplier */
+			*out = ops.get_duty(pwm);
 			break;
 
 		default:
@@ -88,15 +95,23 @@ static int pwm_ctrl_wrdw(const struct mcuio_range *r, unsigned offset,
 
 	switch(reg) {
 
-		case 0x08: /* current value */
-			ret = ops.set(pwm, *__in);
-			break;
-
-		case 0x0c: /* status and ctrl */
+		case 0x0c: /* status and ctrl (bit0: enable) */
 			if ((*__in) & 0x1)
 				ret = ops.enable(pwm);
 			else
 				ops.disable(pwm);
+			break;
+
+		case 0x10: /* set period multiplier */
+			if (!ops.set_period)
+				ret = -EINVAL;
+			ret = ops.set_period(pwm, *__in);
+			break;
+
+		case 0x14: /* set duty cycle multiplier */
+			if (!ops.set_duty)
+				ret = -EINVAL;
+			ret = ops.set_duty(pwm, *__in);
 			break;
 
 		default:
