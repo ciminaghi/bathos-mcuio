@@ -29,12 +29,23 @@ static const unsigned int PROGMEM pwm_descr_length = sizeof(pwm_descr);
 extern struct mcuio_function pwm;
 static struct mcuio_function_runtime pwm_rt;
 
+static inline const struct pwm_ops *get_pwm_ops(const struct pwm *pwm,
+		struct pwm_ops *out)
+{
+	memcpy_p(out, &pwm->ops, sizeof(*out));
+	return out;
+}
+
+
 static int pwm_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 			  uint32_t *out, int fill)
 {
 	unsigned idx = offset / 0x40;
 	unsigned reg = offset % 0x40;
 	const struct pwm *pwm = &pwms[idx];
+	struct pwm_ops ops;
+
+	get_pwm_ops(pwm, &ops);
 
 	switch(reg) {
 
@@ -48,8 +59,8 @@ static int pwm_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 			*out = pwm->nbits;
 			break;
 
-		case 0x08: /* current value */
-			*out = pwm_get(idx);
+		case 0x08: /* max multiplier */
+			*out = ops.get(pwm);
 			break;
 
 		case 0x0c: /* status and ctrl */
@@ -70,18 +81,22 @@ static int pwm_ctrl_wrdw(const struct mcuio_range *r, unsigned offset,
 	unsigned idx = offset / 0x40;
 	unsigned reg = offset % 0x40;
 	int ret = 0;
+	struct pwm *pwm = (struct pwm *)&pwms[idx];
+	struct pwm_ops ops;
+
+	get_pwm_ops(pwm, &ops);
 
 	switch(reg) {
 
 		case 0x08: /* current value */
-			ret = pwm_set(idx, *__in);
+			ret = ops.set(pwm, *__in);
 			break;
 
 		case 0x0c: /* status and ctrl */
 			if ((*__in) & 0x1)
-				ret = pwm_en(idx);
+				ret = ops.enable(pwm);
 			else
-				ret = pwm_dis(idx);
+				ops.disable(pwm);
 			break;
 
 		default:
