@@ -48,8 +48,8 @@ static void init_timer1(void)
 {
 	/* Enable Fast PWM Mode and WGM 14 on Timer 1. Period 20ms. */
 	TCCR1A |= (1 << WGM11);
-	TCCR1B |= (1 << WGM13) | (1 << WGM12) | (1 << CS10) | (1 << CS11);
-	ICR1 = 4999;
+	TCCR1B |= (1 << WGM13) | (1 << WGM12) | (1 << CS11);
+	ICR1 = 39999;
 }
 
 static void deinit_timer1(void)
