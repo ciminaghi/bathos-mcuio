@@ -9,6 +9,8 @@ extern const uint32_t num_pwm;   /* number of supported pwm's */
 struct pwm {
 	uint8_t nbits;
 	char label[4];
+	uint32_t tim_res_ns;
+	uint32_t tim_max_mul;
 };
 
 extern const struct pwm PROGMEM pwms[];

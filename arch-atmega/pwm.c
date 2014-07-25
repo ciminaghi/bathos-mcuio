@@ -23,10 +23,30 @@ uint32_t pwm_stat = 0;
 /* FIXME: labels should be configurable. Here, yun board mapping is
  * temporarly fixed in the src */
 const struct pwm PROGMEM pwms[NPWM] = {
-	{ .nbits = 16, .label = "D11"}, /* OC1C */
-	{ .nbits = 8,  .label = "D3"},  /* OC0B */
-	{ .nbits = 16, .label = "D9"},  /* OC1A */
-	{ .nbits = 16, .label = "D10"}, /* OC1B */
+	{ /* OC1C */
+		.nbits = 16,
+		.label = "D11",
+		.tim_res_ns = 500,
+		.tim_max_mul = 65535,
+	},
+	{ /* OC0B */
+		.nbits = 8,
+		.label = "D3",
+		.tim_res_ns = 62500,
+		.tim_max_mul = 255,
+	},
+	{ /* OC1A */
+		.nbits = 16,
+		.label = "D9",
+		.tim_res_ns = 500,
+		.tim_max_mul = 65535,
+	},
+	{ /* OC1B */
+		.nbits = 16,
+		.label = "D10",
+		.tim_res_ns = 500,
+		.tim_max_mul = 65535,
+	},
 };
 
 static void init_timer0(void)
