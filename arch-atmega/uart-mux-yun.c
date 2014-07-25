@@ -53,6 +53,7 @@
 #include <bathos/string.h>
 #include <bathos/errno.h>
 #include <bathos/types.h>
+#include <bathos/shell.h>
 #include <arch/hw.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -153,6 +154,10 @@ static void __do_switch_usb_uart(void)
 		m = uart_data.usb_uart_mode == SPI ? "spi" : "uart";
 		break;
 	default:
+		if (trigger_event(&evt_shell_start, NULL, EVT_PRIO_MAX) < 0) {
+			printf("error switching to shell mode\n");
+			return;
+		}
 		uart_data.usb_uart_mode = SHELL;
 		m = "shell";
 		break;
@@ -218,9 +223,12 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 			}
 		}
 
-		if (uart_data.usb_uart_mode == SHELL)
+		if (uart_data.usb_uart_mode == SHELL) {
 			/* Let the shell read the chars */
+			trigger_event(&evt_shell_input_ready,
+				      NULL, EVT_PRIO_MAX);
 			return;
+		}
 
 		if (uart_data.usb_uart_mode == SPI) {
 			/* spi on MIPS is active */
@@ -255,3 +263,10 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 
 declare_event_handler(pipe_input_ready, NULL, __pipe_input_handle, NULL);
 
+static void __shell_termination_handle(struct event_handler_data *ed)
+{
+	__do_switch_usb_uart();
+}
+
+declare_event_handler(shell_termination, NULL, __shell_termination_handle,
+		      NULL);
