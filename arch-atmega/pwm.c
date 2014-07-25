@@ -245,7 +245,7 @@ const uint32_t PROGMEM num_pwm = NPWM;
 const struct pwm PROGMEM pwms[NPWM] = {
 	{ /* OC0B */
 		.label = "D3",
-		.tim_res_ns = 62500,
+		.tim_res_ns = 15625,
 		.tim_max_mul = 255,
 		.ops = {pwm_en_0b,
 				pwm_dis_0b,
