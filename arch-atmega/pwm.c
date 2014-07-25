@@ -51,17 +51,16 @@ const struct pwm PROGMEM pwms[NPWM] = {
 
 static void init_timer0(void)
 {
-	/* Enable Fast PWM Mode and clock on Timer 0. Period = 16ms */
+	/* Enable Fast PWM Mode on Timer 0. Period = 4ms, as
+	 set in arch/atmega-32u4.c (pwm can not change it, since Timer 0
+	 is used as main system timer) */
 	TCCR0A |= (1 << WGM00) | (1 << WGM01);
-	TCCR0B |= (1 << CS00) | (1 << CS02);
-	TCCR0B &= ~(1 << CS01);
 }
 
 static void deinit_timer0(void)
 {
-	/* Disable Fast PWM Mode and clock on timer0 */
+	/* Disable Fast PWM Mode on timer0 */
 	TCCR0A &= ~((1 << WGM00) | (1 << WGM01));
-	TCCR0B &= ~(1 << CS00);
 }
 
 static void init_timer1(void)
