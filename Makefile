@@ -224,8 +224,12 @@ $(INT_EVENTS_OBJ): $(INT_EVENTS_OBJS)
 interrupt_event_%.o: interrupt_event.c
 	$(CC) $(CFLAGS) -DINTNO=$* -c -o $@ $<
 
-bathos.o: silentoldconfig $(obj-y) $(ARCH_EXTRA)
+bathos.o: silentoldconfig $(obj-y) $(ARCH_EXTRA) events.lds
 	$(LD) -r -T $(SRC_DIR)/bigobj.lds $(obj-y) -o $@
+
+events.lds:
+	$(SCRIPTS)/evt_ldsgen $@ $(SRC_DIR) $(SRC_DIR)/lib/ $(SRC_DIR)/$(ADIR) \
+	$(SRC_DIR)/tasks $(SRC_DIR)/tasks-$(ARCH) $(SRC_DIR)/drivers/
 
 version_data.o:
 	export SCRIPTS=$(SCRIPTS) CC=$(CC) OBJDUMP=$(OBJDUMP) \

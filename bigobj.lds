@@ -19,7 +19,7 @@ SECTIONS
 		initcall_end = .;
 	}
 	.data : {
-		*(.data);      
+		*(.data);
 		. = ALIGN(8);
 		bathos_devices_start = .;
 		*(.bathos_devices);
@@ -32,112 +32,16 @@ SECTIONS
 	.text : {
 		. = ALIGN(2);
 		events_start = .;
-		*(.events);
+		*(.events)
 		events_end = .;
-		default_hl_handlers_start = .;
-		*(.default_hl_handlers);
-		default_hl_handlers_end = .;
-		default_ll_handlers_start = .;
-		*(.default_ll_handlers);
-		default_ll_handlers_end = .;
-		interrupt_events_start = .;
-		*(.interrupt_events);
-		interrupt_events_end = .;
 		cmds_start = .;
-		*(.shell_cmds);
+		*(.shell_cmds)
 		cmds_end = .;
-		*(.text.version);
-		. = ALIGN(64);
-		evt_sys_timer_tick_handlers_start = .;
-		*(.evt_sys_timer_tick_handlers);
-		evt_sys_timer_tick_handlers_end = .;
-		evt_hw_timer_tick_handlers_start = .;
-		*(.evt_hw_timer_tick_handlers);
-		evt_hw_timer_tick_handlers_end = .;
-		evt_input_pipe_opened_handlers_start = .;
-		*(.evt_input_pipe_opened_handlers);
-		evt_input_pipe_opened_handlers_end = .;
-		evt_output_pipe_opened_handlers_start = .;
-		*(.evt_output_pipe_opened_handlers);
-		evt_output_pipe_opened_handlers_end = .;
-		evt_pipe_output_ready_handlers_start = .;
-		*(.evt_pipe_output_ready_handlers);
-		evt_pipe_output_ready_handlers_end = .;
-		evt_pipe_input_ready_handlers_start = .;
-		*(.evt_pipe_input_ready_handlers);
-		evt_pipe_input_ready_handlers_end = .;
-		evt_mcuio_function_request_handlers_start = .;
-		*(.evt_mcuio_function_request_handlers);
-		evt_mcuio_function_request_handlers_end = .;
-		evt_input_pipe_closed_handlers_start = .;
-		*(.evt_input_pipe_closed_handlers);
-		evt_input_pipe_closed_handlers_end = .;
-		evt_output_pipe_closed_handlers_start = .;
-		*(.evt_output_pipe_closed_handlers);
-		evt_output_pipe_closed_handlers_end = .;
-		evt_pipe_really_closed_handlers_start = .;
-		*(.evt_pipe_really_closed_handlers);
-		evt_pipe_really_closed_handlers_end = .;
-		evt_mcuio_data_ready_handlers_start = .;
-		*(.evt_mcuio_data_ready_handlers);
-		evt_mcuio_data_ready_handlers_end = .;
-		evt_mcuio_irq_handlers_start = .;
-		*(.evt_mcuio_irq_handlers);
-		evt_mcuio_irq_handlers_end = .;
-		evt_gpio_evt_handlers_start = .;
-		*(.evt_gpio_evt_handlers);
-		evt_gpio_evt_handlers_end = .;
-		evt_i2c_transaction_handlers_start = .;
-		*(.evt_i2c_transaction_handlers);
-		evt_i2c_transaction_handlers_end = .;
-		evt_shell_input_ready_handlers_start = .;
-		*(.evt_shell_input_ready_handlers);
-		evt_shell_input_ready_handlers_end = .;
-		evt_shell_start_handlers_start = .;
-		*(.evt_shell_start_handlers);
-		evt_shell_start_handlers_end = .;
-		evt_shell_termination_handlers_start = .;
-		*(.evt_shell_termination_handlers);
-		evt_shell_termination_handlers_end = .;
-		evt_usb_cdc_acm_control_event0_handlers_start = .;
-		*(.evt_usb_cdc_acm_control_event0_handlers);
-		evt_usb_cdc_acm_control_event0_handlers_end = .;
-		evt_usb_cdc_acm_data_event0_handlers_start = .;
-		*(.evt_usb_cdc_acm_data_event0_handlers);
-		evt_usb_cdc_acm_data_event0_handlers_end = .;
-		evt_usb_cdc_acm_control_event1_handlers_start = .;
-		*(.evt_usb_cdc_acm_control_event1_handlers);
-		evt_usb_cdc_acm_control_event1_handlers_end = .;
-		evt_usb_cdc_acm_data_event1_handlers_start = .;
-		*(.evt_usb_cdc_acm_data_event1_handlers);
-		evt_usb_cdc_acm_data_event1_handlers_end = .;
-		evt_usb_cdc_acm_control_event2_handlers_start = .;
-		*(.evt_usb_cdc_acm_control_event2_handlers);
-		evt_usb_cdc_acm_control_event2_handlers_end = .;
-		evt_usb_cdc_acm_data_event2_handlers_start = .;
-		*(.evt_usb_cdc_acm_data_event2_handlers);
-		evt_usb_cdc_acm_data_event2_handlers_end = .;
-		evt_loopback_handlers_start = .;
-		*(.evt_loopback_handlers);
-		evt_loopback_handlers_end = .;
-		evt_radio_empty_packet_received_handlers_start = .;
-		*(.evt_radio_empty_packet_received);
-		evt_radio_empty_packet_received_handlers_end = .;
-		evt_rb_ipipe_input_ready_handlers_start = .;
-		*(.evt_rb_ipipe_input_ready_handlers);
-		evt_rb_ipipe_input_ready_handlers_end = .;
-		evt_rb_opipe_input_ready_handlers_start = .;
-		*(.evt_rb_opipe_input_ready_handlers);
-		evt_rb_opipe_input_ready_handlers_end = .;
-		evt_upstream_input_ready_handlers_start = .;
-		*(.evt_upstream_input_ready_handlers);
-		evt_upstream_input_ready_handlers_end = .;
-		evt_downstream_input_ready_handlers_start = .;
-		*(.evt_downstream_input_ready_handlers);
-		evt_downstream_input_ready_handlers_end = .;
 		mcuio_functions_start = .;
 		*(.mcuio_functions);
 		mcuio_functions_end = .;
+
+		INCLUDE events.lds
 	}
 }
 
