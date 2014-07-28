@@ -93,13 +93,13 @@ static void check_deinit_timer1(int id)
  * other outputs */
 static int pwm_set_period_timer1(struct pwm *pwm, uint32_t val)
 {
-	ICR1 = val;
+	ICR1 = val - 1;
 	return 0;
 }
 
 static uint32_t pwm_get_period_timer1(struct pwm *pwm)
 {
-	return ICR1;
+	return ICR1 + 1;
 }
 
 /* OC0B output */
