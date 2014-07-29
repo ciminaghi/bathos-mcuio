@@ -135,10 +135,9 @@ static uint32_t pwm_get_duty_0b(struct pwm *pwm)
 
 static uint32_t pwm_get_period_default(struct pwm *pwm)
 {
-	uint32_t max, res;
+	uint32_t max;
 	__copy_dword(&max, &pwm->tim_max_mul);
-	__copy_dword(&res, &pwm->tim_res_ns);
-	return res * (max + 1);
+	return max + 1;
 }
 
 /* OC1A output */
