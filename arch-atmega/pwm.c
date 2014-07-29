@@ -19,6 +19,7 @@ int pwm_enabled(int idx)
 
 uint8_t t0_ref = 0;
 uint8_t t1_ref = 0;
+uint8_t t3_ref = 0;
 
 static void init_timer0(void)
 {
@@ -88,6 +89,41 @@ static void check_deinit_timer1(int id)
 		deinit_timer1();
 }
 
+static void init_timer3(void)
+{
+	/* Enable Fast PWM Mode and WGM 14 on Timer 3. Default period 20ms. */
+	TCCR3A |= (1 << WGM11);
+	TCCR3B |= (1 << WGM13) | (1 << WGM12) | (1 << CS11);
+	ICR3 = 39999;
+}
+
+static void deinit_timer3(void)
+{
+	/* Disable Fast PWM Mode and clock on timer3 */
+	TCCR3A &= ~(1 << WGM11);
+	TCCR3B &= ~((1 << WGM13) | (1 << WGM12) |
+		(1 << CS10) | (1 << CS11) | (1 << CS12));
+}
+
+static void check_init_timer3(int id)
+{
+	if (t3_ref == 0) {
+		t3_ref = 1;
+		init_timer3();
+	}
+	else if (!pwm_enabled(id))
+		t3_ref++;
+}
+
+static void check_deinit_timer3(int id)
+{
+	if (pwm_enabled(id))
+		t3_ref--;
+
+	if (t3_ref == 0)
+		deinit_timer3();
+}
+
 /* Warning: since timer1 is shared by 1A, 1B and 1C outputs, a set
  * of period in each of them causes a change of period for the
  * other outputs */
@@ -100,6 +136,20 @@ static int pwm_set_period_timer1(struct pwm *pwm, uint32_t val)
 static uint32_t pwm_get_period_timer1(struct pwm *pwm)
 {
 	return ICR1 + 1;
+}
+
+/* Warning: since timer3 is shared by 3A, 3B and 3C outputs, a set
+ * of period in each of them causes a change of period for the
+ * other outputs */
+static int pwm_set_period_timer3(struct pwm *pwm, uint32_t val)
+{
+	ICR3 = val - 1;
+	return 0;
+}
+
+static uint32_t pwm_get_period_timer3(struct pwm *pwm)
+{
+	return ICR3 + 1;
 }
 
 /* OC0B output */
@@ -236,7 +286,39 @@ static uint32_t pwm_get_duty_1c(struct pwm *pwm)
 	return OCR1C;
 }
 
-#define NPWM 4
+/* OC3A output */
+static int pwm_en_3a(struct pwm *pwm)
+{
+	int id = pwm_id(pwm);
+	check_init_timer3(id);
+	TCCR3A |= (1 << COM3A1);
+	DDRC |= (1 << DDC6);
+	pwm_stat |= (1 << id);
+	return 0;
+}
+
+static void pwm_dis_3a(struct pwm *pwm)
+{
+	int id = pwm_id(pwm);
+	check_deinit_timer3(id);
+	TCCR3A &= ~(1 << COM3A1);
+	DDRC &= ~(1 << DDC6);
+	pwm_stat &= ~(1 << id);
+}
+
+static int pwm_set_duty_3a(struct pwm *pwm, uint32_t val)
+{
+	OCR3AH = val >> 8;
+	OCR3AL = val & 0xff;
+	return 0;
+}
+
+static uint32_t pwm_get_duty_3a(struct pwm *pwm)
+{
+	return OCR3A;
+}
+
+#define NPWM 5
 const uint32_t PROGMEM num_pwm = NPWM;
 
 /* FIXME: labels should be configurable. Here, yun board mapping is
@@ -285,5 +367,16 @@ const struct pwm PROGMEM pwms[NPWM] = {
 			pwm_get_duty_1c,
 			pwm_set_period_timer1,
 			pwm_set_duty_1c,}
+	},
+	{ /* OC3A */
+		.label = "D5",
+		.tim_res_ns = 500,
+		.tim_max_mul = 65535,
+		.ops = {pwm_en_3a,
+			pwm_dis_3a,
+			pwm_get_period_timer3,
+			pwm_get_duty_3a,
+			pwm_set_period_timer3,
+			pwm_set_duty_3a,}
 	},
 };
