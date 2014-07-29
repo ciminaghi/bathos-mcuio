@@ -54,8 +54,16 @@ static int pwm_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 			flip4((uint8_t*)out);
 			break;
 
-		case 0x04: /* timing resolution (ns) */
+		case 0x04: /* capabilities
+				bits 23-0: timing resolution (ns)
+				bit 24: can change period
+				bit 25: can change duty */
 			__copy_dword(out, &pwm->tim_res_ns);
+			*out &= 0x00ffffff;
+			if (ops.set_period)
+				*out |= 1l << 24;
+			if (ops.set_duty)
+				*out |= 1l << 25;
 			break;
 
 		case 0x08: /* max multiplier */
