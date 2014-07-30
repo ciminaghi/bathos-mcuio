@@ -19,7 +19,7 @@ int32_t w1_read_temp(struct w1_dev *dev, unsigned long flags)
 	case 0x10: case 0x28: case 0x42:
 		break; /* Supported, at least for temperature input */
 	default:
-		return 1<<31; /* very negative */
+		return 1l<<31; /* very negative */
 	}
 
 	/* If so asked, jump over start-conversion and only collect result */
@@ -76,5 +76,5 @@ int32_t w1_read_temp_bus(struct w1_bus *bus, unsigned long flags)
 		}
 	}
 	/* not found */
-	return 1 << 31;
+	return 1l << 31;
 }
