@@ -51,7 +51,8 @@ int pipe_close(struct bathos_pipe *);
 int pipe_read(struct bathos_pipe *, char *buf, int len);
 int pipe_write(struct bathos_pipe *, const char *buf, int len);
 int pipe_ioctl(struct bathos_pipe *, struct bathos_ioctl_data *data);
-void pipe_dev_trigger_event(struct bathos_dev *dev, struct event *evt,
+void pipe_dev_trigger_event(struct bathos_dev *dev,
+			    const struct event *evt,
 			    int prio);
 
 declare_extern_event(input_pipe_opened);
