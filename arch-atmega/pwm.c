@@ -68,6 +68,7 @@ static void deinit_timer1(void)
 	TCCR1A &= ~(1 << WGM11);
 	TCCR1B &= ~((1 << WGM13) | (1 << WGM12) |
 		(1 << CS10) | (1 << CS11) | (1 << CS12));
+	ICR1 = 0;
 }
 
 static void check_init_timer1(int id)
@@ -103,6 +104,7 @@ static void deinit_timer3(void)
 	TCCR3A &= ~(1 << WGM11);
 	TCCR3B &= ~((1 << WGM13) | (1 << WGM12) |
 		(1 << CS10) | (1 << CS11) | (1 << CS12));
+	ICR3 = 0;
 }
 
 static void check_init_timer3(int id)
