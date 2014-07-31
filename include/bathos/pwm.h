@@ -26,6 +26,8 @@ struct pwm_ops {
 	/* optional */
 	int (*set_period)(struct pwm *pwm, uint32_t val);
 	int (*set_duty)(struct pwm *pwm, uint32_t val);
+	int (*get_polarity)(const struct pwm *pwm);
+	int (*set_polarity)(struct pwm *pwm, uint32_t val);
 };
 
 /* pwm output

@@ -192,6 +192,20 @@ static uint32_t pwm_get_period_default(struct pwm *pwm)
 	return max + 1;
 }
 
+static int pwm_get_polarity_0b(const struct pwm *pwm)
+{
+	return TCCR0A & (1 << COM0B0) ? 1 : 0;
+}
+
+static int pwm_set_polarity_0b(struct pwm *pwm, uint32_t val)
+{
+	if (val)
+		TCCR0A |= (1 << COM0B0);
+	else
+		TCCR0A &= ~(1 << COM0B0);
+	return 0;
+}
+
 /* OC1A output */
 static int pwm_en_1a(struct pwm *pwm)
 {
@@ -222,6 +236,20 @@ static int pwm_set_duty_1a(struct pwm *pwm, uint32_t val)
 static uint32_t pwm_get_duty_1a(struct pwm *pwm)
 {
 	return OCR1A;
+}
+
+static int pwm_get_polarity_1a(const struct pwm *pwm)
+{
+	return TCCR1A & (1 << COM1A0) ? 1 : 0;
+}
+
+static int pwm_set_polarity_1a(struct pwm *pwm, uint32_t val)
+{
+	if (val)
+		TCCR1A |= (1 << COM1A0);
+	else
+		TCCR1A &= ~(1 << COM1A0);
+	return 0;
 }
 
 /* OC1B output */
@@ -256,6 +284,20 @@ static uint32_t pwm_get_duty_1b(struct pwm *pwm)
 	return OCR1B;
 }
 
+static int pwm_get_polarity_1b(const struct pwm *pwm)
+{
+	return TCCR1A & (1 << COM1B0) ? 1 : 0;
+}
+
+static int pwm_set_polarity_1b(struct pwm *pwm, uint32_t val)
+{
+	if (val)
+		TCCR1A |= (1 << COM1B0);
+	else
+		TCCR1A &= ~(1 << COM1B0);
+	return 0;
+}
+
 /* OC1C output */
 static int pwm_en_1c(struct pwm *pwm)
 {
@@ -286,6 +328,20 @@ static int pwm_set_duty_1c(struct pwm *pwm, uint32_t val)
 static uint32_t pwm_get_duty_1c(struct pwm *pwm)
 {
 	return OCR1C;
+}
+
+static int pwm_get_polarity_1c(const struct pwm *pwm)
+{
+	return TCCR1A & (1 << COM1C0) ? 1 : 0;
+}
+
+static int pwm_set_polarity_1c(struct pwm *pwm, uint32_t val)
+{
+	if (val)
+		TCCR1A |= (1 << COM1C0);
+	else
+		TCCR1A &= ~(1 << COM1C0);
+	return 0;
 }
 
 /* OC3A output */
@@ -320,6 +376,20 @@ static uint32_t pwm_get_duty_3a(struct pwm *pwm)
 	return OCR3A;
 }
 
+static int pwm_get_polarity_3a(const struct pwm *pwm)
+{
+	return TCCR3A & (1 << COM3A0) ? 1 : 0;
+}
+
+static int pwm_set_polarity_3a(struct pwm *pwm, uint32_t val)
+{
+	if (val)
+		TCCR3A |= (1 << COM3A0);
+	else
+		TCCR3A &= ~(1 << COM3A0);
+	return 0;
+}
+
 #define NPWM 5
 const uint32_t PROGMEM num_pwm = NPWM;
 
@@ -335,7 +405,10 @@ const struct pwm PROGMEM pwms[NPWM] = {
 			pwm_get_period_default,
 			pwm_get_duty_0b,
 			NULL,
-			pwm_set_duty_0b}
+			pwm_set_duty_0b,
+			pwm_get_polarity_0b,
+			pwm_set_polarity_0b,
+		}
 	},
 	{ /* OC1A */
 		.label = "D9",
@@ -346,7 +419,10 @@ const struct pwm PROGMEM pwms[NPWM] = {
 			pwm_get_period_timer1,
 			pwm_get_duty_1a,
 			pwm_set_period_timer1,
-			pwm_set_duty_1a,}
+			pwm_set_duty_1a,
+			pwm_get_polarity_1a,
+			pwm_set_polarity_1a,
+		}
 	},
 	{ /* OC1B */
 		.label = "D10",
@@ -357,7 +433,10 @@ const struct pwm PROGMEM pwms[NPWM] = {
 			pwm_get_period_timer1,
 			pwm_get_duty_1b,
 			pwm_set_period_timer1,
-			pwm_set_duty_1b,}
+			pwm_set_duty_1b,
+			pwm_get_polarity_1b,
+			pwm_set_polarity_1b,
+		}
 	},
 	{ /* OC1C */
 		.label = "D11",
@@ -368,7 +447,10 @@ const struct pwm PROGMEM pwms[NPWM] = {
 			pwm_get_period_timer1,
 			pwm_get_duty_1c,
 			pwm_set_period_timer1,
-			pwm_set_duty_1c,}
+			pwm_set_duty_1c,
+			pwm_get_polarity_1c,
+			pwm_set_polarity_1c,
+		}
 	},
 	{ /* OC3A */
 		.label = "D5",
@@ -379,6 +461,9 @@ const struct pwm PROGMEM pwms[NPWM] = {
 			pwm_get_period_timer3,
 			pwm_get_duty_3a,
 			pwm_set_period_timer3,
-			pwm_set_duty_3a,}
+			pwm_set_duty_3a,
+			pwm_get_polarity_3a,
+			pwm_set_polarity_3a,
+		}
 	},
 };

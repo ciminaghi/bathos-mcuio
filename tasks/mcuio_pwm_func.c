@@ -70,9 +70,12 @@ static int pwm_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 			__copy_dword(out, &pwm->tim_max_mul);
 			break;
 
-		case 0x0c: /* status and ctrl */
-			/* bit 0 of this reg is 'enabled' bit */
+		case 0x0c: /* status and ctrl
+				* bit 0: enabled
+				* bit 1: invert polarity */
 			*out = pwm_enabled(idx) ? 0x1 : 0x0;
+			if ((ops.get_polarity) && ops.get_polarity(pwm))
+				*out |= (1 << 1);
 			break;
 
 		case 0x10: /* period multiplier */
@@ -108,6 +111,8 @@ static int pwm_ctrl_wrdw(const struct mcuio_range *r, unsigned offset,
 				ret = ops.enable(pwm);
 			else
 				ops.disable(pwm);
+			if (ops.set_polarity)
+				ops.set_polarity(pwm, ((*__in) >> 1) & 0x1);
 			break;
 
 		case 0x10: /* set period multiplier */
