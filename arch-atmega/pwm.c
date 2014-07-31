@@ -20,6 +20,7 @@ int pwm_enabled(int idx)
 uint8_t t0_ref = 0;
 uint8_t t1_ref = 0;
 uint8_t t3_ref = 0;
+uint8_t t4_ref = 0;
 
 static void init_timer0(void)
 {
@@ -126,6 +127,35 @@ static void check_deinit_timer3(int id)
 		deinit_timer3();
 }
 
+static void init_timer4(void)
+{
+	/* Enable Fast PWM Mode on Timer 4. */
+}
+
+static void deinit_timer4(void)
+{
+	/* Enable Fast PWM Mode on Timer 4. */
+}
+
+static void check_init_timer4(int id)
+{
+	if (t4_ref == 0) {
+		t4_ref = 1;
+		init_timer4();
+	}
+	else if (!pwm_enabled(id))
+		t4_ref++;
+}
+
+static void check_deinit_timer4(int id)
+{
+	if (pwm_enabled(id))
+		t4_ref--;
+
+	if (t4_ref == 0)
+		deinit_timer4();
+}
+
 /* Warning: since timer1 is shared by 1A, 1B and 1C outputs, a set
  * of period in each of them causes a change of period for the
  * other outputs */
@@ -152,6 +182,18 @@ static int pwm_set_period_timer3(struct pwm *pwm, uint32_t val)
 static uint32_t pwm_get_period_timer3(struct pwm *pwm)
 {
 	return ICR3 + 1;
+}
+
+static int pwm_set_period_timer4(struct pwm *pwm, uint32_t val)
+{
+	/* TODO FIXME */
+	return 0;
+}
+
+static uint32_t pwm_get_period_timer4(struct pwm *pwm)
+{
+	/* TODO FIXME */
+	return 0;
 }
 
 /* OC0B output */
@@ -390,7 +432,43 @@ static int pwm_set_polarity_3a(struct pwm *pwm, uint32_t val)
 	return 0;
 }
 
-#define NPWM 5
+/* OC4D output */
+static int pwm_en_4d(struct pwm *pwm)
+{
+	/* TODO FIXME */
+	return 0;
+}
+
+static void pwm_dis_4d(struct pwm *pwm)
+{
+	/* TODO FIXME */
+}
+
+static int pwm_set_duty_4d(struct pwm *pwm, uint32_t val)
+{
+	/* TODO FIXME */
+	return 0;
+}
+
+static uint32_t pwm_get_duty_4d(struct pwm *pwm)
+{
+	/* TODO FIXME */
+	return 0;
+}
+
+static int pwm_get_polarity_4d(const struct pwm *pwm)
+{
+	/* TODO FIXME */
+	return 0;
+}
+
+static int pwm_set_polarity_4d(struct pwm *pwm, uint32_t val)
+{
+	/* TODO FIXME */
+	return 0;
+}
+
+#define NPWM 6
 const uint32_t PROGMEM num_pwm = NPWM;
 
 /* FIXME: labels should be configurable. Here, yun board mapping is
@@ -466,4 +544,19 @@ const struct pwm PROGMEM pwms[NPWM] = {
 			pwm_set_polarity_3a,
 		}
 	},
+	{ /* OC4D */
+		.label = "D6",
+		.tim_res_ns = 15625,
+		.tim_max_mul = 255,
+		.ops = {pwm_en_4d,
+			pwm_dis_4d,
+			pwm_get_period_timer4,
+			pwm_get_duty_4d,
+			pwm_set_period_timer4,
+			pwm_set_duty_4d,
+			pwm_get_polarity_4d,
+			pwm_set_polarity_4d,
+		}
+	},
+
 };
