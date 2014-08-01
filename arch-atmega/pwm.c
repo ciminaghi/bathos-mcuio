@@ -465,7 +465,6 @@ static uint32_t pwm_get_duty_4d(struct pwm *pwm)
 static int pwm_get_polarity_4d(const struct pwm *pwm)
 {
 	return (TCCR4B & (1 << PWM4X)) ? 1 : 0;
-	return 0;
 }
 
 static int pwm_set_polarity_4d(struct pwm *pwm, uint32_t val)
