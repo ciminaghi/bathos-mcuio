@@ -32,13 +32,12 @@ static const unsigned int PROGMEM __gpio_caps_size =
 static const unsigned int PROGMEM __gpio_evts_caps_size =
 	(const unsigned int)&gpio_evts_caps_size;
 
-static const struct mcuio_func_descriptor PROGMEM gpio_descr = {
-	.device = CONFIG_MCUIO_GPIO_DEVICE,
-	.vendor = CONFIG_MCUIO_GPIO_VENDOR,
-	.rev = 0,
-	/* GPIOs class */
-	.class = 0x00000002,
-};
+static const struct mcuio_func_descriptor PROGMEM gpio_descr =
+    INIT_MCUIO_FUNC_DESCR(CONFIG_MCUIO_GPIO_DEVICE,
+			  CONFIG_MCUIO_GPIO_VENDOR,
+			  0,
+			  /* GPIOs class */
+			  2);
 
 static const unsigned int PROGMEM gpio_descr_length = sizeof(gpio_descr);
 
@@ -100,27 +99,21 @@ static int __gpio_data_wr(const struct mcuio_range *r, unsigned offset,
 
 
 static int gpio_data_wrb(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_data_wr(r, offset, __in, fill, 8);
 }
 
 static int gpio_data_wrw(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_data_wr(r, offset, __in, fill, 16);
 }
 
 static int gpio_data_wrdw(const struct mcuio_range *r, unsigned offset,
-			  const uint32_t *__in, int fill)
+			  const void *__in, int fill)
 {
 	return __gpio_data_wr(r, offset, __in, fill, 32);
-}
-
-static int gpio_data_wrq(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *in, int fill)
-{
-	return -EPERM;
 }
 
 static int __gpio_data_rd(const struct mcuio_range *r, unsigned offset,
@@ -159,32 +152,26 @@ static int __gpio_data_rd(const struct mcuio_range *r, unsigned offset,
 }
 
 static int gpio_data_rdb(const struct mcuio_range *r, unsigned offset,
-			 uint32_t *__out, int fill)
+			 void *__out, int fill)
 {
 	return __gpio_data_rd(r, offset, __out, fill, 8);
 }
 
 static int gpio_data_rdw(const struct mcuio_range *r, unsigned offset,
-			 uint32_t *__out, int fill)
+			 void *__out, int fill)
 {
 	return __gpio_data_rd(r, offset, __out, fill, 16);
 }
 
 static int gpio_data_rddw(const struct mcuio_range *r, unsigned offset,
-			  uint32_t *__out, int fill)
+			  void *__out, int fill)
 {
 	return __gpio_data_rd(r, offset, __out, fill, 32);
 }
 
-static int gpio_data_rdq(const struct mcuio_range *r, unsigned offset,
-			 uint32_t *__out, int fill)
-{
-	return -EPERM;
-}
-
 const struct mcuio_range_ops PROGMEM gpio_data_ops = {
-	.rd = { gpio_data_rdb, gpio_data_rdw, gpio_data_rddw, gpio_data_rdq, },
-	.wr = { gpio_data_wrb, gpio_data_wrw, gpio_data_wrdw, gpio_data_wrq, },
+	.rd = { gpio_data_rdb, gpio_data_rdw, gpio_data_rddw,  },
+	.wr = { gpio_data_wrb, gpio_data_wrw, gpio_data_wrdw,  },
 };
 
 
@@ -205,32 +192,26 @@ static int __gpio_set_wr(const struct mcuio_range *r, unsigned offset,
 
 
 static int gpio_set_wrb(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_data_wr(r, offset, __in, fill, 8);
 }
 
 static int gpio_set_wrw(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_set_wr(r, offset, __in, fill, 16);
 }
 
 static int gpio_set_wrdw(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_set_wr(r, offset, __in, fill, 32);
 }
 
-static int gpio_set_wrq(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *in, int fill)
-{
-	return -EPERM;
-}
-
 const struct mcuio_range_ops PROGMEM gpio_set_ops = {
 	.rd = { NULL, NULL, NULL, },
-	.wr = { gpio_set_wrb, gpio_set_wrw, gpio_set_wrdw, gpio_set_wrq, },
+	.wr = { gpio_set_wrb, gpio_set_wrw, gpio_set_wrdw, },
 };
 
 static int __gpio_clr_wr(const struct mcuio_range *r, unsigned offset,
@@ -250,32 +231,26 @@ static int __gpio_clr_wr(const struct mcuio_range *r, unsigned offset,
 
 
 static int gpio_clr_wrb(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_data_wr(r, offset, __in, fill, 8);
 }
 
 static int gpio_clr_wrw(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_clr_wr(r, offset, __in, fill, 16);
 }
 
 static int gpio_clr_wrdw(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_clr_wr(r, offset, __in, fill, 32);
 }
 
-static int gpio_clr_wrq(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *in, int fill)
-{
-	return -EPERM;
-}
-
 const struct mcuio_range_ops PROGMEM gpio_clr_ops = {
 	.rd = { NULL, NULL, NULL, },
-	.wr = { gpio_clr_wrb, gpio_clr_wrw, gpio_clr_wrdw, gpio_clr_wrq, },
+	.wr = { gpio_clr_wrb, gpio_clr_wrw, gpio_clr_wrdw, },
 };
 
 
@@ -305,27 +280,21 @@ static int __gpio_modes_wr(const struct mcuio_range *r, unsigned offset,
 }
 
 static int gpio_modes_wrb(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_modes_wr(r, offset, __in, fill, 8);
 }
 
 static int gpio_modes_wrw(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
+			 const void *__in, int fill)
 {
 	return __gpio_modes_wr(r, offset, __in, fill, 16);
 }
 
 static int gpio_modes_wrdw(const struct mcuio_range *r, unsigned offset,
-			  const uint32_t *__in, int fill)
+			  const void *__in, int fill)
 {
 	return __gpio_modes_wr(r, offset, __in, fill, 32);
-}
-
-static int gpio_modes_wrq(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *in, int fill)
-{
-	return -EPERM;
 }
 
 static int __gpio_modes_rd(const struct mcuio_range *r, unsigned offset,
@@ -344,34 +313,26 @@ static int __gpio_modes_rd(const struct mcuio_range *r, unsigned offset,
 }
 
 static int gpio_modes_rdb(const struct mcuio_range *r, unsigned offset,
-			  uint32_t *__out, int fill)
+			  void *__out, int fill)
 {
 	return __gpio_modes_rd(r, offset, __out, fill, 8);
 }
 
 static int gpio_modes_rdw(const struct mcuio_range *r, unsigned offset,
-			  uint32_t *__out, int fill)
+			  void *__out, int fill)
 {
 	return __gpio_modes_rd(r, offset, __out, fill, 16);
 }
 
 static int gpio_modes_rddw(const struct mcuio_range *r, unsigned offset,
-			   uint32_t *__out, int fill)
+			   void *__out, int fill)
 {
 	return __gpio_modes_rd(r, offset, __out, fill, 32);
 }
 
-static int gpio_modes_rdq(const struct mcuio_range *r, unsigned offset,
-			  uint32_t *out, int fill)
-{
-	return -EPERM;
-}
-
 const struct mcuio_range_ops PROGMEM gpio_modes_ops = {
-	.rd = { gpio_modes_rdb, gpio_modes_rdw, gpio_modes_rddw,
-		gpio_modes_rdq,},
-	.wr = { gpio_modes_wrb, gpio_modes_wrw, gpio_modes_wrdw,
-		gpio_modes_wrq, },
+	.rd = { gpio_modes_rdb, gpio_modes_rdw, gpio_modes_rddw, },
+	.wr = { gpio_modes_wrb, gpio_modes_wrw, gpio_modes_wrdw, },
 };
 
 static int __gpio_evts_rd(const struct mcuio_range *r, unsigned offset,
@@ -395,7 +356,7 @@ static int __gpio_evts_rd(const struct mcuio_range *r, unsigned offset,
 }
 
 static int gpio_evts_rddw(const struct mcuio_range *r, unsigned offset,
-			   uint32_t *__out, int fill)
+			  void *__out, int fill)
 {
 	return __gpio_evts_rd(r, offset, __out, fill, 32);
 }
@@ -424,7 +385,7 @@ static int __gpio_evts_wr(const struct mcuio_range *r, unsigned offset,
 }
 
 static int gpio_evts_wrdw(const struct mcuio_range *r, unsigned offset,
-			  const uint32_t *__in, int fill)
+			  const void *__in, int fill)
 {
 	return __gpio_evts_wr(r, offset, __in, fill, 32);
 }
@@ -462,7 +423,7 @@ static int __gpio_evts_status_rd(const struct mcuio_range *r, unsigned offset,
 }
 
 static int gpio_evts_status_rddw(const struct mcuio_range *r, unsigned offset,
-				 uint32_t *__out, int fill)
+				 void *__out, int fill)
 {
 	return __gpio_evts_status_rd(r, offset, __out, fill, 32);
 }

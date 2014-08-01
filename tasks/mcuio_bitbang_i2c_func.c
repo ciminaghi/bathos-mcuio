@@ -101,13 +101,12 @@ static struct mcuio_i2c_data {
 #define I2C_MCUIO_OBUF	   0x040
 #define I2C_MCUIO_IBUF	   (I2C_MCUIO_OBUF + I2C_MCUIO_OBUF_MAX_SIZE)
 
-static const struct mcuio_func_descriptor PROGMEM i2c_bitbang_descr = {
-	.device = CONFIG_MCUIO_BITBANG_I2C_DEVICE,
-	.vendor = CONFIG_MCUIO_BITBANG_I2C_VENDOR,
-	.rev = 0,
-	/* I2C controller class */
-	.class = MCUIO_CLASS_I2C_CONTROLLER,
-};
+static const struct mcuio_func_descriptor PROGMEM i2c_bitbang_descr =
+INIT_MCUIO_FUNC_DESCR(CONFIG_MCUIO_BITBANG_I2C_DEVICE,
+		      CONFIG_MCUIO_BITBANG_I2C_VENDOR,
+		      0,
+		      /* I2C controller class */
+		      MCUIO_CLASS_I2C_CONTROLLER);
 
 static const unsigned int PROGMEM i2c_bitbang_descr_length =
     sizeof(i2c_bitbang_descr);
@@ -507,10 +506,10 @@ static int __i2c_bitbang_start_transaction(void)
 
 static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 				      unsigned offset,
-				      uint32_t *__out, int fill)
+				      void *_out, int fill)
 {
 	unsigned i, size = fill ? sizeof(uint64_t) : sizeof(uint32_t);
-	uint32_t *out;
+	uint32_t *out, *__out = _out;
 	static struct mcuio_function_irq_data idata;
 
 	for (i = 0; i < size; i += sizeof(uint32_t)) {
@@ -584,9 +583,11 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 
 static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 				      unsigned offset,
-				      const uint32_t *__in, int fill)
+				      const void *_in, int fill)
 {
+	const uint32_t *__in = _in;
 	unsigned i, size = fill ? sizeof(uint64_t) : sizeof(uint32_t);
+
 	for (i = 0; i < size; i += sizeof(uint32_t)) {
 		uint32_t in = __in[i / sizeof(uint32_t)];
 		switch (i + offset + r->start) {

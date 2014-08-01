@@ -21,14 +21,12 @@
 #define MCUIO_SHIELD_DEVICE_ID 0x0002
 #endif
 
-static const struct mcuio_func_descriptor PROGMEM js_descr = {
-	/* dev 1 , vendor 1 */
-	.device = MCUIO_SHIELD_DEVICE_ID,
-	.vendor = MCUIO_SHIELD_VENDOR_ID,
-	.rev = 0,
-	/* shield class */
-	.class = 0x0000000c,
-};
+static const struct mcuio_func_descriptor PROGMEM js_descr =
+    INIT_MCUIO_FUNC_DESCR(MCUIO_SHIELD_DEVICE_ID,
+			  MCUIO_SHIELD_VENDOR_ID,
+			  0,
+			  /* shield class */
+			  0xc);
 
 static const unsigned int PROGMEM js_descr_length = sizeof(js_descr);
 

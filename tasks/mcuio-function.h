@@ -10,10 +10,20 @@
 struct mcuio_range;
 struct mcuio_function;
 
+/*
+ * Note: the how_much parameter shall be interpreted as follows:
+ *
+ * For "short" packets (rdb, rdw, rddw, wrb, wrw, wrdw):
+ *    1 means that the fill flag is on (fill packet with data objects)
+ *    0 means that the fill flag is off (read/write just one object)
+ *
+ * For extended packets (rdmb, wrmb): it is the number of bytes to be
+ * read or written
+ */
 typedef int (*mcuio_read)(const struct mcuio_range *,
-			  unsigned offset, uint32_t *out, int fill_data);
+			  unsigned offset, void *out, int how_much);
 typedef int (*mcuio_write)(const struct mcuio_range *, unsigned offset,
-			   const uint32_t *in, int fill_data);
+			   const void *in, int how_much);
 
 struct mcuio_range_ops {
 	/* Pointers to read operations */
@@ -72,21 +82,21 @@ declare_extern_event(mcuio_function_irq);
 
 
 extern int mcuio_rdb(const struct mcuio_range *, unsigned offset,
-		     uint32_t *out, int fill);
+		     void *out, int fill);
 extern int mcuio_rdw(const struct mcuio_range *, unsigned offset,
-		     uint32_t *out, int fill);
+		     void *out, int fill);
 extern int mcuio_rddw(const struct mcuio_range *, unsigned offset,
-		      uint32_t *out, int fill);
-extern int mcuio_rdq(const struct mcuio_range *, unsigned offset,
-		     uint32_t *out, int fill);
+		      void *out, int fill);
+extern int mcuio_rdmb(const struct mcuio_range *, unsigned offset,
+		      void *out, int len);
 extern int mcuio_wrb(const struct mcuio_range *, unsigned offset,
-		     const uint32_t *in, int fill);
+		     const void *in, int fill);
 extern int mcuio_wrw(const struct mcuio_range *, unsigned offset,
-		     const uint32_t *in, int fill);
+		     const void *in, int fill);
 extern int mcuio_wrdw(const struct mcuio_range *, unsigned offset,
-		      const uint32_t *in, int fill);
-extern int mcuio_wrq(const struct mcuio_range *, unsigned offset,
-		     const uint32_t *in, int fill);
+		      const void *in, int fill);
+extern int mcuio_wrmb(const struct mcuio_range *, unsigned offset,
+		      const void *in, int len);
 
 extern const struct mcuio_range_ops default_mcuio_range_ops;
 extern const struct mcuio_range_ops default_mcuio_range_ro_ops;

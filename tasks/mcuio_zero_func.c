@@ -7,22 +7,20 @@
 #include "mcuio-function.h"
 
 
-static struct mcuio_func_descriptor PROGMEM zero_descr = {
-	.device = 0xdead,
-	.vendor = 0xbeef,
-	.rev = 0,
-	.class = 0,
-};
+static const struct mcuio_func_descriptor PROGMEM
+zero_descr = INIT_MCUIO_FUNC_DESCR(0xdead, 0xbeef, 0, 0);
 
-const unsigned int PROGMEM zero_descr_length = sizeof(zero_descr);
+static const unsigned int PROGMEM zero_descr_length = sizeof(zero_descr);
 
-const char PROGMEM zero_ro_contents[8] = "mcuio";
+static const char PROGMEM zero_ro_contents[8] = "mcuio";
 
-const unsigned int PROGMEM zero_ro_contents_length = sizeof(zero_ro_contents);
+static const unsigned int PROGMEM
+zero_ro_contents_length = sizeof(zero_ro_contents);
 
-char PROGMEM zero_rw_contents[8] = "deadbeef";
+static char zero_rw_contents[8] = "deadbeef";
 
-const unsigned int PROGMEM zero_rw_contents_length = sizeof(zero_rw_contents);
+static const unsigned int PROGMEM
+zero_rw_contents_length = sizeof(zero_rw_contents);
 
 static const struct mcuio_range PROGMEM zero_ranges[] = {
 	{

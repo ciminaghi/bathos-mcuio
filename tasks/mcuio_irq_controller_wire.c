@@ -59,13 +59,12 @@ static struct mcuio_irq_controller_wire_data {
 static const unsigned int PROGMEM irq_controller_registers_length =
 	sizeof(data.registers);
 
-static const struct mcuio_func_descriptor PROGMEM irq_controller_wire_descr = {
-	.device = CONFIG_MCUIO_IRQ_CONTROLLER_WIRE_DEVICE,
-	.vendor = CONFIG_MCUIO_IRQ_CONTROLLER_WIRE_VENDOR,
-	.rev = 0,
-	/* Irq controller (wire) class */
-	.class = 0x0000000b,
-};
+static const struct mcuio_func_descriptor PROGMEM irq_controller_wire_descr =
+	INIT_MCUIO_FUNC_DESCR(CONFIG_MCUIO_IRQ_CONTROLLER_WIRE_DEVICE,
+			      CONFIG_MCUIO_IRQ_CONTROLLER_WIRE_DEVICE,
+			      0,
+			      /* Irq controller (wire) class */
+			      0xb);
 
 static const unsigned int PROGMEM irq_controller_wire_descr_length =
     sizeof(irq_controller_wire_descr);
@@ -78,9 +77,11 @@ static const uint32_t PROGMEM cfg_area[] = {
 static const unsigned int PROGMEM cfg_area_length = sizeof(cfg_area);
 
 static int mcuio_irqw_rddw(const struct mcuio_range *r,
-			   unsigned offset, uint32_t *out,
+			   unsigned offset, void *__out,
 			   int fill)
 {
+	uint32_t *out = __out;
+
 	if (fill)
 		return -EPERM;
 	if (offset % sizeof(uint32_t))
@@ -90,8 +91,10 @@ static int mcuio_irqw_rddw(const struct mcuio_range *r,
 }
 
 static int mcuio_irqw_wrdw(const struct mcuio_range *r, unsigned offset,
-			   const uint32_t *in, int fill)
+			   const void *__in, int fill)
 {
+	const uint32_t *in = __in;
+
 	if (fill)
 		return -EPERM;
 	switch (offset) {
@@ -137,7 +140,7 @@ static int mcuio_irqw_wrdw(const struct mcuio_range *r, unsigned offset,
 }
 
 const struct mcuio_range_ops PROGMEM registers_ops = {
-	.rd = { mcuio_rdb, mcuio_rdw, mcuio_irqw_rddw, mcuio_rdq, },
+	.rd = { mcuio_rdb, mcuio_rdw, mcuio_irqw_rddw,  },
 	/* Only 32bits write is supported */
 	.wr = { NULL, NULL, mcuio_irqw_wrdw, NULL, },
 };
