@@ -10,17 +10,17 @@
 #include <bathos/stdio.h>
 
 /* Status (enabled/disabled) of each pwm (max 32) */
-uint32_t pwm_stat = 0;
+static uint32_t pwm_stat = 0;
 
 int pwm_enabled(int idx)
 {
 	return (pwm_stat & (1 << idx)) ? 1 : 0;
 }
 
-uint8_t t0_ref = 0;
-uint8_t t1_ref = 0;
-uint8_t t3_ref = 0;
-uint8_t t4_ref = 0;
+static uint8_t t0_ref = 0;
+static uint8_t t1_ref = 0;
+static uint8_t t3_ref = 0;
+static uint8_t t4_ref = 0;
 
 static void init_timer0(void)
 {
