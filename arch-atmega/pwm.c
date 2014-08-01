@@ -129,12 +129,14 @@ static void check_deinit_timer3(int id)
 
 static void init_timer4(void)
 {
-	/* Enable Fast PWM Mode on Timer 4. */
+	/* Set timer4. Default period 16.384ms */
+	TCCR4B |= (1 << CS43) | (1 << CS41) | (1 << CS40);
 }
 
 static void deinit_timer4(void)
 {
-	/* Enable Fast PWM Mode on Timer 4. */
+	/* Reset timer4. */
+	TCCR4B &= ~((1 << CS43) | (1 << CS41) | (1 << CS40));
 }
 
 static void check_init_timer4(int id)
@@ -186,14 +188,13 @@ static uint32_t pwm_get_period_timer3(struct pwm *pwm)
 
 static int pwm_set_period_timer4(struct pwm *pwm, uint32_t val)
 {
-	/* TODO FIXME */
+	OCR4C = val - 1;
 	return 0;
 }
 
 static uint32_t pwm_get_period_timer4(struct pwm *pwm)
 {
-	/* TODO FIXME */
-	return 0;
+	return OCR4C + 1;
 }
 
 /* OC0B output */
@@ -435,36 +436,44 @@ static int pwm_set_polarity_3a(struct pwm *pwm, uint32_t val)
 /* OC4D output */
 static int pwm_en_4d(struct pwm *pwm)
 {
-	/* TODO FIXME */
+	int id = pwm_id(pwm);
+	check_init_timer4(id);
+	TCCR4C |= (1 << COM4D1) | (1 << PWM4D);
+	DDRD |= (1 << DDD7);
 	return 0;
 }
 
 static void pwm_dis_4d(struct pwm *pwm)
 {
-	/* TODO FIXME */
+	int id = pwm_id(pwm);
+	check_deinit_timer4(id);
+	TCCR4C &= ~((1 < COM4D1) | (1 < PWM4D));
+	DDRD &= ~(1 << DDD7);
 }
 
 static int pwm_set_duty_4d(struct pwm *pwm, uint32_t val)
 {
-	/* TODO FIXME */
+	OCR4D = val;
 	return 0;
 }
 
 static uint32_t pwm_get_duty_4d(struct pwm *pwm)
 {
-	/* TODO FIXME */
-	return 0;
+	return OCR4D;
 }
 
 static int pwm_get_polarity_4d(const struct pwm *pwm)
 {
-	/* TODO FIXME */
+	return (TCCR4B & (1 << PWM4X)) ? 1 : 0;
 	return 0;
 }
 
 static int pwm_set_polarity_4d(struct pwm *pwm, uint32_t val)
 {
-	/* TODO FIXME */
+	if (val)
+		TCCR4B |= (1 << PWM4X);
+	else
+		TCCR4B &= ~(1 << PWM4X);
 	return 0;
 }
 
@@ -546,7 +555,7 @@ const struct pwm PROGMEM pwms[NPWM] = {
 	},
 	{ /* OC4D */
 		.label = "D6",
-		.tim_res_ns = 15625,
+		.tim_res_ns = 64000,
 		.tim_max_mul = 255,
 		.ops = {pwm_en_4d,
 			pwm_dis_4d,
