@@ -4,6 +4,7 @@
 LIBBATHOS = lib/libbathos.a
 LIB_OBJS += lib/string.o
 LIB_OBJS += lib/stdio.o
+LIB_OBJS += lib/stdlib.o
 LIB_OBJS += lib/ctype.o
 LIB_OBJS += lib/setup.o
 LIB_OBJS += lib/udelay.o
