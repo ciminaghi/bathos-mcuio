@@ -8,6 +8,8 @@
 #include <bathos/string.h>
 #include <bathos/init.h>
 #include <bathos/errno.h>
+#include <bathos/shell.h>
+#include <bathos/stdlib.h>
 #include <arch/hw.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -23,11 +25,17 @@ static struct uart_data {
 
 struct bathos_dev __uart_dev;
 
+static int uart_set_baudrate(uint32_t baud)
+{
+	UBRR1 = (THOS_QUARTZ / 16) / baud - 1;
+	return 0;
+}
 
 static int uart_init(void)
 {
 	/* Target baud rate = 250000 */
-	UBRR1 = THOS_QUARTZ/(16*250000) - 1;
+	uint32_t baud = 250000;
+	uart_set_baudrate(baud);
 	uart_data.cbuf.head = uart_data.cbuf.tail = 0;
 	UCSR1B = (1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1);
 	return 0;
@@ -121,3 +129,51 @@ struct bathos_dev __uart_dev __attribute__((section(".bathos_devices"),
 	.ops = &uart_dev_ops,
 };
 
+/* baudrate command */
+#define NBAUDRATES 2
+
+struct baudrate {
+	uint32_t val;
+	char *descr; /* needed because printf of val fails for val > 32767 */
+};
+
+static const struct baudrate PROGMEM baud[NBAUDRATES] = {
+	{125000, "125000"},
+	{250000, "250000"}
+};
+
+static uint8_t baud_idx = 1;
+
+static int baudrate_handler(int argc, char *argv[])
+{
+	int ret = 0, i;
+
+	if (argc > 1) {
+		i = atol(argv[1]) - 1;
+		if ((i < 0) || (i > NBAUDRATES)) {
+			printf("Invalid baudrate: %d\n", i);
+			ret = -EINVAL;
+		}
+		else {
+			baud_idx = i;
+			uart_set_baudrate(baud[i].val);
+		}
+	}
+
+	for (i = 0; i < NBAUDRATES; i++) {
+		if (i == baud_idx)
+			printf("*");
+		else
+			printf(" ");
+		printf(" %d: %s\n", i + 1, baud[i].descr);
+	}
+
+	return ret;
+}
+
+static void baudrate_help(int argc, char *argv[])
+{
+	printf("show/set uart baudrate\n");
+}
+
+declare_shell_cmd(baudrate, baudrate_handler, baudrate_help);
