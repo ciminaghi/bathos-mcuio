@@ -52,14 +52,14 @@ static int __do_cmd(char *buf)
 	int i;
 
 	/* find args */
-	for (i = 1, argv[0] = buf, ptr = buf; *ptr && *ptr != ';';) {
-		if (*ptr++ == ' ' && i < MAX_ARGV) {
+	for (i = 1, argv[0] = buf, ptr = buf; *ptr && *ptr != ';'; ptr++) {
+		if ((*ptr == ' ' || *ptr == '\0') && i < MAX_ARGV) {
 			/* zero terminate arg */
-			*(ptr - 1) = 0;
+			*ptr = 0;
 			/* Skip multiple spaces */
-			for (; *ptr == ' '; ptr++);
+			for (ptr++; *ptr == ' '; ptr++);
 			if (*ptr)
-				argv[i++] = ptr - 1;
+				argv[i++] = ptr;
 		}
 	}
 	if (*ptr == ';')
