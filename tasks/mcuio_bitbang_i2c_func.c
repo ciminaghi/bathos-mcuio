@@ -54,7 +54,8 @@ static struct mcuio_i2c_data {
 	int udelay;
 	int timeout;
 	uint16_t slave_address;
-	uint16_t buf_len;
+	uint16_t ibuf_len;
+	uint16_t obuf_len;
 	uint16_t data_cnt;
 	uint8_t  status;
 	uint8_t  int_enable;
@@ -355,8 +356,8 @@ static void __i2c_handle_go(void)
 		__i2c_bitbang_next_state(ADDR_SENT);
 		break;
 	case ADDR_SENT:
-		if (!i2c_data.buf_len) {
-			pr_debug("no data, switching to DATA_SENT state\n");
+		if (!i2c_data.obuf_len) {
+			pr_debug("no out data, switching to DATA_SENT state\n");
 			/* No data */
 			__i2c_bitbang_next_state(DATA_SENT);
 			break;
@@ -382,7 +383,7 @@ static void __i2c_handle_go(void)
 		i2c_data.obuf_tail = (i2c_data.obuf_tail + 1) &
 			(sizeof(i2c_data.buffer) - 1);
 		/* Set next state */
-		done = i2c_data.data_cnt == i2c_data.buf_len;
+		done = i2c_data.data_cnt == i2c_data.obuf_len;
 		if (done) {
 			/* equalize tail to head: the host always writes
 			   dwords, maybe 1 to 3 bytes are in eccess
@@ -441,7 +442,7 @@ static void __i2c_handle_go(void)
 		/* Read byte */
 		pr_debug("RECEIVING_DATA state\n");
 		__i2c_bitbang_recv_byte(&i2c_data.buffer[i2c_data.data_cnt++]);
-		done = i2c_data.data_cnt == i2c_data.buf_len;
+		done = i2c_data.data_cnt == i2c_data.ibuf_len;
 		__i2c_bitbang_send_acknak(!done);
 		if (done) {
 			pr_debug("done\n");
@@ -572,8 +573,10 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 			*out = i2c_data.ibuf_tail;
 			break;
 		case I2C_MCUIO_OBUF_LEN:
+			*out = i2c_data.obuf_len;
+			break;
 		case I2C_MCUIO_IBUF_LEN:
-			*out = i2c_data.buf_len;
+			*out = i2c_data.ibuf_len;
 			break;			
 		default:
 			return -EPERM;
@@ -619,8 +622,10 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 			/* Buffer size, cannot be written */
 			return -EPERM;
 		case I2C_MCUIO_OBUF_LEN:
+			i2c_data.obuf_len = in;
+			break;
 		case I2C_MCUIO_IBUF_LEN:
-			i2c_data.buf_len = in;
+			i2c_data.ibuf_len = in;
 			break;
 		case I2C_MCUIO_OBUF_HEAD:
 			i2c_data.obuf_head = in;
