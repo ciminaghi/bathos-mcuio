@@ -124,11 +124,6 @@ static const unsigned int PROGMEM i2c_bitbang_ibuf_length =
 
 declare_event(i2c_transaction);
 
-static inline int is_i2c_write(void)
-{
-	return !(i2c_data.slave_address & 1);
-}
-
 static inline void setsda(int v)
 {
 	gpio_dir(GPIO_SDA, 1, v);
@@ -407,15 +402,23 @@ static void __i2c_handle_go(void)
 		break;
 	}
 	case DATA_SENT:
-		if (is_i2c_write()) {
+		if (!i2c_data.ibuf_len) {
 			pr_debug("DATA_SENT state, transaction ok\n");
 			__i2c_bitbang_end_transaction(TRANSACTION_OK);
 			return;
 		}
-		/* Send repeated start */
-		pr_debug("sending repeated start\n");
-		__i2c_bitbang_send_repstart();
-		__i2c_bitbang_next_state(REPEATED_START_SENT);
+		if (!i2c_data.obuf_len) {
+			/* Read data without writing cmd first */
+			pr_debug("read data without sending cmd first\n");
+			__i2c_bitbang_next_state(RECEIVING_DATA);
+		} else {
+			/* Output data sent, send repeated start */
+			pr_debug("sending repeated start\n");
+			__i2c_bitbang_send_repstart();
+			__i2c_bitbang_next_state(REPEATED_START_SENT);
+		}
+		/* Reset counter */
+		i2c_data.data_cnt = 0;
 		break;
 	case REPEATED_START_SENT:
 		/* Send slave address + r bit */
