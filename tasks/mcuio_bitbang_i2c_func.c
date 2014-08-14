@@ -447,9 +447,13 @@ static void __i2c_handle_go(void)
 		int done, space;
 		/* Read byte */
 		pr_debug("RECEIVING_DATA state\n");
-		__i2c_bitbang_recv_byte(&i2c_data.buffer[i2c_data.data_cnt++]);
+		__i2c_bitbang_recv_byte(&i2c_data.buffer[i2c_data.ibuf_head]);
+		pr_debug("c = 0x%02x\n", i2c_data.buffer[i2c_data.ibuf_head]);
+		i2c_data.data_cnt++;
 		done = i2c_data.data_cnt == i2c_data.ibuf_len;
 		__i2c_bitbang_send_acknak(!done);
+		i2c_data.ibuf_head = (i2c_data.ibuf_head + 1) &
+			(sizeof(i2c_data.buffer) - 1);
 		if (done) {
 			pr_debug("done\n");
 			__i2c_bitbang_next_state(DATA_RECEIVED);
