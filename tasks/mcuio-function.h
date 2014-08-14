@@ -73,12 +73,40 @@ declare_extern_event(mcuio_function_irq);
 
 extern int mcuio_rdb(const struct mcuio_range *, unsigned offset,
 		     uint32_t *out, int fill);
+#ifdef ARCH_IS_HARVARD
+extern int mcuio_rdb_ram(const struct mcuio_range *, unsigned offset,
+			 uint32_t *out, int fill);
+#else
+#define mcuio_rdb_ram mcuio_rdb
+#endif
+
 extern int mcuio_rdw(const struct mcuio_range *, unsigned offset,
 		     uint32_t *out, int fill);
+#ifdef ARCH_IS_HARVARD
+extern int mcuio_rdw_ram(const struct mcuio_range *, unsigned offset,
+			 uint32_t *out, int fill);
+#else
+#define mcuio_rdw_ram mcuio_rdw
+#endif
+
 extern int mcuio_rddw(const struct mcuio_range *, unsigned offset,
 		      uint32_t *out, int fill);
+#ifdef ARCH_IS_HARVARD
+extern int mcuio_rddw_ram(const struct mcuio_range *, unsigned offset,
+			  uint32_t *out, int fill);
+#else
+#define mcuio_rddw_ram mcuio_rddw
+#endif
+
 extern int mcuio_rdq(const struct mcuio_range *, unsigned offset,
 		     uint32_t *out, int fill);
+#ifdef ARCH_IS_HARVARD
+extern int mcuio_rdq_ram(const struct mcuio_range *, unsigned offset,
+			 uint32_t *out, int fill);
+#else
+#define mcuio_rdq_ram mcuio_rdq
+#endif
+
 extern int mcuio_wrb(const struct mcuio_range *, unsigned offset,
 		     const uint32_t *in, int fill);
 extern int mcuio_wrw(const struct mcuio_range *, unsigned offset,
@@ -90,6 +118,8 @@ extern int mcuio_wrq(const struct mcuio_range *, unsigned offset,
 
 extern const struct mcuio_range_ops default_mcuio_range_ops;
 extern const struct mcuio_range_ops default_mcuio_range_ro_ops;
+extern const struct mcuio_range_ops default_mcuio_range_ram_ops;
+extern const struct mcuio_range_ops default_mcuio_range_ro_ram_ops;
 
 
 

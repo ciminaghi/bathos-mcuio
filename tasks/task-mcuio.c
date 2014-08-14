@@ -425,6 +425,47 @@ int mcuio_rdq(const struct mcuio_range *r, unsigned offset, uint32_t *out,
 	return sizeof(uint64_t);
 }
 
+#ifdef ARCH_IS_HARVARD
+int mcuio_rdb_ram(const struct mcuio_range *r, unsigned offset, uint32_t *__out,
+		  int fill)
+{
+	uint8_t *out = (uint8_t *)__out;
+	if (!fill) {
+		*out = *(uint8_t *)(r->rd_target + offset);
+	} else
+		memcpy(out, r->rd_target + offset, sizeof(uint64_t));
+	return fill ? sizeof(uint64_t) : sizeof(uint8_t);
+}
+
+int mcuio_rdw_ram(const struct mcuio_range *r, unsigned offset, uint32_t *__out,
+		  int fill)
+{
+	uint16_t *out = (uint16_t *)__out;
+	if (!fill) {
+		*out = *(uint16_t *)(r->rd_target + offset);
+	} else
+		memcpy(out, r->rd_target + offset, sizeof(uint64_t));
+	return fill ? sizeof(uint64_t): sizeof(uint16_t);
+}
+
+int mcuio_rddw_ram(const struct mcuio_range *r, unsigned offset, uint32_t *out,
+		   int fill)
+{
+	*out = *(uint32_t *)(r->rd_target + offset);
+	if (fill)
+		out[1] = *(uint32_t *)(r->rd_target + offset +
+				       sizeof(uint32_t));
+	return fill ? sizeof(uint64_t) : sizeof(uint32_t);
+}
+
+int mcuio_rdq_ram(const struct mcuio_range *r, unsigned offset, uint32_t *out,
+		  int fill)
+{
+	memcpy(out, r->rd_target + offset, sizeof(uint64_t));
+	return sizeof(uint64_t);
+}
+#endif /* ARCH_IS_HARVARD */
+
 int mcuio_wrb(const struct mcuio_range *r, unsigned offset,
 	      const uint32_t *__in, int fill)
 {
@@ -468,8 +509,15 @@ const struct mcuio_range_ops PROGMEM default_mcuio_range_ops = {
 	.wr = { mcuio_wrb, mcuio_wrw, mcuio_wrdw, mcuio_wrq, },
 };
 
+const struct mcuio_range_ops PROGMEM default_mcuio_range_ram_ops = {
+	.rd = { mcuio_rdb_ram, mcuio_rdw_ram, mcuio_rddw_ram, mcuio_rdq_ram, },
+	.wr = { mcuio_wrb, mcuio_wrw, mcuio_wrdw, mcuio_wrq, },
+};
 
 const struct mcuio_range_ops PROGMEM default_mcuio_range_ro_ops = {
 	.rd = { mcuio_rdb, mcuio_rdw, mcuio_rddw, mcuio_rdq, },
 };
 
+const struct mcuio_range_ops PROGMEM default_mcuio_range_ro_ram_ops = {
+	.rd = { mcuio_rdb_ram, mcuio_rdw_ram, mcuio_rddw_ram, mcuio_rdq_ram, },
+};
