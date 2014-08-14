@@ -339,9 +339,11 @@ static void __i2c_handle_go(void)
 		__i2c_bitbang_next_state(START_SENT);
 		break;
 	case START_SENT:
+	{
+		int force_rd = i2c_data.ibuf_len && !i2c_data.obuf_len;
 		pr_debug("sending slave address\n");
 		/* Send slave address + w bit */
-		if (__i2c_bitbang_send_slave_addr(0) < 0) {
+		if (__i2c_bitbang_send_slave_addr(force_rd) < 0) {
 			pr_debug("error sending slave address\n");
 			__i2c_bitbang_end_transaction(NAK_RECEIVED);
 			return;
@@ -350,6 +352,7 @@ static void __i2c_handle_go(void)
 		pr_debug("address send\n");
 		__i2c_bitbang_next_state(ADDR_SENT);
 		break;
+	}
 	case ADDR_SENT:
 		if (!i2c_data.obuf_len) {
 			pr_debug("no out data, switching to DATA_SENT state\n");
