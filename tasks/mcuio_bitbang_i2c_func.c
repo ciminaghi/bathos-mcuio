@@ -681,14 +681,14 @@ static const struct mcuio_range PROGMEM i2c_bitbang_ranges[] = {
 		.length = &i2c_bitbang_obuf_length,
 		.rd_target = i2c_data.buffer,
 		.wr_target = i2c_data.buffer,
-		.ops = &default_mcuio_range_ops,
+		.ops = &default_mcuio_range_ram_ops,
 	},
 	/* dwords 0x140 .. 0x240, input buffer, read only */
 	{
 		.start = 0x140,
 		.length = &i2c_bitbang_ibuf_length,
 		.rd_target = i2c_data.buffer,
-		.ops = &default_mcuio_range_ro_ops,
+		.ops = &default_mcuio_range_ro_ram_ops,
 	},
 };
 
