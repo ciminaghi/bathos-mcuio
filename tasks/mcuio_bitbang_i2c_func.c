@@ -54,7 +54,7 @@ static struct mcuio_i2c_data {
 	int udelay;
 	int timeout;
 	uint16_t slave_address;
-	uint16_t ibuf_len;
+	int16_t ibuf_len;
 	uint16_t obuf_len;
 	uint16_t data_cnt;
 	uint8_t  status;
@@ -86,6 +86,7 @@ static struct mcuio_i2c_data {
 #define	  TRANSACTION_OK       0x1
 #define	  BUSY		       0x2
 #define	  NAK_RECEIVED	       0x80
+#define   INVALID_LEN          0x81
 #define I2C_MCUIO_CFG	   0x010
 #define I2C_MCUIO_BRATE	   0x014
 #define I2C_MCUIO_CMD	   0x018
@@ -413,6 +414,8 @@ static void __i2c_handle_go(void)
 		if (!i2c_data.obuf_len) {
 			/* Read data without writing cmd first */
 			pr_debug("read data without sending cmd first\n");
+			/* Reset counter */
+			i2c_data.data_cnt = i2c_data.ibuf_len == -1 ? -1 : 0;
 			__i2c_bitbang_next_state(RECEIVING_DATA);
 		} else {
 			/* Output data sent, send repeated start */
@@ -438,17 +441,35 @@ static void __i2c_handle_go(void)
 	case ADDR_SENT_2:
 		pr_debug("ADDR_SENT_2 state\n");
 		/* Reset counter */
-		i2c_data.data_cnt = 0;
+		i2c_data.data_cnt = i2c_data.ibuf_len == -1 ? -1 : 0;
+		pr_debug("i2c_data.data_cnt reset to %u\n", i2c_data.data_cnt);
 		/* -> RECEIVING_DATA */
 		__i2c_bitbang_next_state(RECEIVING_DATA);
 		break;
 	case RECEIVING_DATA:
 	{
+		uint8_t c;
 		int done, space;
 		/* Read byte */
 		pr_debug("RECEIVING_DATA state\n");
-		__i2c_bitbang_recv_byte(&i2c_data.buffer[i2c_data.ibuf_head]);
-		pr_debug("c = 0x%02x\n", i2c_data.buffer[i2c_data.ibuf_head]);
+		__i2c_bitbang_recv_byte(&c);
+		i2c_data.buffer[i2c_data.ibuf_head] = c;
+		pr_debug("c = 0x%02x\n", c);
+		if (i2c_data.data_cnt == -1) {
+			if (c > CIRC_SPACE(i2c_data.ibuf_head,
+					   i2c_data.ibuf_tail,
+					   sizeof(i2c_data.buffer))) {
+				pr_debug("SMBUS IS TOO BIG\n");
+				__i2c_bitbang_end_transaction(INVALID_LEN);
+				return;
+			}
+			/*
+			 * smbus read block, the device shall tell us about
+			 * block lenght (max 32)
+			 */
+			i2c_data.data_cnt = 0;
+			i2c_data.ibuf_len = c;
+		}
 		i2c_data.data_cnt++;
 		done = i2c_data.data_cnt == i2c_data.ibuf_len;
 		__i2c_bitbang_send_acknak(!done);
@@ -635,7 +656,9 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 			i2c_data.obuf_len = in;
 			break;
 		case I2C_MCUIO_IBUF_LEN:
-			i2c_data.ibuf_len = in;
+			i2c_data.ibuf_len = (int32_t)in;
+			pr_debug("i2c_data.ibuf_len set to %d\n",
+				 i2c_data.ibuf_len);
 			break;
 		case I2C_MCUIO_OBUF_HEAD:
 			i2c_data.obuf_head = in;
