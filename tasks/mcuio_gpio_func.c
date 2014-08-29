@@ -385,11 +385,11 @@ static int __gpio_evts_rd(const struct mcuio_range *r, unsigned offset,
 	for (i = 0; i < n && ret > 0; i++, out++) {
 		*out = 0;
 		if (test_bit(i + start, gpio_events_falling))
-			*out |= 2;
+			*out |= GPIO_EVT_FALLING;
 		if (test_bit(i + start, gpio_events_rising))
-			*out |= 1;
+			*out |= GPIO_EVT_RISING;
 		if (test_bit(i + start, gpio_events_enable))
-			*out |= 0x80;
+			*out |= GPIO_EVT_ENABLE;
 	}
 	return ret;
 }
@@ -409,11 +409,11 @@ static int __gpio_evts_wr(const struct mcuio_range *r, unsigned offset,
 		n = min(MCUIO_NGPIO, sizeof(uint64_t)/8);
 	ret = n;
 	for (i = 0; i < n; i++, in++) {
-		if (*in & 2)
+		if (*in & GPIO_EVT_FALLING)
 			set_bit(i + start, gpio_events_falling);
-		if (*in & 1)
+		if (*in & GPIO_EVT_RISING)
 			set_bit(i + start, gpio_events_rising);
-		if (*in & 0x80)
+		if (*in & GPIO_EVT_ENABLE)
 			set_bit(i + start, gpio_events_enable);
 		stat = gpio_request_events(i + start, *in);
 		if (stat < 0)
