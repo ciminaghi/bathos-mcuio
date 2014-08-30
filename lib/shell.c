@@ -36,7 +36,7 @@ static struct shell_cmd *__get_cmd(const struct shell_cmd * PROGMEM _cmd,
 #else
 
 static struct shell_cmd *__get_cmd(const struct shell_cmd * PROGMEM _cmd,
-				   struct shell *__cmd)
+				   struct shell_cmd *__cmd)
 {
 	return _cmd;
 }
