@@ -16,6 +16,7 @@
 #include <tasks/mcuio.h>
 #include <bathos/jiffies.h>
 #include <bathos/stdio.h>
+#include <generated/autoconf.h>
 
 #include "mcuio-function.h"
 
