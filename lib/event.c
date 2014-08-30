@@ -82,8 +82,8 @@ static inline struct event_handler_data *
 __get_evt_handler_data(struct event_handler_data *ehd,
 		       const struct event_handler_data *src)
 {
-	*dst = *src;
-	return dst;
+	*ehd = *src;
+	return ehd;
 }
 
 static inline struct event_handler_ops *

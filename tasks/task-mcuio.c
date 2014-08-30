@@ -97,18 +97,18 @@ __get_range_ops(const struct mcuio_range *r,
 static inline void __get_range(const struct mcuio_function *f,
 			       int index, struct mcuio_range *out)
 {
-	*out = f->ranges[i];
+	*out = f->ranges[index];
 }
 
 static inline int __get_nranges(const struct mcuio_function *f)
 {
-	*out = f->nranges;
+	return f->nranges;
 }
 
 static inline struct mcuio_function *__get_function(int fn,
 						    struct mcuio_function *f)
 {
-	struct mcuio_function *out = &mcuio_functions_start[packet->func];
+	struct mcuio_function *out = &mcuio_functions_start[fn];
 	if (out >= mcuio_functions_end)
 		return NULL;
 	*f = *out;
