@@ -71,9 +71,11 @@ static inline int __gpio_get_portw(int gpio, void *out, int w)
 	return -ENOSYS;
 }
 
-#define GPIO_EVT_RISING 1
-#define GPIO_EVT_FALLING 2
-#define GPIO_EVT_ENABLE 0x80
+#define GPIO_EVT_RISING  0x01
+#define GPIO_EVT_FALLING 0x02
+#define GPIO_EVT_HIGH    0x04
+#define GPIO_EVT_LOW     0x08
+#define GPIO_EVT_ENABLE  0x80
 
 #ifndef HAVE_GPIO_EVENTS
 static inline int gpio_request_events(int gpio, int flags)

@@ -71,5 +71,9 @@ int gpio_request_events(int gpio, int flags)
 		falling[port] |= mask;
 	if (flags & GPIO_EVT_ENABLE)
 		enable[port] |= mask;
+	if ((flags & GPIO_EVT_LOW) | (flags & GPIO_EVT_HIGH)) {
+		rising[port] |= mask;
+		falling[port] |= mask;
+	}
 	return 0;
 }
