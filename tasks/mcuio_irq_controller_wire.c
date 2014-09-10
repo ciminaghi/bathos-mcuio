@@ -199,11 +199,6 @@ static void mcuio_irq_handle(struct event_handler_data *edata)
 		return;
 	}
 	data.registers[STATUS_OFFSET/sizeof(uint32_t)] = new_status;
-	if (new_status) {
-		/* automatically mask irq */
-		data.registers[MASK_OFFSET/sizeof(uint32_t)] |=
-			(1 << idata->func);
-	}
 	__activate_irq_line(new_status != 0);
 }
 
