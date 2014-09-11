@@ -291,12 +291,18 @@ static int mcuio_init(void *arg)
 	return 0;
 }
 
+#ifdef CONFIG_MCUIO_ALIVE_TASK
 static void *mcuio_alive(void *arg)
 {
 	printf("mcuio ");
 	arg ? printf("alive\n") : printf("dead\n");
 	return arg;
 }
+#else
+static void *mcuio_alive(void *arg)
+{
+}
+#endif /* CONFIG_MCUIO_ALIVE_TASK */
 
 static struct bathos_task __task t_mcuio = {
 	.name = "mcuio", .period = 60 * HZ,

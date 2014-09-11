@@ -5,6 +5,14 @@ config TASK_MCUIO
        help
 	 Enable mcuio implementation
 
+config MCUIO_ALIVE_TASK
+	prompt "Mcuio alive task"
+	bool
+	depends on TASK_MCUIO
+	default n
+	help
+	  Print "mcuio alive" string on stdout once every 60s
+
 config MCUIO_PIPE_INPUT_PATH
        prompt "Mcuio input pipe path"
        string
