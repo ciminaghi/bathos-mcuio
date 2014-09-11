@@ -25,10 +25,10 @@
 #define MSB(n) ((n >> 8) & 255)
 
 #define VENDOR_ID		0x2a03
-#define PRODUCT_ID		0x8001
+#define PRODUCT_ID		0x0001
 
 #define STR_MANUFACTURER	L"Dog Hunter"
-#define STR_PRODUCT		L"YUN"
+#define STR_PRODUCT		L"Linino"
 #define STR_SERIAL_NUMBER	L"00000"
 
 
