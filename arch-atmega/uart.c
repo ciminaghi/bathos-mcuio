@@ -149,7 +149,7 @@ static int baudrate_handler(int argc, char *argv[])
 	int ret = 0, i;
 
 	if (argc > 1) {
-		i = atol(argv[1]) - 1;
+		i = argv[1][0] - '1';
 		if ((i < 0) || (i > NBAUDRATES)) {
 			printf("Invalid baudrate: %d\n", i);
 			ret = -EINVAL;
