@@ -200,10 +200,17 @@ declare_shell_cmd(help, help_handler, help_help);
 
 /* version command */
 
+extern const char version_string;
+
 static int version_handler(int argc, char *argv[])
 {
-	printf("lininoIO git: %s, built %s %s\n", BATHOS_GIT, __DATE__,
-		__TIME__);
+	/*
+	 * printf is actually a macro, which does not expand into correct C
+	 * if used with a pointer as first arg instead of a string literal.
+	 * We can't use printf("%s", &version_string) either, because the
+	 * second arg must point to ram, not flash on the atmega.
+	 */
+	__printf(&version_string);
 	return 0;
 }
 

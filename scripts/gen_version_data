@@ -1,0 +1,21 @@
+#!/bin/bash
+
+[ $# -lt 3 ] && { echo "use $0 version_string output_elf_format output_file" ; \
+  exit 1 ; }
+
+str=$1
+fmt=$2
+out=$3
+
+f=$(tempfile)
+
+echo lininoIO: git $str built $(date "+%a %Y-%m-%d %H:%M:%S") \
+     $(whoami)@$(hostname) > $f
+
+${OBJCOPY} --redefine-sym _binary__tmp_$(basename ${f})_start=version_string \
+	   -I binary -O $fmt $f $out || { rm -f $f ; exit 1 ; }
+${OBJCOPY} --rename-section \
+	   .data=.text.version,contents,alloc,load,readonly,code $out $out || \
+	   { rm -f $f ; exit 1 ; }
+
+rm -f $f

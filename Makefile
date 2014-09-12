@@ -139,11 +139,16 @@ bathos.bin: bathos
 bathos: bathos.o
 	$(CC) bathos.o $(LDFLAGS) -o $@
 
-obj-y =  main.o sys_timer.o periodic_scheduler.o pipe.o \
+obj-y =  main.o sys_timer.o periodic_scheduler.o pipe.o version_data.o \
 $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 
 bathos.o: silentoldconfig $(obj-y)
 	$(LD) -r -T bigobj.lds $(obj-y) -o $@
+
+version_data.o:
+	export CC=$(CC) OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
+	scripts/gen_version_data $(BATHOS_GIT) $$(scripts/get_bin_format) \
+	$@
 
 $(GPIOS_NAMES_FILE): tasks/%-names.o: tasks/%.cfg
 	export CC=$(CC) OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
@@ -172,3 +177,5 @@ defconfig:
 	@$(MAKE) -f Makefile.kconfig lpc1343_defconfig
 
 .config: silentoldconfig
+
+.PHONY: version_data.o

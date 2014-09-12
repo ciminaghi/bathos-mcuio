@@ -29,6 +29,7 @@ SECTIONS
 		cmds_start = .;
 		*(.shell_cmds);
 		cmds_end = .;
+		*(.text.version);
 		. = ALIGN(64);
 		evt_sys_timer_tick_handlers_start = .;
 		*(.evt_sys_timer_tick_handlers);
