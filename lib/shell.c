@@ -100,9 +100,8 @@ static void __shell_input_handle(struct event_handler_data *ed)
 		return;
 
 	if (data->curr_ptr - data->buf >= sizeof(data->buf)) {
-		printf("invalid cmd\n");
-		data->curr_ptr = data->buf;
-		return;
+		printf("\ninvalid cmd\n");
+		goto next_cmd;
 	}
 
 	stat = pipe_read(bathos_stdin, data->curr_ptr,
@@ -132,9 +131,12 @@ static void __shell_input_handle(struct event_handler_data *ed)
 	/* one or more ; separated cmds have been received, run them */
 	for (cmdstr = data->buf; cmdstr[0]; )
 		cmdstr += __do_cmd(cmdstr);
-	
+
+next_cmd:
 	/* get ready for next cmd */
 	data->curr_ptr = data->buf;
+	/* Empty pipe (if pending chars are there) and reset buffer */
+	pipe_read(bathos_stdin, data->curr_ptr, sizeof(data->buf));
 	memset(data->buf, 0, sizeof(data->buf));
 	printf(PROMPT);
 }
