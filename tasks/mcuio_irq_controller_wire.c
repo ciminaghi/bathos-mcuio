@@ -204,27 +204,3 @@ static void mcuio_irq_handle(struct event_handler_data *edata)
 
 declare_event_handler(mcuio_irq, mcuio_irq_init, mcuio_irq_handle, NULL);
 
-#if defined CONFIG_MCUIO_TEST_IRQ
-
-declare_event(mcuio_irq);
-
-static void __pipe_input_handle(struct event_handler_data *ed)
-{
-	struct bathos_pipe *pipe = ed->data;
-	static struct mcuio_function_irq_data idata;
-
-	if (list_empty(&pipe->dev->pipes))
-		/* Not opened */
-		return;
-
-	if (pipe != bathos_stdin)
-		return;
-
-	idata.func = 2;
-	idata.active = 1;
-	trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX);
-}
-
-declare_event_handler(pipe_input_ready, NULL, __pipe_input_handle, NULL);
-
-#endif /* CONFIG_MCUIO_TEST_IRQ */
