@@ -111,14 +111,6 @@ config MCUIO_IRQ_WIRE_ACTIVE_LEVEL
        help
          This select the active level for irqs sent to the MPU
 
-config MCUIO_TEST_IRQ
-       prompt "mcuio irq test task"
-       bool
-       depends on MCUIO_IRQ_CONTROLLER_WIRE
-       default false
-       help
-         This sets up a task wich sends periodic interrupts to the host.
-
 config MCUIO_SHIELD
        prompt "generic mcuio shield function"
        bool
