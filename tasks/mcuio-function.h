@@ -44,7 +44,8 @@ extern struct mcuio_function_runtime mcuio_func_common_runtime;
 
 struct mcuio_function_ops {
 	/* reply/error notification */
-	void (*reply)(struct mcuio_function *f, int err);
+	void (*reply)(struct mcuio_base_packet *data,
+		      struct mcuio_function *f, int err);
 };
 
 struct mcuio_function {
