@@ -238,12 +238,13 @@ static void __mcuio_send_error_to_function(struct mcuio_data *d,
 					   int err)
 {
 	if (f->ops->reply)
-		f->ops->reply(f, err);
+		f->ops->reply(&d->input_packet, f, err);
 }
 
 static void mcuio_send_reply_to_function(struct mcuio_data *d,
 					 struct mcuio_function *f)
 {
+	__mcuio_send_error_to_function(d, f, 0);
 }
 
 static void mcuio_request_received(struct mcuio_data *d,
