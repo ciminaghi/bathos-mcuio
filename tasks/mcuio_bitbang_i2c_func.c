@@ -296,19 +296,31 @@ static void __i2c_bitbang_trig_evt_error(void)
 	pr_debug("__i2c_bitbang_trig_evt_error\n");
 }
 
-static void __i2c_bitbang_next_state(enum i2c_transaction_state s)
+/*
+ * Returns 0 when GO event handler must be left to allow for more events
+ * to be handled, !0 otherwise
+ */
+static int __i2c_bitbang_next_state(enum i2c_transaction_state s)
 {
-	int stat;
+	int stat, n;
 	i2c_data.state = s;
+
 	pr_debug("__i2c_bitbang_next_state %d\n", s);
 	if (s == IDLE || s == AWAITING_OUTPUT_DATA ||
 	    s == AWAITING_INPUT_SPACE)
-		return;
+		return 0;
+
+	n = pending_events();
+	if (!n) {
+		pr_debug("no pending events\n");
+		return 1;
+	}
 	pr_debug("triggering evt I2C_GO\n");
 	stat = trigger_event(&event_name(i2c_transaction),
 			     (void *)I2C_GO, EVT_PRIO_MAX);
 	if (stat < 0)
 		__i2c_bitbang_trig_evt_error();
+	return stat < 0 ? 1 : 0;
 }
 
 static void __i2c_bitbang_trigger_irq(void)
@@ -342,10 +354,12 @@ static void __i2c_handle_reset(void)
 	__i2c_bitbang_next_state(IDLE);
 }
 
-static void __i2c_handle_go(void)
+static int __i2c_handle_go(void)
 {
 	i2c_data.timeout = HZ;
-	i2c_data.udelay = 10;
+	i2c_data.udelay = 1;
+	int ret = 0;
+
 	pr_debug("__i2c_handle_go, s%d\n", i2c_data.state);
 	switch (i2c_data.state) {
 	case IDLE:
@@ -354,7 +368,7 @@ static void __i2c_handle_go(void)
 		__i2c_bitbang_send_start();
 		/* -> START_SENT */
 		pr_debug("start sent\n");
-		__i2c_bitbang_next_state(START_SENT);
+		ret = __i2c_bitbang_next_state(START_SENT);
 		break;
 	case START_SENT:
 	{
@@ -364,24 +378,24 @@ static void __i2c_handle_go(void)
 		if (__i2c_bitbang_send_slave_addr(force_rd) < 0) {
 			pr_debug("error sending slave address\n");
 			__i2c_bitbang_end_transaction(NAK_RECEIVED);
-			return;
+			break;
 		}
 		/* -> ADDR_SENT */
 		pr_debug("address send\n");
-		__i2c_bitbang_next_state(ADDR_SENT);
+		ret = __i2c_bitbang_next_state(ADDR_SENT);
 		break;
 	}
 	case ADDR_SENT:
 		if (!i2c_data.obuf_len) {
 			pr_debug("no out data, switching to DATA_SENT state\n");
 			/* No data */
-			__i2c_bitbang_next_state(DATA_SENT);
+			ret = __i2c_bitbang_next_state(DATA_SENT);
 			break;
 		}
 		/* Reset byte counter */
 		i2c_data.data_cnt = 0;
 		/* -> SENDING_DATA */
-		__i2c_bitbang_next_state(SENDING_DATA);
+		ret = __i2c_bitbang_next_state(SENDING_DATA);
 		break;
 	case SENDING_DATA:
 	{
@@ -393,7 +407,7 @@ static void __i2c_handle_go(void)
 		if (__i2c_bitbang_send_byte(c) < 0) {
 			pr_debug("NAK received sending byte\n");
 			__i2c_bitbang_end_transaction(NAK_RECEIVED);
-			return;
+			break;
 		}
 		i2c_data.data_cnt++;
 		i2c_data.obuf_tail = (i2c_data.obuf_tail + 1) &
@@ -405,7 +419,7 @@ static void __i2c_handle_go(void)
 			   dwords, maybe 1 to 3 bytes are in eccess
 			*/
 			i2c_data.obuf_tail = i2c_data.obuf_head;
-			__i2c_bitbang_next_state(DATA_SENT);
+			ret = __i2c_bitbang_next_state(DATA_SENT);
 			break;
 		}
 		count = CIRC_CNT(i2c_data.obuf_head, i2c_data.obuf_tail,
@@ -417,28 +431,28 @@ static void __i2c_handle_go(void)
 			__i2c_bitbang_trigger_irq();
 		}
 
-		__i2c_bitbang_next_state(count ?
-					 SENDING_DATA :
-					 AWAITING_OUTPUT_DATA);
+		ret = __i2c_bitbang_next_state(count ?
+					       SENDING_DATA :
+					       AWAITING_OUTPUT_DATA);
 		break;
 	}
 	case DATA_SENT:
 		if (!i2c_data.ibuf_len) {
 			pr_debug("DATA_SENT state, transaction ok\n");
 			__i2c_bitbang_end_transaction(TRANSACTION_OK);
-			return;
+			break;
 		}
 		if (!i2c_data.obuf_len) {
 			/* Read data without writing cmd first */
 			pr_debug("read data without sending cmd first\n");
 			/* Reset counter */
 			i2c_data.data_cnt = i2c_data.ibuf_len == -1 ? -1 : 0;
-			__i2c_bitbang_next_state(RECEIVING_DATA);
+			ret = __i2c_bitbang_next_state(RECEIVING_DATA);
 		} else {
 			/* Output data sent, send repeated start */
 			pr_debug("sending repeated start\n");
 			__i2c_bitbang_send_repstart();
-			__i2c_bitbang_next_state(REPEATED_START_SENT);
+			ret = __i2c_bitbang_next_state(REPEATED_START_SENT);
 		}
 		/* Reset counter */
 		i2c_data.data_cnt = 0;
@@ -449,11 +463,11 @@ static void __i2c_handle_go(void)
 		if (__i2c_bitbang_send_slave_addr(1) < 0) {
 			pr_debug("NAK received\n");
 			__i2c_bitbang_end_transaction(NAK_RECEIVED);
-			return;
+			break;;
 		}
 		/* -> ADDR_SENT_2 */
 		pr_debug("address + r sent\n");
-		__i2c_bitbang_next_state(ADDR_SENT_2);
+		ret = __i2c_bitbang_next_state(ADDR_SENT_2);
 		break;
 	case ADDR_SENT_2:
 		pr_debug("ADDR_SENT_2 state\n");
@@ -461,7 +475,7 @@ static void __i2c_handle_go(void)
 		i2c_data.data_cnt = i2c_data.ibuf_len == -1 ? -1 : 0;
 		pr_debug("i2c_data.data_cnt reset to %u\n", i2c_data.data_cnt);
 		/* -> RECEIVING_DATA */
-		__i2c_bitbang_next_state(RECEIVING_DATA);
+		ret = __i2c_bitbang_next_state(RECEIVING_DATA);
 		break;
 	case RECEIVING_DATA:
 	{
@@ -478,7 +492,7 @@ static void __i2c_handle_go(void)
 					   sizeof(i2c_data.buffer))) {
 				pr_debug("SMBUS IS TOO BIG\n");
 				__i2c_bitbang_end_transaction(INVALID_LEN);
-				return;
+				break;
 			}
 			/*
 			 * smbus read block, the device shall tell us about
@@ -494,7 +508,7 @@ static void __i2c_handle_go(void)
 			(sizeof(i2c_data.buffer) - 1);
 		if (done) {
 			pr_debug("done\n");
-			__i2c_bitbang_next_state(DATA_RECEIVED);
+			ret = __i2c_bitbang_next_state(DATA_RECEIVED);
 			break;
 		}
 		space = CIRC_SPACE(i2c_data.ibuf_head,
@@ -506,9 +520,9 @@ static void __i2c_handle_go(void)
 			__i2c_bitbang_trigger_irq();
 		}
 
-		__i2c_bitbang_next_state(space ?
-					 RECEIVING_DATA :
-					 AWAITING_INPUT_SPACE);
+		ret = __i2c_bitbang_next_state(space ?
+					       RECEIVING_DATA :
+					       AWAITING_INPUT_SPACE);
 		break;
 	}
 	case DATA_RECEIVED:
@@ -522,6 +536,7 @@ static void __i2c_handle_go(void)
 		/* Error state, ignore go events */
 		break;
 	}
+	return ret;
 }
 
 static void __i2c_bitbang_do_transaction(struct event_handler_data *ed)
@@ -533,7 +548,7 @@ static void __i2c_bitbang_do_transaction(struct event_handler_data *ed)
 		__i2c_handle_reset();
 		break;
 	case I2C_GO:
-		__i2c_handle_go();
+		while(__i2c_handle_go());
 		break;
 	default:
 		printf("__i2c_bitbang_do_transaction ! %d\n", evt);
