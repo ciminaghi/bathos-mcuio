@@ -126,6 +126,10 @@ static const unsigned int PROGMEM i2c_bitbang_ibuf_length =
 
 declare_event(i2c_transaction);
 
+#ifndef i2c_udelay
+#define i2c_udelay(a) udelay(a)
+#endif
+
 #ifndef setsda
 static inline void setsda(int v)
 {
@@ -163,7 +167,7 @@ static inline int getsda(void)
 static inline void sdalo(void)
 {
 	setsda(0);
-	udelay((i2c_data.udelay + 1) / 2);
+	i2c_udelay((i2c_data.udelay + 1) / 2);
 }
 #endif
 
@@ -171,7 +175,7 @@ static inline void sdalo(void)
 static inline void sdahi(void)
 {
 	setsda(1);
-	udelay((i2c_data.udelay + 1) / 2);
+	i2c_udelay((i2c_data.udelay + 1) / 2);
 }
 #endif
 
@@ -179,7 +183,7 @@ static inline void sdahi(void)
 static inline void scllo(void)
 {
 	setscl(0);
-	udelay(i2c_data.udelay / 2);
+	i2c_udelay(i2c_data.udelay / 2);
 }
 #endif
 
@@ -194,7 +198,7 @@ static inline int sclhi(void)
 		if (time_after(jiffies, start + i2c_data.timeout))
 			return -ETIMEDOUT;
 	}
-	udelay(i2c_data.udelay);
+	i2c_udelay(i2c_data.udelay);
 	return 0;
 }
 #endif
@@ -203,7 +207,7 @@ static inline int sclhi(void)
 static void __i2c_bitbang_send_start(void)
 {
 	setsda(0);
-	udelay(i2c_data.udelay);
+	i2c_udelay(i2c_data.udelay);
 	scllo();
 }
 
@@ -212,7 +216,7 @@ static void __i2c_bitbang_send_repstart(void)
 	sdahi();
 	sclhi();
 	setsda(0);
-	udelay(i2c_data.udelay);
+	i2c_udelay(i2c_data.udelay);
 	scllo();
 }
 
@@ -221,7 +225,7 @@ static void __i2c_bitbang_send_stop(void)
 	sdalo();
 	sclhi();
 	setsda(1);
-	udelay(i2c_data.udelay);
+	i2c_udelay(i2c_data.udelay);
 }
 
 static int __i2c_bitbang_send_byte(uint8_t c)
@@ -234,7 +238,7 @@ static int __i2c_bitbang_send_byte(uint8_t c)
 	for (i = 7; i >= 0; i--) {
 		sb = (c >> i) & 1;
 		setsda(sb);
-		udelay((i2c_data.udelay + 1) / 2);
+		i2c_udelay((i2c_data.udelay + 1) / 2);
 		if (sclhi() < 0)
 			return -ETIMEDOUT;
 		scllo();
@@ -268,7 +272,7 @@ static int __i2c_bitbang_recv_byte(uint8_t *out)
 		if (getsda())
 			*out |= 0x01;
 		setscl(0);
-		udelay(i == 7 ? i2c_data.udelay / 2 : i2c_data.udelay);
+		i2c_udelay(i == 7 ? i2c_data.udelay / 2 : i2c_data.udelay);
 	}
 	/* assert: scl is low */
 	return 0;
@@ -284,7 +288,7 @@ static int __i2c_bitbang_send_acknak(int is_ack)
 {
 	if (is_ack)
 		setsda(0);
-	udelay((i2c_data.udelay + 1) / 2);
+	i2c_udelay((i2c_data.udelay + 1) / 2);
 	if (sclhi() < 0)
 		return -ETIMEDOUT;
 	scllo();
