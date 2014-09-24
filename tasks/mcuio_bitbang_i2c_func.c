@@ -13,6 +13,7 @@
 #include <bathos/jiffies.h>
 #include <bathos/delay.h>
 #include <bathos/circ_buf.h>
+#include <arch/gpio-bitbang-i2c.h>
 #include <tasks/mcuio.h>
 
 #include "mcuio-function.h"
@@ -125,49 +126,64 @@ static const unsigned int PROGMEM i2c_bitbang_ibuf_length =
 
 declare_event(i2c_transaction);
 
+#ifndef setsda
 static inline void setsda(int v)
 {
 	gpio_dir(GPIO_SDA, 1, v);
 	if (v)
 		gpio_dir(GPIO_SDA, 0, 1);
 }
+#endif
 
+#ifndef setscl
 static inline void setscl(int v)
 {
 	gpio_dir(GPIO_SCL, 1, v);
 	if (v)
 		gpio_dir(GPIO_SCL, 0, 1);
 }
+#endif
 
+#ifndef getscl
 static inline int getscl(void)
 {
 	return gpio_get(GPIO_SCL);
 }
+#endif
 
+#ifndef getsda
 static inline int getsda(void)
 {
 	int ret = gpio_get(GPIO_SDA);
 	return ret;
 }
+#endif
 
+#ifndef sdalo
 static inline void sdalo(void)
 {
 	setsda(0);
 	udelay((i2c_data.udelay + 1) / 2);
 }
+#endif
 
+#ifndef sdahi
 static inline void sdahi(void)
 {
 	setsda(1);
 	udelay((i2c_data.udelay + 1) / 2);
 }
+#endif
 
+#ifndef scllo
 static inline void scllo(void)
 {
 	setscl(0);
 	udelay(i2c_data.udelay / 2);
 }
+#endif
 
+#ifndef sclhi
 static inline int sclhi(void)
 {
 	unsigned long start;
@@ -181,6 +197,7 @@ static inline int sclhi(void)
 	udelay(i2c_data.udelay);
 	return 0;
 }
+#endif
 
 
 static void __i2c_bitbang_send_start(void)
