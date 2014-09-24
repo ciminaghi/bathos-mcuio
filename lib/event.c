@@ -162,3 +162,7 @@ void handle_events(void)
 	}
 }
 
+int pending_events(void)
+{
+	return CIRC_CNT(pe_head, pe_tail, pe_buffer_nevts);
+}

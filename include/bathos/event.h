@@ -70,6 +70,7 @@ struct pending_event {
 
 
 extern int events_init(void);
+extern int pending_events(void);
 
 /*
  * Trigger a generic event
