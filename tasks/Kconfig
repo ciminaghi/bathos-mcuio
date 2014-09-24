@@ -73,14 +73,30 @@ config MCUIO_PWM
        depends on TASK_MCUIO
        default n
 
+choice
+       prompt "Irq controller"
+
 config MCUIO_IRQ_CONTROLLER_WIRE
        prompt "Wire irq controller"
        bool
-       depends on TASK_MCUIO
-       default n
        help
          This adds an mcuio function which sends interrupts to the MPU via
 	 an MCU gpio
+
+config MCUIO_IRQ_CONTROLLER_MSG
+       prompt "Message irq controller"
+       bool
+       help
+         This adds an mcuio function which sends interrupts to the MPU via
+	 an MCU message over the bus
+
+config MCUIO_IRQ_CONTROLLER_NONE
+       prompt "No irq controller"
+       bool
+       help
+         This avoids building any interrupt controller
+
+endchoice
 
 config MCUIO_IRQ_CONTROLLER_WIRE_DEVICE
        prompt "Device id for irq controller"
