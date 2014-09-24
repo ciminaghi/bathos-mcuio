@@ -32,6 +32,9 @@ ifndef TASK-y
   ifeq ($(CONFIG_MCUIO_IRQ_CONTROLLER_WIRE),y)
     TASK-y+=mcuio_irq_controller_wire.o
   endif
+  ifeq ($(CONFIG_MCUIO_IRQ_CONTROLLER_MSG),y)
+    TASK-y+=mcuio_irq_controller_msg.o
+  endif
   ifeq ($(CONFIG_MCUIO_SHIELD), y)
     TASK-y+=mcuio_shield_func.o
   endif
