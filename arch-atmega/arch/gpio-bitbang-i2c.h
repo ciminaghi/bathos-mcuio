@@ -45,4 +45,7 @@ static inline int __atmega_bitbang_getsda(void)
 	return PIND & _BV(PIND1);
 }
 
+/* No udelay for i2c ! */
+#define i2c_udelay(a)
+
 #endif /* __GPIO_BITBANG_H__ */
