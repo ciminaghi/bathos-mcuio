@@ -300,6 +300,13 @@ static void __i2c_bitbang_trig_evt_error(void)
 	pr_debug("__i2c_bitbang_trig_evt_error\n");
 }
 
+static int __trigger_go_event(void)
+{
+	pr_debug("triggering evt I2C_GO\n");
+	return trigger_event(&event_name(i2c_transaction),
+			     (void *)I2C_GO, EVT_PRIO_MAX);
+}
+
 /*
  * Returns 0 when GO event handler must be left to allow for more events
  * to be handled, !0 otherwise
@@ -314,17 +321,7 @@ static int __i2c_bitbang_next_state(enum i2c_transaction_state s)
 	    s == AWAITING_INPUT_SPACE)
 		return 0;
 
-	n = pending_events();
-	if (!n) {
-		pr_debug("no pending events\n");
-		return 1;
-	}
-	pr_debug("triggering evt I2C_GO\n");
-	stat = trigger_event(&event_name(i2c_transaction),
-			     (void *)I2C_GO, EVT_PRIO_MAX);
-	if (stat < 0)
-		__i2c_bitbang_trig_evt_error();
-	return stat < 0 ? 1 : 0;
+	return 1;
 }
 
 static void __i2c_bitbang_trigger_irq(void)
@@ -698,13 +695,17 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 			break;
 		case I2C_MCUIO_OBUF_HEAD:
 			i2c_data.obuf_head = in;
-			if (i2c_data.state == AWAITING_OUTPUT_DATA)
+			if (i2c_data.state == AWAITING_OUTPUT_DATA) {
 				__i2c_bitbang_next_state(SENDING_DATA);
+				__trigger_go_event();
+			}
 			break;
 		case I2C_MCUIO_IBUF_TAIL:
 			i2c_data.ibuf_tail = in;
-			if (i2c_data.state == AWAITING_INPUT_SPACE)
+			if (i2c_data.state == AWAITING_INPUT_SPACE) {
 				__i2c_bitbang_next_state(RECEIVING_DATA);
+				__trigger_go_event();
+			}
 			break;
 		default:
 			return -EPERM;
