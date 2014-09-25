@@ -63,12 +63,17 @@ static void spi_close(struct bathos_pipe *pipe)
 static int spi_read(struct bathos_pipe *pipe, char *buf, int len)
 {
 	struct spi_data *data = &spi_data;
+	int flags;
+	int l;
 
-	int l = min(len, CIRC_CNT_TO_END(data->cbufrx.head, data->cbufrx.tail,
+	interrupt_disable(flags);
+	l = min(len, CIRC_CNT_TO_END(data->cbufrx.head, data->cbufrx.tail,
 				     SPI_BUF_SIZE));
 
-	if (!l)
+	if (!l) {
+		interrupt_restore(flags);
 		return -EAGAIN;
+	}
 
 	memcpy(buf, &data->bufrx[data->cbufrx.tail], l);
 	data->cbufrx.tail = (data->cbufrx.tail + l) & (SPI_BUF_SIZE - 1);
@@ -78,6 +83,7 @@ static int spi_read(struct bathos_pipe *pipe, char *buf, int len)
 		pipe_dev_trigger_event(&__spi_dev, &evt_pipe_input_ready,
 				       EVT_PRIO_MAX);
 
+	interrupt_restore(flags);
 	return l;
 }
 
