@@ -14,16 +14,17 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <bathos/allocator.h>
 
 #define SPI_BUF_SIZE 16
 
 struct spi_data {
 	struct circ_buf cbufrx;
-	char bufrx[SPI_BUF_SIZE];
+	char *bufrx;
 	int overrun;
 
 	struct circ_buf cbuftx;
-	char buftx[SPI_BUF_SIZE];
+	char *buftx;
 };
 
 struct spi_data spi_data;
@@ -46,6 +47,8 @@ static int spi_open(struct bathos_pipe *pipe)
 	/* Enable SPI (in slave mode) and its interrupt */
 	SPCR = (1 << SPE);
 	SPCR |= (1 << SPIE);
+	spi_data.bufrx = bathos_alloc_buffer(SPI_BUF_SIZE);
+	spi_data.buftx = bathos_alloc_buffer(SPI_BUF_SIZE);
 	return 0;
 }
 
@@ -53,6 +56,8 @@ static void spi_close(struct bathos_pipe *pipe)
 {
 	SPCR &= ~(1 << SPIE);
 	SPCR &= ~(1 << SPE);
+	bathos_free_buffer(spi_data.bufrx, SPI_BUF_SIZE);
+	bathos_free_buffer(spi_data.buftx, SPI_BUF_SIZE);
 }
 
 static int spi_read(struct bathos_pipe *pipe, char *buf, int len)
