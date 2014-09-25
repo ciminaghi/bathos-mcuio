@@ -127,6 +127,11 @@ ISR(SPI_STC_vect, __attribute__((section(".text.ISR"))))
 	}
 
 	else {
+		SPDR = 0x00;
+
+		if (c == 0x00)
+			return;
+
 		cnt_prev = CIRC_CNT(data->cbufrx.head, data->cbufrx.tail,
 				    SPI_BUF_SIZE);
 		if (!CIRC_SPACE(data->cbufrx.head, data->cbufrx.tail,
