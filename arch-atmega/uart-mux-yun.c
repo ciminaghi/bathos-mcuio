@@ -77,6 +77,9 @@ enum usb_uart_mux_mode {
 /* Switch command from mips: 0xaa */
 #define UART_MODE_SWITCH_MIPS 0xaa
 
+/* Buffer length for dynamic allocation */
+#define PIPE_BUF_SIZE 64
+
 static struct uart_mux_yun_data {
 	enum uart_mux_mode uart_mode;
 	enum usb_uart_mux_mode usb_uart_mode;
@@ -165,10 +168,10 @@ static void __do_switch_usb_uart(void)
 	printf("\r\nswitched to usb_uart mode: %s\r\n", m);
 }
 
-static void __spi_pipe_input_handle(struct event_handler_data *ed)
+static void __spi_pipe_input_handle(struct event_handler_data *ed,
+	char *buf, int bufsize)
 {
 	struct bathos_pipe *pipe = ed->data;
-	char buf[20];
 	int l = 0;
 
 	if (pipe != uart_data.spipipe)
@@ -181,7 +184,7 @@ static void __spi_pipe_input_handle(struct event_handler_data *ed)
 	if (uart_data.usb_uart_mode != SHELL)
 		uart_data.usb_uart_mode = SPI;
 
-	l = pipe_read(pipe, buf, sizeof(buf));
+	l = pipe_read(pipe, buf, bufsize);
 	if (l <= 0)
 		return;
 
@@ -191,28 +194,30 @@ static void __spi_pipe_input_handle(struct event_handler_data *ed)
 static void __pipe_input_handle(struct event_handler_data *ed)
 {
 	struct bathos_pipe *pipe = ed->data;
-	char buf[20];
+	char *buf;
 	int l = 0;
+
+	buf = bathos_alloc_buffer(PIPE_BUF_SIZE);
 
 	/* FIXME: __spi_pipe_input_handle should be registered as handler
 	 * for pipe_input_ready, so that it is directly called */
 	if (pipe == uart_data.spipipe) {
-		__spi_pipe_input_handle(ed);
-		return;
+		__spi_pipe_input_handle(ed, buf, PIPE_BUF_SIZE);
+		goto free_buffer;
 	}
 
 	if (list_empty(&pipe->dev->pipes))
 		/* Not opened */
-		return;
+		goto free_buffer;
 
 	if (pipe != uart_data.uartpipe && pipe != bathos_stdin)
-		return;
+		goto free_buffer;
 
 	if ((uart_data.uart_mode == MIPS_CONSOLE || pipe == bathos_stdin) &&
 	    uart_data.usb_uart_mode != SHELL) {
-		l = pipe_read(pipe, buf, sizeof(buf));
+		l = pipe_read(pipe, buf, PIPE_BUF_SIZE);
 		if (l <= 0)
-		    return;
+		    goto free_buffer;
 	}
 	if (pipe == bathos_stdin) {
 		int i;
@@ -227,7 +232,7 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 			/* Let the shell read the chars */
 			trigger_event(&evt_shell_input_ready,
 				      NULL, EVT_PRIO_MAX);
-			return;
+			goto free_buffer;
 		}
 
 		if (uart_data.usb_uart_mode == SPI) {
@@ -237,11 +242,11 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 		}
 
 		if (uart_data.uart_mode == MCUIO)
-			return;
+			goto free_buffer;
 		/* Console uart_mode, send input to mips */
 		if (uart_data.uartpipe)
 			pipe_write(uart_data.uartpipe, buf, l);
-		return;
+		goto free_buffer;
 	}
 	/* Data coming from mips (avr-uart) */
 	if (uart_data.uart_mode == MIPS_CONSOLE) {
@@ -253,12 +258,15 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 			}
 		}
 		if (uart_data.uart_mode == MCUIO)
-			return;
+			goto free_buffer;
 		pipe_write(bathos_stdout, buf, l);
-		return;
+		goto free_buffer;
 	}
 	/* MCUIO uart_mode, trigger event for mcuio */
 	trigger_event(&evt_mcuio_data_ready, NULL, EVT_PRIO_MAX);
+
+free_buffer:
+	bathos_free_buffer(buf, PIPE_BUF_SIZE);
 }
 
 declare_event_handler(pipe_input_ready, NULL, __pipe_input_handle, NULL);

@@ -16,7 +16,7 @@
 #include <avr/pgmspace.h>
 #include <bathos/allocator.h>
 
-#define SPI_BUF_SIZE 16
+#define SPI_BUF_SIZE 64
 
 struct spi_data {
 	struct circ_buf cbufrx;
