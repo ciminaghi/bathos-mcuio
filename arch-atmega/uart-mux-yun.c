@@ -194,30 +194,28 @@ static void __spi_pipe_input_handle(struct event_handler_data *ed,
 static void __pipe_input_handle(struct event_handler_data *ed)
 {
 	struct bathos_pipe *pipe = ed->data;
-	char *buf;
+	char buf[PIPE_BUF_SIZE];
 	int l = 0;
-
-	buf = bathos_alloc_buffer(PIPE_BUF_SIZE);
 
 	/* FIXME: __spi_pipe_input_handle should be registered as handler
 	 * for pipe_input_ready, so that it is directly called */
 	if (pipe == uart_data.spipipe) {
 		__spi_pipe_input_handle(ed, buf, PIPE_BUF_SIZE);
-		goto free_buffer;
+		goto done;
 	}
 
 	if (list_empty(&pipe->dev->pipes))
 		/* Not opened */
-		goto free_buffer;
+		goto done;
 
 	if (pipe != uart_data.uartpipe && pipe != bathos_stdin)
-		goto free_buffer;
+		goto done;
 
 	if ((uart_data.uart_mode == MIPS_CONSOLE || pipe == bathos_stdin) &&
 	    uart_data.usb_uart_mode != SHELL) {
 		l = pipe_read(pipe, buf, PIPE_BUF_SIZE);
 		if (l <= 0)
-		    goto free_buffer;
+		    goto done;
 	}
 	if (pipe == bathos_stdin) {
 		int i;
@@ -232,7 +230,7 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 			/* Let the shell read the chars */
 			trigger_event(&evt_shell_input_ready,
 				      NULL, EVT_PRIO_MAX);
-			goto free_buffer;
+			goto done;
 		}
 
 		if (uart_data.usb_uart_mode == SPI) {
@@ -242,11 +240,11 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 		}
 
 		if (uart_data.uart_mode == MCUIO)
-			goto free_buffer;
+			goto done;
 		/* Console uart_mode, send input to mips */
 		if (uart_data.uartpipe)
 			pipe_write(uart_data.uartpipe, buf, l);
-		goto free_buffer;
+		goto done;
 	}
 	/* Data coming from mips (avr-uart) */
 	if (uart_data.uart_mode == MIPS_CONSOLE) {
@@ -258,15 +256,15 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 			}
 		}
 		if (uart_data.uart_mode == MCUIO)
-			goto free_buffer;
+			goto done;
 		pipe_write(bathos_stdout, buf, l);
-		goto free_buffer;
+		goto done;
 	}
 	/* MCUIO uart_mode, trigger event for mcuio */
 	trigger_event(&evt_mcuio_data_ready, NULL, EVT_PRIO_MAX);
 
-free_buffer:
-	bathos_free_buffer(buf, PIPE_BUF_SIZE);
+done:
+	return;
 }
 
 declare_event_handler(pipe_input_ready, NULL, __pipe_input_handle, NULL);

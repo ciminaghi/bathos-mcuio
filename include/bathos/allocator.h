@@ -6,7 +6,7 @@
 #define BATHOS_NORDERS		(1 << BATHOS_NORDERS_LOG)
 #define BATHOS_MAX_ORDER	((BATHOS_NORDERS) - 1)
 /* How many bytes are managed by the allocator */
-#define BATHOS_ALLOCATOR_MEMORY 1024
+#define BATHOS_ALLOCATOR_MEMORY 512
 
 /* Returns number of buffers for order o */
 #define BATHOS_NBUFS(o) (1 << ((BATHOS_NORDERS - (o)) - 1))
