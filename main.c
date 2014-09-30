@@ -25,7 +25,8 @@ int bathos_main(void)
 	printf("Hello, Bathos is speaking (%s built on " __DATE__ ")\n",
 	       BATHOS_GIT);
 	while(1) {
-		handle_events();
+		while(pending_events())
+			handle_events();
 		idle();
 	}
 	return 0;
