@@ -34,52 +34,45 @@ static int adc_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 {
 	unsigned idx = offset / 0x40;
 	unsigned reg = offset % 0x40;
-	const struct adc *adc = &adcs[idx];
 	uint8_t id[4];
+	struct adc *adc;
+#ifdef ARCH_IS_HARVARD
+	struct adc _adc;
+	memcpy_p(&_adc, &adcs[idx], sizeof(_adc));
+	adc = &_adc;
+#else
+	adc = &adcs[idx];
+#endif
 
 	switch(reg) {
 
-		case 0x00: /* identifier, return ADXX */
+		/* FIXME: labels should be configurable.
+		 * Here, labels are taken from adcs index */
+
+		case 0x00: /* identifier, return AX */
 			id[0] = 'A';
-			id[1] = 'D';
-			id[2] = '0' + (idx / 10);
-			id[3] = '0' + (idx % 10);
+			id[1] = (idx >= 10) ? '0' + (idx / 10) : '0' + idx;
+			id[2] = (idx >= 10) ? '0' + (idx % 10) : '\0';
+			id[3] = '\0';
 			memcpy(out, id, sizeof(id));
+			flip4((uint8_t*)out);
+				/* FIXME: to be done only if
+				endiennes differs on MPU*/
 			break;
 
-		case 0x04: /* capabilities
-			    * bit 6-1: #sampling_bits; bit 0: signed */
-			*out = (adc->is_signed ? 1 : 0) | (adc->nbits << 1);
+		case 0x04: /* flags
+			    * bit 0: signed */
+			*out = adc->flags;
 			break;
 
-		case 0x08: /* response time (in ns) */
-			*out = adc->tresp_ns;
+		case 0x08: /* voltage resolution (in uV) */
+			*out = adc->vref_uv;
 			break;
 
 		case 0x0c: /* data */
 			if (!adc_enabled())
 				return -EACCES;
-			adc = adc_get(idx);
-			if (!adc)
-				return -EBUSY;
 			*out = adc_sample(adc);
-			adc_release(adc);
-			break;
-
-		case 0x10: /* status */
-			/* bit 0 of this reg is 'busy' bit */
-			*out = (ch_stat >> idx) & 0x1;
-			break;
-
-		/* The following regs are for future uses: asynchronous
-		 * control of ADCs */
-
-		case 0x14: /* period multiplier */
-			/* FIXME todo */
-			break;
-
-		case 0x18: /* ctrl */
-			/* FIXME todo */
 			break;
 
 		default:
@@ -89,16 +82,9 @@ static int adc_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 	return 0;
 }
 
-static int adc_ctrl_wrdw(const struct mcuio_range *r, unsigned offset,
-			 const uint32_t *__in, int fill)
-{
-	/* FIXME: todo: at present, all registers are read only */
-	return -EINVAL;
-}
-
 const struct mcuio_range_ops PROGMEM adc_ctrl_ops = {
 	.rd = { NULL, NULL, adc_ctrl_rddw, NULL, },
-	.wr = { NULL, NULL, adc_ctrl_wrdw, NULL, },
+	.wr = { NULL, NULL, NULL, NULL, },
 };
 
 static int adc_gen_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
@@ -149,6 +135,7 @@ static const struct mcuio_range PROGMEM adc_ranges[] = {
 	},
 	/* dword 0x14, general ADC control */
 	{
+		/* bit 0: enable */
 		.start = 0x014,
 		.length = &u32_length,
 		.rd_target = NULL,

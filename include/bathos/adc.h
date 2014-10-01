@@ -8,13 +8,16 @@
 extern const uint32_t num_adc;   /* number of supported adc's */
 extern const uint32_t min_per_us;/* minimum period, in us */
 extern const uint32_t max_mul;   /* max value for multiplier */
-extern uint32_t ch_stat;         /* channel status, to be provided
-				      externally, initialized to 0 */
+
+#define BATHOS_ADC_FLAG_NONE		0
+#define BATHOS_ADC_FLAG_SIGNED	(1 << 0)
+#define BATHOS_ADC(idx, f, vr) \
+	{.hw_idx = idx, .flags = f, .vref_uv = vr}
 
 struct adc {
-	uint8_t nbits;
-	uint8_t is_signed;
-	uint32_t tresp_ns;
+	uint8_t flags;		/* flags, see above defines */
+	uint8_t hw_idx;	/* idx of adc on hw chip */
+	uint32_t vref_uv;	/* Voltage resolution, in microvolts */
 };
 
 extern const struct adc adcs[];
@@ -33,29 +36,5 @@ extern int adc_enabled();
  * arch-specific */
 
 extern uint32_t adc_sample(const struct adc *adc);
-extern const struct adc *adc_get(unsigned adc_id);
-extern void adc_release(const struct adc *adc);
-
-/* _adc_get and _adc_release are macros to be called by arch-specific
- * code */
-static inline int _adc_id(const struct adc *adc)
-{
-	return adc - adcs;
-}
-
-static inline const struct adc *_adc_get(unsigned adc_id)
-{
-	if (adc_id >= num_adc)
-		return NULL;
-	if (ch_stat & (1 << adc_id))
-		return NULL;
-	ch_stat |= (1 << adc_id);
-	return &adcs[adc_id];
-}
-
-static inline void _adc_release(const struct adc *adc)
-{
-	ch_stat &= ~(1 << _adc_id(adc));
-}
 
 #endif
