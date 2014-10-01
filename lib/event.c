@@ -139,7 +139,7 @@ int trigger_event(const struct event *e, void *data, int evt_prio)
 void handle_events(void)
 {
 	struct event *e;
-	int i, n = CIRC_CNT(pe_head, pe_tail, pe_buffer_nevts);
+	int i, n = pending_events();
 
 	for (i = 0; i < n; i++) {
 		struct pending_event *pe = &pe_buffer[pe_tail];
