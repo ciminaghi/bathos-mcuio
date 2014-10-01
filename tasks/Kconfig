@@ -61,6 +61,18 @@ config MCUIO_GPIO_VENDOR
        depends on MCUIO_GPIO
        default 0xaaaa
 
+config MCUIO_ADC
+       prompt "Mcuio ADC function"
+       bool
+       depends on TASK_MCUIO
+       default n
+
+config MCUIO_PWM
+       prompt "Mcuio PWM function"
+       bool
+       depends on TASK_MCUIO
+       default n
+
 config MCUIO_IRQ_CONTROLLER_WIRE
        prompt "Wire irq controller"
        bool

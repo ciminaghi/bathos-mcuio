@@ -35,7 +35,8 @@ $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
 
 ifeq ($(MCU),atmega32u4)
-AOBJ = $(ADIR)/main.o $(ADIR)/idle.o $(ADIR)/uart-mux-yun.o $(ADIR)/gpio.o
+AOBJ = $(ADIR)/main.o $(ADIR)/idle.o $(ADIR)/uart-mux-yun.o $(ADIR)/gpio.o \
+	$(ADIR)/adc.o $(ADIR)/pwm.o
 endif
 
 ifeq ($(CONFIG_DEBUG_BITBANG),y)
@@ -48,14 +49,6 @@ endif
 
 ifeq ($(CONFIG_UART),y)
 AOBJ += $(ADIR)/uart.o
-endif
-
-ifeq ($(CONFIG_ADC),y)
-AOBJ += $(ADIR)/adc.o
-endif
-
-ifeq ($(CONFIG_PWM),y)
-AOBJ += $(ADIR)/pwm.o
 endif
 
 ifeq ($(CONFIG_SPI),y)

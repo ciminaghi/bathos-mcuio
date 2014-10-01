@@ -42,16 +42,6 @@ config UART
        help
          Add an UART driver
 
-config ADC
-       bool "ADC driver"
-       help
-         Add an ADC driver
-
-config PWM
-       bool "PWM driver"
-       help
-         Add a PWM driver
-
 config SPI
        bool "SPI driver"
        help
