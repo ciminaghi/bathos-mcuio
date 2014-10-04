@@ -327,7 +327,9 @@ static void data_ready_handle(struct event_handler_data *ed)
 	else {
 		if (data->curr_len) {
 			if (time_after(jiffies, last + HZ/20)) {
+#ifdef CONFIG_MCUIO_DEBUG
 				printf("data_ready_handle to\n");
+#endif
 				data->curr_len = 0;
 			}
 		}
