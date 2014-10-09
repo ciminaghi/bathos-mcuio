@@ -13,3 +13,6 @@
 .config.old
 include/config
 include/generated
+
+scripts/allocator_aux_gen
+lib/allocator-tables.c
