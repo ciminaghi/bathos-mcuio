@@ -145,3 +145,8 @@ config COPY_STDOUT_TO_CONSOLE
        depends on !STDOUT_CONSOLE
        help
          Copy standard output to console
+
+config SMALLSIZE
+	bool "Shrink and optimize for size"
+	help
+	  Remove verbose or useless code, to minimize size in flash"
