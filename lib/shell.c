@@ -8,6 +8,12 @@
 
 #define MAX_ARGV 5
 
+#ifndef DEBUG
+#define pr_debug(a, args...)
+#else
+#define pr_debug(a, args...) printf(a, ##args)
+#endif
+
 #define PROMPT "lininoIO> "
 
 extern const struct shell_cmd PROGMEM cmds_start[], cmds_end[];
@@ -102,7 +108,7 @@ static void __shell_input_handle(struct event_handler_data *ed)
 	stat = pipe_read(bathos_stdin, data->curr_ptr,
 			 sizeof(data->buf) - (data->curr_ptr - data->buf));
 	if (stat < 0) {
-		printf("shell: error reading from stdin\n");
+		pr_debug("shell: error reading from stdin\n");
 		return;
 	}
 	/* find newline */
@@ -150,7 +156,7 @@ static void __shell_start_handle(struct event_handler_data *ed)
 	*pdata = bathos_alloc_buffer(sizeof(struct shell_data));
 	data = *pdata;
 	if (!data) {
-		printf("ERROR: shell_init(): not enough memory\n");
+		pr_debug("ERROR: shell_init(): not enough memory\n");
 		return;
 	}
 	printf("\nlininoIO shell started\n");
