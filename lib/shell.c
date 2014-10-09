@@ -147,8 +147,6 @@ static void __shell_start_handle(struct event_handler_data *ed)
 	struct shell_data **pdata = ed->priv;
 	struct shell_data *data = *pdata;
 
-	if (data)
-		printf("WARN: shell_init(): shell_data is not NULL\n");
 	*pdata = bathos_alloc_buffer(sizeof(struct shell_data));
 	data = *pdata;
 	if (!data) {
