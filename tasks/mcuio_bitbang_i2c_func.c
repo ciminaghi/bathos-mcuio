@@ -334,7 +334,7 @@ static void __i2c_bitbang_trigger_irq(void)
 	idata.active = 1;
 	pr_debug("__i2c_bitbang_trigger_irq()\n");
 	if (trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX))
-		printf("__i2c_bitbang_trigger_irq: evt error\n");
+		printf("i2c trg irq: evt err\n");
 }
 
 static void __i2c_bitbang_end_transaction(uint8_t s)
@@ -552,7 +552,7 @@ static void __i2c_bitbang_do_transaction(struct event_handler_data *ed)
 		while(__i2c_handle_go());
 		break;
 	default:
-		printf("__i2c_bitbang_do_transaction ! %d\n", evt);
+		printf("i2c do trans %d\n", evt);
 		break;
 	}
 }
@@ -596,8 +596,7 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 				idata.active = 0;
 				if (trigger_event(&event_name(mcuio_irq),
 						  &idata, EVT_PRIO_MAX))
-					printf("i2c_bitbang_registers_rddw: "
-					       "evt error\n");
+					printf("i2c reg rddw: evt err\n");
 				if (i2c_data.state != AWAITING_OUTPUT_DATA &&
 				    i2c_data.state != AWAITING_INPUT_SPACE) {
 					trigger_event(&event_name(
