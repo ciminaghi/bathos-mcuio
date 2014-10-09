@@ -237,7 +237,8 @@ static int license_handler(int argc, char *argv[])
 {
 	printf("lininoIO, MCU implementation of the mcuio protocol\n");
 	printf("See source files for individual Copyright terms\n");
-	printf("lininoIO is distributed under the GPL license version 2 or later, see source files for details\n");
+	printf("lininoIO is distributed under the GPL license version 2 "
+		"or later, see source files for details\n");
 	return 0;
 }
 
