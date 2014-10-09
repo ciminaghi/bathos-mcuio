@@ -33,6 +33,12 @@ extern int __vsprintf(char *buf, const char * PROGMEM, va_list)
 
 #define vsprintf(a, args...) __vsprintf(PSTR(a), ##args)
 
+#ifndef DEBUG
+#define pr_debug(a, args...)
+#else
+#define pr_debug(a, args...) printf(a, ##args)
+#endif
+
 /* Puts is not actually "standard", as it doesn't add the trailing newline */
 extern void putc(int c);
 extern int puts(const char *s);

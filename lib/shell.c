@@ -8,12 +8,6 @@
 
 #define MAX_ARGV 5
 
-#ifndef DEBUG
-#define pr_debug(a, args...)
-#else
-#define pr_debug(a, args...) printf(a, ##args)
-#endif
-
 #define PROMPT "lininoIO> "
 
 extern const struct shell_cmd PROGMEM cmds_start[], cmds_end[];

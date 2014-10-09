@@ -18,13 +18,6 @@
 
 #include "mcuio-function.h"
 
-#ifndef DEBUG
-#define pr_debug(a, args...)
-#else
-#define pr_debug(a, args...) printf(a, ##args)
-#endif
-
-
 extern struct mcuio_function mcuio_bitbang_i2c;
 declare_extern_event(mcuio_irq);
 

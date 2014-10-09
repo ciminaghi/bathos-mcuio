@@ -9,12 +9,6 @@
 
 #include "mcuio-function.h"
 
-#ifndef DEBUG
-#define pr_debug(a, args...)
-#else
-#define pr_debug(a, args...) printf(a, ##args)
-#endif
-
 #ifndef CONFIG_MCUIO_IRQ_WIRE_GPIO_NUMBER
 #define IRQ_LINE_GPIO 30
 #else
