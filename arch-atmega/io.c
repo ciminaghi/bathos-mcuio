@@ -54,7 +54,7 @@ static int md_handler(int argc, char *argv[])
 
 static void md_help(int argc, char *argv[])
 {
-	printf("show content of registers memory area\n");
+	printf("show registers status\n");
 }
 
 declare_shell_cmd(md, md_handler, md_help);

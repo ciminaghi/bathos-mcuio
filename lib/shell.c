@@ -77,18 +77,18 @@ static int __do_cmd(char *buf)
 			break;
 	}
 	if (_cmd == cmds_end) {
-		printf("Unknown command %s\n", argv[0]);
+		printf("unknown cmd %s\n", argv[0]);
 		goto end;
 	}
 	if (cmd->handler(i, argv) < 0)
-		printf("shell: error executing cmd %s\n", buf);
+		printf("error exec cmd %s\n", buf);
 end:
 	return ptr - buf;
 }
 
 static void __shell_exit(struct shell_data *data)
 {
-	printf("lininoIO shell terminated, bye\n");
+	printf("\nbye\n");
 	bathos_free_buffer(data, sizeof(*data));
 	data = NULL;
 	trigger_event(&evt_shell_termination, NULL, EVT_PRIO_MAX);
@@ -159,7 +159,7 @@ static void __shell_start_handle(struct event_handler_data *ed)
 		pr_debug("ERROR: shell_init(): not enough memory\n");
 		return;
 	}
-	printf("\nlininoIO shell started\n");
+	printf("\nshell started\n");
 	memset(data->buf, 0, sizeof(data->buf));
 	data->curr_ptr = data->buf;
 	printf(PROMPT);
@@ -189,7 +189,6 @@ static int help_handler(int argc, char *argv[])
 	const struct shell_cmd *cmd, * PROGMEM _cmd;
 	struct shell_cmd __cmd;
 
-	printf("lininoIO shell, available commands:\n");
 	for (_cmd = cmds_start; _cmd != cmds_end; _cmd++) {
 		cmd = __get_cmd(_cmd, &__cmd);
 		printf("%s: ", cmd->str);
@@ -201,7 +200,7 @@ static int help_handler(int argc, char *argv[])
 
 static void help_help(int argc, char *argv[])
 {
-	printf("print shell help and return\n");
+	printf("print help\n");
 }
 
 declare_shell_cmd(help, help_handler, help_help);
@@ -225,7 +224,7 @@ static int version_handler(int argc, char *argv[])
 
 static void version_help(int argc, char *argv[])
 {
-	printf("prints out lininoIO version and returns\n");
+	printf("print version\n");
 }
 
 declare_shell_cmd(version, version_handler, version_help);
@@ -244,7 +243,7 @@ static int license_handler(int argc, char *argv[])
 
 static void license_help(int argc, char *argv[])
 {
-	printf("prints out lininoIO licensing terms\n");
+	printf("print licensing terms\n");
 }
 
 declare_shell_cmd(license, license_handler, license_help);
@@ -259,8 +258,7 @@ static int exit_handler(int argc, char *argv[])
 
 static void exit_help(int argc, char *argv[])
 {
-	printf("terminates the shell\n");
+	printf("terminate\n");
 }
 
 declare_shell_cmd(exit, exit_handler, exit_help);
-
