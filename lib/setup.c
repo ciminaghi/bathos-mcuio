@@ -9,8 +9,10 @@ static int do_one_initcall(initcall_t *p)
 {
 	int error = (*p)();
 
+#if !CONFIG_CONSOLE_NULL
 	if (error)
 		printf("initcall at %p: error %i\n", p, error);
+#endif
 	return error;
 }
 

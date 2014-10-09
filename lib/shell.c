@@ -168,6 +168,7 @@ static void __shell_start_handle(struct event_handler_data *ed)
 declare_event_handler_with_priv(shell_start, NULL, __shell_start_handle,
 				NULL, &shell_data);
 
+#if !CONFIG_CONSOLE_NULL
 static int shell_init()
 {
 	printf("bathos shell initialized\n");
@@ -175,6 +176,7 @@ static int shell_init()
 }
 
 rom_initcall(shell_init);
+#endif
 
 declare_event_handler_with_priv(shell_input_ready, NULL, __shell_input_handle,
 				NULL, &shell_data);

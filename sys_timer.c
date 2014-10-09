@@ -24,7 +24,9 @@ struct scheduled_tick {
 
 static int system_timer_init(void)
 {
+#if !CONFIG_CONSOLE_NULL
 	printf("%s\n", __func__);
+#endif
 	INIT_LIST_HEAD(&scheduled_ticks);
 	return 0;
 }
