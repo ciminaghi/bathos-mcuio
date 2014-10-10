@@ -13,6 +13,7 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
+#include <avr/wdt.h>
 
 #define MAX_ENDPOINT		4
 
@@ -523,6 +524,14 @@ ISR(USB_COM_vect, __attribute__((section(".text.ISR"))))
 			}
 			usb_ack_out();
 			usb_send_in();
+
+			/* Check for baudrate 1200 and force a restart
+			 * (required for compatibility with Arduino IDE */
+			if (*((uint32_t*)(&__data.cdc_line_coding[0]))
+				== 1200) {
+				*(uint16_t *)0x0800 = 0x7777;
+				wdt_enable(WDTO_120MS);
+			}
 			return;
 		}
 		if (bRequest == CDC_SET_CONTROL_LINE_STATE &&
