@@ -28,7 +28,6 @@ const uint32_t PROGMEM max_mul = 0xffffffff;
 
 int adc_init()
 {
-	int i;
 	/* set reference to Vcc */
 	adc_set_ref(ADMUX_AVCC);
 
@@ -37,8 +36,6 @@ int adc_init()
 
 	/* disable all */
 	adc_dis();
-	for (i = 0; i < ARRAY_SIZE(adcs); i++)
-		adc_dis_in(adcs[i].hw_idx);
 
 	return 0;
 }
@@ -48,11 +45,9 @@ rom_initcall(adc_init);
 uint32_t adc_sample(const struct adc *adc)
 {
 	uint32_t data;
-	adc_en_in(adc->hw_idx);
 	adc_sel_in(adc->hw_idx);
 	adc_start();
 	while (ADCSRA & (1 << ADSC));
 	data = adc_data();
-	adc_dis_in(adc->hw_idx);
 	return data;
 }
