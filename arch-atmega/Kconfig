@@ -150,3 +150,15 @@ config SMALLSIZE
 	bool "Shrink and optimize for size"
 	help
 	  Remove verbose or useless code, to minimize size in flash"
+
+config ADD_EXTERNAL_BOOTLOADER
+       bool "Add external bootloader"
+       help
+         Add pre-compiled bootloader (hex format) to final image
+
+config EXTERNAL_BOOTLOADER_PATH
+       string "External bootloader path"
+       depends on ADD_EXTERNAL_BOOTLOADER
+       help
+         Path of hex file containing external bootloader (placed in top 4k of
+	 ATMEGA flash).

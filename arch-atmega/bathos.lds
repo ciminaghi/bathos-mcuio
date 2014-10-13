@@ -22,6 +22,7 @@ SECTIONS
 		mcuio_functions_end = .;
 	}
 	__end_text = .;
+	INCLUDE arch-atmega/bootloader.lds
 	/* By conventions, RAM is thought to be at address 0x80.0000 */
 	.data 0x800100 : AT (__end_text) {
 		__data_start = .;      

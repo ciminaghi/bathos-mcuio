@@ -145,7 +145,7 @@ bathos: bathos.o
 obj-y =  main.o sys_timer.o periodic_scheduler.o pipe.o version_data.o \
 $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 
-bathos.o: silentoldconfig $(obj-y)
+bathos.o: silentoldconfig $(obj-y) $(ARCH_EXTRA)
 	$(LD) -r -T bigobj.lds $(obj-y) -o $@
 
 version_data.o:

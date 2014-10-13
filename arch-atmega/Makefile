@@ -7,6 +7,16 @@ else
 BATHOS_MCU = atmega8 m8
 endif
 
+ifeq ($(CONFIG_ADD_EXTERNAL_BOOTLOADER),y)
+BOOTLOADER_HEX=$(shell echo $(CONFIG_EXTERNAL_BOOTLOADER_PATH))
+BOOTLOADER=$(ADIR)/bootloader.o
+else
+BOOTLOADER_HEX=
+BOOTLOADER=
+endif
+
+ARCH_EXTRA := $(ADIR)/bootloader.lds
+
 
 # Similary, the user can set TTY= when running "make load"
 TTY ?= /dev/ttyUSB0
@@ -36,7 +46,7 @@ $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 
 ifeq ($(MCU),atmega32u4)
 AOBJ = $(ADIR)/main.o $(ADIR)/idle.o $(ADIR)/uart-mux-yun.o $(ADIR)/gpio.o \
-	$(ADIR)/adc.o $(ADIR)/pwm.o
+	$(ADIR)/adc.o $(ADIR)/pwm.o $(BOOTLOADER)
 endif
 
 ifeq ($(CONFIG_DEBUG_BITBANG),y)
@@ -63,7 +73,26 @@ load: bathos.hex
 %.hex: %
 	$(OBJCOPY) -O ihex $^ $@
 
+ifneq ($(BOOTLOADER_HEX),)
+$(ADIR)/bootloader.o: $(BOOTLOADER_HEX)
+	$(OBJCOPY) -I ihex -O elf32-avr --rename-section \
+	    .sec1=.bootloader,contents,alloc,load,readonly,code $< $@
+
+$(ADIR)/bootloader.lds:
+	echo \
+	".bootloader 0x7000 : AT(0x7000) { arch-atmega/bootloader.o(*); }" > $@
+
+else
+$(ADIR)/bootloader.o:
+	rm -f $@ && touch $@
+
+$(ADIR)/bootloader.lds:
+	echo "" > $@
+endif
+
 clean: cleanhex
 
 cleanhex:
 	rm -f bathos.hex
+
+.PHONY: $(ADIR)/bootloader.lds $(ADIR)/bootloader.o
