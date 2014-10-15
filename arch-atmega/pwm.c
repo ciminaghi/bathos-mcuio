@@ -482,12 +482,9 @@ static int pwm_set_polarity_4d(struct pwm *pwm, uint32_t val)
 	return 0;
 }
 
-#define NPWM 6
-const uint32_t PROGMEM num_pwm = NPWM;
-
 /* FIXME: labels should be configurable. Here, yun board mapping is
  * temporarly fixed in the src */
-const struct pwm PROGMEM pwms[NPWM] = {
+const struct pwm PROGMEM pwms[] = {
 	{ /* OC0B */
 		.label = "D3",
 		.tim_res_ns = 15625,
@@ -574,3 +571,5 @@ const struct pwm PROGMEM pwms[NPWM] = {
 	},
 
 };
+
+const uint32_t PROGMEM num_pwm = ARRAY_SIZE(pwms);
