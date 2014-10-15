@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ */
+
+/*
  * Very simple protocol for microprocessor <-> mcu communication
  */
 #include <arch/hw.h>

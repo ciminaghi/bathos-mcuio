@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ */
+
 #ifndef __GPIO_ATMEGA8_H__
 #define __GPIO_ATMEGA8_H__
 

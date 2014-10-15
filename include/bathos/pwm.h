@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Aurelio Colosimo <aurelio@aureliocolosimo.it>
+ */
+
 #ifndef __PWM_H__
 #define __PWM_H__
 

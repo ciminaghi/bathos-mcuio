@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Aurelio Colosimo <aurelio@aureliocolosimo.it>
+ */
+
+/*
  * SPI driver for bathos
  */
 

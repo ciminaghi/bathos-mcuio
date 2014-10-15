@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ */
+
 #ifndef _ASM_GENERIC_BITOPS_NON_ATOMIC_H_
 #define _ASM_GENERIC_BITOPS_NON_ATOMIC_H_
 

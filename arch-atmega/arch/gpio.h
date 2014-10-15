@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ */
+
+/*
  * ATMEGA gpio definitions
  */
 #ifndef __ATMEGA_GPIO_H__

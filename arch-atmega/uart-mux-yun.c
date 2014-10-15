@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ */
+
 /* 
  * On the arduino yun board, we have the following configuration,
  * currently:

@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ */
+
+/*
  * bitbang i2c mcuio function, some code taken from
  * drivers/i2c/algos/i2c-algo-bit.c
  */

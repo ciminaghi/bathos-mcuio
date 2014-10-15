@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ */
+
+/*
  * From mm/page_alloc.c, Linux Kernel
  *
  * 1) Any buddy B1 will have an order O twin B2 which satisfies

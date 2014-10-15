@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ */
 
 #include <bathos/stdio.h>
 #include <bathos/event.h>

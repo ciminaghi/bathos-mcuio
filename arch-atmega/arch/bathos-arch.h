@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) dog hunter AG - Zug - CH
+ * General Public License version 2 (GPLv2)
+ * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ */
+
+
 #ifndef __BATHOS_ARCH_H__
 #define __BATHOS_ARCH_H__
 
