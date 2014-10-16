@@ -81,6 +81,9 @@ extern int pending_events(void);
  * Trigger a generic event
  */
 extern int trigger_event(const struct event *, void *data, int evt_prio);
+/* As above, but handlers are executed immediately */
+extern int trigger_event_immediate(const struct event *, void *data,
+				   int evt_prio);
 /*
  * Invoke this from main loop
  */

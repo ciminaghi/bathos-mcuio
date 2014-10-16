@@ -141,6 +141,32 @@ int trigger_event(const struct event *e, void *data, int evt_prio)
 	return 0;
 }
 
+static void __handle_event(const struct event *__e, void *data)
+{
+	struct event_handler_data *__d, *d;
+	static struct event_handler_data ehd;
+	static struct event_handler_ops eho;
+	static struct event evt;
+	struct event *e;
+
+	e = __get_evt(&evt, __e);
+	for (__d = e->handlers_start;
+	     __d != e->handlers_end; __d++) {
+		d = __get_evt_handler_data(&ehd, __d);
+		d->ops = __get_evt_handler_ops(&eho,
+					       d);
+		d->data = data;
+		if (d->ops->handle)
+			d->ops->handle(d);
+	}
+}
+
+int trigger_event_immediate(const struct event *e, void *data, int evt_prio)
+{
+	__handle_event(e, data);
+	return 0;
+}
+
 void handle_events(void)
 {
 	struct event *e;
