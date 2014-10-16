@@ -599,7 +599,9 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 						  &idata, EVT_PRIO_MAX))
 					printf("i2c reg rddw: evt err\n");
 				if (i2c_data.state != AWAITING_OUTPUT_DATA &&
-				    i2c_data.state != AWAITING_INPUT_SPACE) {
+				    i2c_data.state != AWAITING_INPUT_SPACE &&
+				    i2c_data.state != SENDING_DATA &&
+				    i2c_data.state != RECEIVING_DATA) {
 					trigger_event(&event_name(
 							      i2c_transaction),
 						      (void *)I2C_RESET,
