@@ -17,6 +17,7 @@
 
 /* Status (enabled/disabled) of each pwm (max 32) */
 static uint32_t pwm_stat = 0;
+static uint32_t gpio_orig_dir = 0;
 
 int pwm_enabled(int idx)
 {
@@ -149,7 +150,16 @@ static int pwm_en(struct pwm *pwm)
 	int id = pwm_id(pwm);
 	check_init_timer(pwm);
 	_SFR_MEM8(pwm->ctl_reg) |= pwm->en_msk;
-	_SFR_MEM8(pwm->dir_reg) |= pwm->dir_msk;
+
+	if (_SFR_MEM8(pwm->dir_reg) & pwm->dir_msk) {
+		/* Output direction already enabled */
+		gpio_orig_dir |= (1 << id);
+	}
+	else {
+		/* Enable output direction */
+		gpio_orig_dir &= ~(1 << id);
+		_SFR_MEM8(pwm->dir_reg) |= pwm->dir_msk;
+	}
 
 	pwm_stat |= (1 << id);
 	return 0;
@@ -160,8 +170,10 @@ static void pwm_dis(struct pwm *pwm)
 	int id = pwm_id(pwm);
 	check_deinit_timer(pwm);
 	_SFR_MEM8(pwm->ctl_reg) &= ~pwm->en_msk;
-	_SFR_MEM8(pwm->dir_reg) &= ~pwm->dir_msk;
 
+	/* Direction set back to 'in' only if it was 'in' before enable */
+	if (!(gpio_orig_dir & (1 << id)))
+		_SFR_MEM8(pwm->dir_reg) &= ~pwm->dir_msk;
 
 	pwm_stat &= ~(1 << id);
 }
