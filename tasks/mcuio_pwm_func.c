@@ -35,28 +35,19 @@ static const unsigned int PROGMEM pwm_descr_length = sizeof(pwm_descr);
 extern struct mcuio_function pwm;
 static struct mcuio_function_runtime pwm_rt;
 
-static inline const struct pwm_ops *get_pwm_ops(const struct pwm *pwm,
-		struct pwm_ops *out)
-{
-	memcpy_p(out, &pwm->ops, sizeof(*out));
-	return out;
-}
-
-
 static int pwm_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 			  uint32_t *out, int fill)
 {
 	unsigned idx = offset / 0x40;
 	unsigned reg = offset % 0x40;
-	const struct pwm *pwm = &pwms[idx];
-	struct pwm_ops ops;
+	struct pwm pwm;
 
-	get_pwm_ops(pwm, &ops);
+	get_pwm(&pwm, pwms, idx);
 
 	switch(reg) {
 
 		case 0x00: /* label */
-			memcpy_p(out, pwm->label, sizeof(*out));
+			memcpy(out, &pwm.label[0], sizeof(*out));
 			flip4((uint8_t*)out);
 				/* FIXME: to be done only if
 				endiennes differs on MPU*/
@@ -67,32 +58,33 @@ static int pwm_ctrl_rddw(const struct mcuio_range *r, unsigned offset,
 				bits 23-0: timing resolution (ns)
 				bit 24: can change period
 				bit 25: can change duty */
-			__copy_dword(out, &pwm->tim_res_ns);
+			*out = pwm.tim_res_ns;
 			*out &= 0x00ffffff;
-			if (ops.set_period)
+			if (pwm.ops.set_period)
 				*out |= 1l << 24;
-			if (ops.set_duty)
+			if (pwm.ops.set_duty)
 				*out |= 1l << 25;
 			break;
 
 		case 0x08: /* max multiplier */
-			__copy_dword(out, &pwm->tim_max_mul);
+			*out = pwm.tim_max_mul;
 			break;
 
 		case 0x0c: /* status and ctrl
 				* bit 0: enabled
 				* bit 1: invert polarity */
 			*out = pwm_enabled(idx) ? 0x1 : 0x0;
-			if ((ops.get_polarity) && ops.get_polarity(pwm))
+			if ((pwm.ops.get_polarity) &&
+				pwm.ops.get_polarity(&pwm))
 				*out |= (1 << 1);
 			break;
 
 		case 0x10: /* period multiplier */
-			*out = ops.get_period(pwm);
+			*out = pwm.ops.get_period(&pwm);
 			break;
 
 		case 0x14: /* duty multiplier */
-			*out = ops.get_duty(pwm);
+			*out = pwm.ops.get_duty(&pwm);
 			break;
 
 		default:
@@ -108,32 +100,31 @@ static int pwm_ctrl_wrdw(const struct mcuio_range *r, unsigned offset,
 	unsigned idx = offset / 0x40;
 	unsigned reg = offset % 0x40;
 	int ret = 0;
-	struct pwm *pwm = (struct pwm *)&pwms[idx];
-	struct pwm_ops ops;
+	struct pwm pwm;
 
-	get_pwm_ops(pwm, &ops);
+	get_pwm(&pwm, pwms, idx);
 
 	switch(reg) {
 
 		case 0x0c: /* status and ctrl (bit0: enable) */
 			if ((*__in) & 0x1)
-				ret = ops.enable(pwm);
+				ret = pwm.ops.enable(&pwm);
 			else
-				ops.disable(pwm);
-			if (ops.set_polarity)
-				ops.set_polarity(pwm, ((*__in) >> 1) & 0x1);
+				pwm.ops.disable(&pwm);
+			if (pwm.ops.set_polarity)
+				pwm.ops.set_polarity(&pwm, ((*__in) >> 1) & 0x1);
 			break;
 
 		case 0x10: /* set period multiplier */
-			if (!ops.set_period)
+			if (!pwm.ops.set_period)
 				ret = -EINVAL;
-			ret = ops.set_period(pwm, *__in);
+			ret = pwm.ops.set_period(&pwm, *__in);
 			break;
 
 		case 0x14: /* set duty cycle multiplier */
-			if (!ops.set_duty)
+			if (!pwm.ops.set_duty)
 				ret = -EINVAL;
-			ret = ops.set_duty(pwm, *__in);
+			ret = pwm.ops.set_duty(&pwm, *__in);
 			break;
 
 		default:
