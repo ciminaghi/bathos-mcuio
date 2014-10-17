@@ -113,13 +113,16 @@ static void deinit_timer4(void)
  * other outputs */
 static int pwm_set_period_timer1(struct pwm *pwm, uint32_t val)
 {
-	ICR1 = val - 1;
+	if (val > 0)
+		val--;
+	ICR1 = val;
 	return 0;
 }
 
 static uint32_t pwm_get_period_timer1(struct pwm *pwm)
 {
-	return ICR1 + 1;
+	uint32_t ret = ICR1;
+	return ret + 1;
 }
 
 /* Warning: since timer3 is shared by 3A, 3B and 3C outputs, a set
@@ -127,24 +130,27 @@ static uint32_t pwm_get_period_timer1(struct pwm *pwm)
  * other outputs */
 static int pwm_set_period_timer3(struct pwm *pwm, uint32_t val)
 {
-	ICR3 = val - 1;
+	if (val > 0)
+		val--;
+	ICR3 = val;
 	return 0;
 }
 
 static uint32_t pwm_get_period_timer3(struct pwm *pwm)
 {
-	return ICR3 + 1;
+	uint32_t ret = ICR3;
+	return ret + 1;
 }
 
 static int pwm_set_period_timer4(struct pwm *pwm, uint32_t val)
 {
-	OCR4C = val - 1;
+	OCR4C = val;
 	return 0;
 }
 
 static uint32_t pwm_get_period_timer4(struct pwm *pwm)
 {
-	return OCR4C + 1;
+	return OCR4C;
 }
 
 static int pwm_en(struct pwm *pwm)
@@ -197,18 +203,20 @@ static int pwm_set_polarity(struct pwm *pwm, uint32_t val)
 /* OC0B output */
 static int pwm_set_duty_0b(struct pwm *pwm, uint32_t val)
 {
+	if (val > 0)
+		val--;
 	OCR0B = *((uint8_t*)&val);
 	return 0;
 }
 
 static uint32_t pwm_get_duty_0b(struct pwm *pwm)
 {
-	return OCR0B;
+	return OCR0B + 1;
 }
 
 static uint32_t pwm_get_period_default(struct pwm *pwm)
 {
-	return pwm->tim_max_mul + 1;
+	return pwm->tim_max_mul;
 }
 
 /* OC1A, OC1B, OC1C, OC3A output duty cycle handling */
@@ -259,7 +267,7 @@ const struct pwm PROGMEM pwms[] = {
 	{ /* OC0B */
 		.label = "D3",
 		.tim_res_ns = 15625,
-		.tim_max_mul = 255,
+		.tim_max_mul = 256,
 		.tim_id = 0,
 		.ctl_reg = _SFR_MEM_ADDR(TCCR0A),
 		.en_msk = 1 << COM0B1,
@@ -281,7 +289,7 @@ const struct pwm PROGMEM pwms[] = {
 	{ /* OC1A */
 		.label = "D9",
 		.tim_res_ns = 500,
-		.tim_max_mul = 65535,
+		.tim_max_mul = 65536,
 		.tim_id = 1,
 		.ctl_reg = _SFR_MEM_ADDR(TCCR1A),
 		.en_msk = 1 << COM1A1,
@@ -304,7 +312,7 @@ const struct pwm PROGMEM pwms[] = {
 	{ /* OC1B */
 		.label = "D10",
 		.tim_res_ns = 500,
-		.tim_max_mul = 65535,
+		.tim_max_mul = 65536,
 		.tim_id = 1,
 		.ctl_reg = _SFR_MEM_ADDR(TCCR1A),
 		.en_msk = 1 << COM1B1,
@@ -327,7 +335,7 @@ const struct pwm PROGMEM pwms[] = {
 	{ /* OC1C */
 		.label = "D11",
 		.tim_res_ns = 500,
-		.tim_max_mul = 65535,
+		.tim_max_mul = 65536,
 		.tim_id = 1,
 		.ctl_reg = _SFR_MEM_ADDR(TCCR1A),
 		.en_msk = 1 << COM1C1,
@@ -350,7 +358,7 @@ const struct pwm PROGMEM pwms[] = {
 	{ /* OC3A */
 		.label = "D5",
 		.tim_res_ns = 500,
-		.tim_max_mul = 65535,
+		.tim_max_mul = 65536,
 		.tim_id = 3,
 		.ctl_reg = _SFR_MEM_ADDR(TCCR3A),
 		.en_msk = 1 << COM3A1,
