@@ -336,9 +336,15 @@ static void data_ready_handle(struct event_handler_data *ed)
 		if (data->curr_len) {
 			if (time_after(jiffies, last + HZ/20)) {
 #ifdef CONFIG_MCUIO_DEBUG
-				printf("data_ready_handle to\n");
-#endif
+				int i;
+
+				printf("data_ready_handle to (%d):\n\t",
+				       data->curr_len);
+				for (i = 0; i < data->curr_len; i++)
+					printf("0x%02x ", &((char *)packet)[i]);
 				data->curr_len = 0;
+				printf("\n");
+#endif
 			}
 		}
 	}
