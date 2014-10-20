@@ -319,13 +319,22 @@ static void data_ready_handle(struct event_handler_data *ed)
 	static int initialized;
 	static unsigned long last;
 
+
+	packet = &data->input_packet;
+
 	if (!initialized)
 		initialized = 1;
 	else {
 		if (data->curr_len) {
 			if (time_after(jiffies, last + HZ/20)) {
 #ifdef CONFIG_MCUIO_DEBUG
-				printf("data_ready_handle to\n");
+				int i;
+
+				printf("data_ready_handle to (%d):\n\t",
+				       data->curr_len);
+				for (i = 0; i < data->curr_len; i++)
+					printf("0x%02x ", ((char *)packet)[i]);
+				printf("\n");
 #endif
 				data->curr_len = 0;
 			}
@@ -335,7 +344,6 @@ static void data_ready_handle(struct event_handler_data *ed)
 
 	pipe = data->input_pipe;
 
-	packet = &data->input_packet;
 	stat = pipe_read(pipe, &((char *)packet)[data->curr_len],
 			 sizeof(*packet) - data->curr_len);
 	if (stat <= 0) {
