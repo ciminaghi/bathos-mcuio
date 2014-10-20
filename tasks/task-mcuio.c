@@ -347,6 +347,7 @@ static void data_ready_handle(struct event_handler_data *ed)
 	stat = pipe_read(pipe, &((char *)packet)[data->curr_len],
 			 sizeof(*packet) - data->curr_len);
 	if (stat <= 0) {
+		pr_debug("mcuio: pipe rd err (%d)\n", bathos_errno);
 		if (!stat) {
 			/*
 			  The other end closed the pipe (or an error occurred),
