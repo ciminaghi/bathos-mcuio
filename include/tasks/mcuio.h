@@ -29,22 +29,22 @@ struct mcuio_base_packet {
 	uint16_t dummy;
 } __attribute__((packed));
 
-static inline int mcuio_packet_is_read(struct mcuio_base_packet *p)
+static inline int mcuio_packet_is_read(const struct mcuio_base_packet *p)
 {
 	return !(p->type & 0x1);
 }
 
-static inline int mcuio_packet_is_write(struct mcuio_base_packet *p)
+static inline int mcuio_packet_is_write(const struct mcuio_base_packet *p)
 {
 	return (p->type & 0x1);
 }
 
-static inline int mcuio_packet_is_reply(struct mcuio_base_packet *p)
+static inline int mcuio_packet_is_reply(const struct mcuio_base_packet *p)
 {
 	return p->type & (1 << 6);
 }
 
-static inline int mcuio_packet_is_fill_data(struct mcuio_base_packet *p)
+static inline int mcuio_packet_is_fill_data(const struct mcuio_base_packet *p)
 {
 	return (p->type & (1 << 7));
 }
@@ -54,7 +54,7 @@ static inline void mcuio_packet_set_reply(struct mcuio_base_packet *p)
 	p->type |= (1 << 6);
 }
 
-static inline int mcuio_packet_is_error(struct mcuio_base_packet *p)
+static inline int mcuio_packet_is_error(const struct mcuio_base_packet *p)
 {
 	return p->type & (1 << 5);
 }
@@ -64,7 +64,7 @@ static inline int mcuio_packet_set_error(struct mcuio_base_packet *p)
 	return p->type |= (1 << 5);
 }
 
-static inline int mcuio_packet_data_len(struct mcuio_base_packet *p)
+static inline int mcuio_packet_data_len(const struct mcuio_base_packet *p)
 {
 	return 1 << ((p->type & ((1 << 5) - 1)) >> 1);
 }
