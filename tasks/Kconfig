@@ -127,6 +127,24 @@ config MCUIO_IRQ_WIRE_ACTIVE_LEVEL
        help
          This select the active level for irqs sent to the MPU
 
+config MCUIO_IRQ_TEST
+       prompt "Irq test function"
+       bool
+       depends on TASK_MCUIO && !MCUIO_IRQ_CONTROLLER_NONE
+       default y
+       help
+         This adds an mcuio irq test function: such function such triggers
+	 an irq every CONFIG_MCUIO_IRQ_TEST_HW_TICKS hw timer ticks
+
+config MCUIO_IRQ_TEST_HW_TICKS
+       prompt "Irq test period in hw ticks"
+       int
+       depends on MCUIO_IRQ_TEST
+       default 1
+       help
+         This selects a period for the periodic interrupt sent my the mcuio
+	 irq test function (see CONFIG_MCUIO_IRQ_TEST)
+
 config MCUIO_SHIELD
        prompt "generic mcuio shield function"
        bool
