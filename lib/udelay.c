@@ -7,15 +7,10 @@
  * Released according to the GNU GPL, version 2 or any later version.
  */
 #include <bathos/bathos.h>
+#include <bathos/stdio.h>
 #include <bathos/io.h>
 #include <bathos/jiffies.h>
 #include <bathos/init.h>
-
-#ifndef DEBUG
-#define pr_debug(a, args...)
-#else
-#define pr_debug(a, args...) printf(a, ##args)
-#endif
 
 static int udelay_lpj; /* loops per jiffy */
 
