@@ -68,11 +68,6 @@ static inline int __get_range(const struct mcuio_function *f,
 	return 0;
 }
 
-static inline int __get_nranges(const struct mcuio_function *f)
-{
-	return f->nranges;
-}
-
 static inline struct mcuio_function *__get_function(int fn,
 						    struct mcuio_function *f)
 {
@@ -98,11 +93,6 @@ static inline void __get_range(const struct mcuio_function *f,
 			       int index, struct mcuio_range *out)
 {
 	*out = f->ranges[i];
-}
-
-static inline int __get_nranges(const struct mcuio_function *f)
-{
-	*out = f->nranges;
 }
 
 static inline struct mcuio_function *__get_function(int fn,
@@ -154,10 +144,9 @@ static const struct mcuio_range *__lookup_range(struct mcuio_function *f,
 						struct mcuio_base_packet *p,
 						struct mcuio_range *r)
 {
-	int i, len, nranges;
+	int i, len;
 
 	len = mcuio_packet_data_len(p);
-	nranges = __get_nranges(f);
 
 	/* FIXME: SMARTER SEARCH */
 	for (i = 0; i < f->nranges; i++) {
