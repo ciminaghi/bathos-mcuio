@@ -202,10 +202,9 @@ disabled_range:
 }
 
 static void __mcuio_send_to_host(struct mcuio_data *d,
-				 struct mcuio_function *f)
+				 struct mcuio_base_packet *p)
 {
 	int stat;
-	const struct mcuio_base_packet *p = &f->runtime->to_host;
 	dump_packet(p);
 	stat = pipe_write(d->output_pipe, (const char *)p, sizeof(*p));
 	if (stat < 0)
@@ -213,15 +212,17 @@ static void __mcuio_send_to_host(struct mcuio_data *d,
 }
 
 static void mcuio_send_request_to_host(struct mcuio_data *d,
-				       struct mcuio_function *f)
+				       struct mcuio_base_packet *p)
 {
-	__mcuio_send_to_host(d, f);
+	__mcuio_send_to_host(d, p);
 }
 
 static void mcuio_send_reply_to_host(struct mcuio_data *d,
 				     struct mcuio_function *f)
 {
-	__mcuio_send_to_host(d, f);
+	struct mcuio_base_packet *p = &f->runtime->to_host;
+
+	__mcuio_send_to_host(d, p);
 }
 
 static void __mcuio_send_error_to_host(struct mcuio_data *d,
@@ -385,8 +386,8 @@ declare_event_handler_with_priv(mcuio_data_ready, NULL, data_ready_handle,
 static void mcuio_function_request_handle(struct event_handler_data *ed)
 {
 	struct mcuio_data *data = ed->priv;
-	struct mcuio_function *f = ed->data;
-	mcuio_send_request_to_host(data, f);
+	struct mcuio_base_packet *p = ed->data;
+	mcuio_send_request_to_host(data, p);
 }
 
 
