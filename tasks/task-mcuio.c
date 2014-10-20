@@ -161,10 +161,11 @@ static const struct mcuio_range *__lookup_range(struct mcuio_function *f,
 
 	/* FIXME: SMARTER SEARCH */
 	for (i = 0; i < f->nranges; i++) {
-		unsigned int l;
+		unsigned short l;
 		int end;
+
 		__get_range(f, i, r);
-		__copy_word(&l, r->length);
+		__copy_word(&l, (uint16_t *)r->length);
 		end = r->start + l - 1;
 		if ((p->offset >= r->start) &&
 		    (p->offset + len - 1 <= end))
@@ -186,9 +187,9 @@ static int __exec_request(struct mcuio_function *f,
 		goto disabled_range;
 	__ops = __get_range_ops(r, &ops);
 	if (mcuio_packet_is_read(p))
-		rptr = ops.rd[(p->type & ((1 << 5) - 1)) >> 1];
+		rptr = __ops->rd[(p->type & ((1 << 5) - 1)) >> 1];
 	if (mcuio_packet_is_write(p))
-		wptr = ops.wr[((p->type - 1) & ((1 << 5) - 1)) >> 1];
+		wptr = __ops->wr[((p->type - 1) & ((1 << 5) - 1)) >> 1];
 disabled_range:
 	f->runtime->to_host = *p;
 	mcuio_packet_set_reply(&f->runtime->to_host);
@@ -309,6 +310,7 @@ static void *mcuio_alive(void *arg)
 #else
 static void *mcuio_alive(void *arg)
 {
+	return arg;
 }
 #endif /* CONFIG_MCUIO_ALIVE_TASK */
 
