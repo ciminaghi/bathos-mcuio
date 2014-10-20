@@ -109,8 +109,14 @@ ISR(USART1_RX_vect, __attribute__((section(".text.ISR"))))
 	int cnt_prev;
 	uint8_t c;
 	cnt_prev = CIRC_CNT(data->cbuf.head, data->cbuf.tail, UART_BUF_SIZE);
-	if (!CIRC_SPACE(data->cbuf.head, data->cbuf.tail, UART_BUF_SIZE))
+	if (!CIRC_SPACE(data->cbuf.head, data->cbuf.tail, UART_BUF_SIZE)) {
+		pr_debug("USART BUFFER OVERRUN\n");
 		data->overrun = 1;
+	}
+#ifdef DEBUG
+	if (UCSR1A & (1 << DOR1))
+		printf("USART OVERRUN\n");
+#endif
 	c = UDR1;
 	if (!data->overrun) {
 		data->buf[data->cbuf.head] = c;
