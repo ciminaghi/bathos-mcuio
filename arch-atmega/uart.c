@@ -21,7 +21,7 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
-#define UART_BUF_SIZE 32
+#define UART_BUF_SIZE 64
 
 static struct uart_data {
 	struct circ_buf cbuf;
