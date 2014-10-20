@@ -267,7 +267,8 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 		goto done;
 	}
 	/* MCUIO uart_mode, trigger event for mcuio */
-	trigger_event(&evt_mcuio_data_ready, NULL, EVT_PRIO_MAX);
+	if (trigger_event(&evt_mcuio_data_ready, NULL, EVT_PRIO_MAX) < 0)
+		printf("WARN: err on mcuio drdy evt\n");
 
 done:
 	return;
