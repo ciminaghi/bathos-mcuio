@@ -70,14 +70,17 @@ export CC OBJDUMP
 HOSTCC ?= gcc
 HOST_CFLAGS ?= -Iinclude
 
+BOOT_OBJ ?= $(ADIR)/boot.o
+IO_OBJ ?= $(ADIR)/io.o
+
 # Files that depend on the architecture (bathos.lds may be missing)
-AOBJ  += $(ADIR)/boot.o $(ADIR)/io.o
+AOBJ  += $(BOOT_OBJ) $(IO_OBJ)
 
 # The user can pass USER_CFLAGS if needed
 CFLAGS += $(USER_CFLAGS) -DBATHOS_GIT=\"$(BATHOS_GIT)\" -DMODULE_NAME=$(subst -,_,$(subst /,_,$(subst .o,,$@)))
 
 # There may or may not be a linker script (arch-unix doesn't)
-LDS   = $(wildcard $(ADIR)/bathos$(MODE).lds)
+LDS   ?= $(wildcard $(ADIR)/bathos$(MODE).lds)
 
 # Lib objects and flags
 LOBJ = pp_printf/printf.o pp_printf/vsprintf-xint.o
