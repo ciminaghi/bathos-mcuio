@@ -1,0 +1,43 @@
+menu "ARM architecture configuration"
+
+config CPU_CORTEX_M0
+       bool
+
+config CPU_CORTEX_M3
+       bool
+
+config HAS_MEMORY_MODE
+	bool
+
+choice
+	prompt "SOC to build for"
+
+config MACH_NONE
+       bool "NONE"
+       select CPU_CORTEX_M0
+       help
+	 build for no particular machine
+
+endchoice
+
+choice
+	prompt "Target board for bathos"
+
+config BOARD_NONE
+       bool
+	prompt "Build for no particular board"
+
+endchoice
+
+config CPU
+       string
+       default "cortex-m0" if CPU_CORTEX_M0
+       default "cortex-m3" if CPU_CORTEX_M3
+
+config MACH
+       default "none" if MACH_NONE
+
+config BOARD
+       default "none" if BOARD_NONE
+
+endmenu
