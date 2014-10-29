@@ -11,6 +11,11 @@ config ARCH_ATMEGA
 	help
 	  This
 
+config ARCH_ARM
+        bool "ARM -- Cortex-M based"
+	help
+	  Build for ARM based machines
+
 config ARCH_VERSATILE
 	bool "VERSATILE -- for Qemu"
 	help
@@ -28,6 +33,7 @@ config ARCH
        default "atmega" if ARCH_ATMEGA
        default "versatile" if ARCH_VERSATILE
        default "unix" if ARCH_UNIX
+       default "arm" if ARCH_ARM
 
 
 config CROSS_COMPILE
@@ -67,6 +73,10 @@ config MEMORY_MODE
 
 if ARCH_ATMEGA
    source "arch-atmega/Kconfig"
+endif
+
+if ARCH_ARM
+   source "arch-arm/Kconfig"
 endif
 
    source "drivers/Kconfig"
