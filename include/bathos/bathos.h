@@ -5,6 +5,10 @@
 #ifndef __BATHOS_H__
 #define __BATHOS_H__
 
+#ifndef PROGMEM
+#define PROGMEM
+#endif
+
 /*
  * stdio-related stuff is related to bathos/stdio.h, but users are not
  * expected to include it (because it sounds very ugly)
