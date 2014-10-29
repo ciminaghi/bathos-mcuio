@@ -1,0 +1,80 @@
+menu "ARM architecture configuration"
+
+config CPU_CORTEX_M0
+       bool
+
+config CPU_CORTEX_M3
+       bool
+
+config CPU_ARM7
+       bool
+
+config EMBED_DRIVERS
+       bool
+
+config HAS_MEMORY_MODE
+	bool
+
+choice
+	prompt "SOC to build for"
+
+config MACH_KL25Z
+       bool "Freescale KL25Z pinco pallo"
+       select CPU_CORTEX_M0
+       select EMBED_DRIVERS
+
+config MACH_LPC3143
+       bool "NXP LPC1343"
+       select HAS_MEMORY_MODE
+       help
+	  This architecture builds for LPC1343 and similar processors,
+	  by NXP.  This is the original architecture for Thos.
+	  Bathos can build both for RAM and FLASH modes.
+
+endchoice
+
+if MACH_KL25Z
+    source arch-arm/mach-kl25z/Kconfig
+endif
+
+config CPU
+       string
+       default "cortex-m0" if CPU_CORTEX_M0
+       default "cortex-m3" if CPU_CORTEX_M3
+       default "arm7" if CPU_ARM7
+
+config MACH
+       default "lpc1343" if MACH_LPC1343
+       default "kl25z" if MACH_KL25Z
+
+if EMBED_DRIVERS
+
+choice
+	prompt "EMBED library implementation"
+
+
+config MBED_DRIVERS
+       bool "mbed library drivers"
+       help
+         This select the mbed library drivers
+
+config INTERNAL_DRIVERS
+       bool "internal ..."
+       help
+         This
+
+endchoice
+
+if MBED_DRIVERS
+
+config MBED_PATH
+       string "Path of mbed library"
+       help
+	Let this point to the mbedlibrary.
+
+
+endif # MBED_DRIVERS
+
+endif
+
+endmenu
