@@ -13,9 +13,10 @@ echo lininoIO: git $str built $(date "+%a %Y-%m-%d %H:%M:%S") \
      $(whoami)@$(hostname) > $f
 
 ${OBJCOPY} --redefine-sym _binary__tmp_$(basename ${f})_start=version_string \
-	   -I binary -O $fmt $f $out || { rm -f $f ; exit 1 ; }
-${OBJCOPY} --rename-section \
-	   .data=.text.version,contents,alloc,load,readonly,code $out $out || \
-	   { rm -f $f ; exit 1 ; }
+	   -I binary -O $fmt -B arm $f $out || { rm -f $f ; exit 1 ; }
+#${OBJCOPY} -F $fmt --rename-section \
+#	   .data=.text.version,contents,alloc,load,readonly,code $out $out || \
+#
+#	   { rm -f $f ; exit 1 ; }
 
 rm -f $f
