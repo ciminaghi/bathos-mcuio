@@ -6,6 +6,11 @@ config HAS_MEMORY_MODE
 choice
 	prompt "Architecture to build for"
 
+config ARCH_ARM
+       bool "ARM architecture"
+       help
+         This architecture builds BaThos for the ARM architecture
+
 config ARCH_LPC1343
 	bool "LPC-1343 -- Cortex-M3"
 	select HAS_MEMORY_MODE
@@ -39,6 +44,7 @@ endchoice
 
 config ARCH
        string
+       default "arm" if ARCH_ARM
        default "lpc1343" if ARCH_LPC1343
        default "lpc2104" if ARCH_LPC2104
        default "atmega" if ARCH_ATMEGA
@@ -48,6 +54,7 @@ config ARCH
 
 config CROSS_COMPILE
        string "Cross compiler prefix"
+       default "/opt/arm-2011.03/bin/arm-none-eabi-" if ARCH_ARM
        default "/opt/arm-2011.03/bin/arm-none-eabi-" if ARCH_LPC1343
        default "/opt/arm-2011.03/bin/arm-none-eabi-" if ARCH_LPC2104
        default "/opt/arm-2011.03/bin/arm-none-eabi-" if ARCH_VERSATILE
@@ -82,5 +89,10 @@ config MEMORY_MODE
 if ARCH_ATMEGA
    source "arch-atmega/Kconfig"
 endif
+
+if ARCH_ARM
+   source "arch-arm/Kconfig"
+endif
+
 
    source "tasks/Kconfig"
