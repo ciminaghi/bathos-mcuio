@@ -62,6 +62,14 @@
 
 #define REG_OSC0_CR		(0x40065000 / 1)
 
+#define GPIO_PORT_BASE		(0x400ff000)
+
+#define REG_GPIO_PDOR(port)	((GPIO_PORT_BASE + (port)*0x40) / 4)
+#define REG_GPIO_PSOR(port)	(((GPIO_PORT_BASE + (port)*0x40 + 0x4) / 4))
+#define REG_GPIO_PCOR(port)	(((GPIO_PORT_BASE + (port)*0x40 + 0x8) / 4))
+#define REG_GPIO_PTOR(port)	(((GPIO_PORT_BASE + (port)*0x40 + 0xc) / 4))
+#define REG_GPIO_PDIR(port)	(((GPIO_PORT_BASE + (port)*0x40 + 0x10) / 4))
+#define REG_GPIO_PDDR(port)	(((GPIO_PORT_BASE + (port)*0x40 + 0x14) / 4))
 
 
 extern void clocks_init();
