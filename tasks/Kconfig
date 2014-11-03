@@ -76,13 +76,6 @@ config MCUIO_PWM
 choice
        prompt "Irq controller"
 
-config MCUIO_IRQ_CONTROLLER_WIRE
-       prompt "Wire irq controller"
-       bool
-       help
-         This adds an mcuio function which sends interrupts to the MPU via
-	 an MCU gpio
-
 config MCUIO_IRQ_CONTROLLER_MSG
        prompt "Message irq controller"
        bool
