@@ -15,7 +15,7 @@ BOOTLOADER_HEX=
 BOOTLOADER=
 endif
 
-ARCH_EXTRA := $(ADIR)/bootloader.lds
+ARCH_EXTRA := $(ADIR)/bootloader.lds $(ADIR)/bootloader.o
 
 
 # Similary, the user can set TTY= when running "make load"
@@ -46,7 +46,7 @@ $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 
 ifeq ($(MCU),atmega32u4)
 AOBJ = $(ADIR)/main.o $(ADIR)/idle.o $(ADIR)/uart-mux-yun.o $(ADIR)/gpio.o \
-	$(ADIR)/adc.o $(ADIR)/pwm.o $(BOOTLOADER)
+	$(ADIR)/adc.o $(ADIR)/pwm.o
 endif
 
 ifeq ($(CONFIG_DEBUG_BITBANG),y)
@@ -74,8 +74,12 @@ load: bathos.hex
 	$(OBJCOPY) -O ihex $^ $@
 
 ifneq ($(BOOTLOADER_HEX),)
-$(ADIR)/bootloader.o: $(BOOTLOADER_HEX)
-	$(OBJCOPY) -I ihex -O elf32-avr --rename-section \
+
+$(ADIR)/bootloader.bin: $(BOOTLOADER_HEX)
+	$(OBJCOPY) --gap-fill 0xff -I ihex -O binary $< $@
+
+$(ADIR)/bootloader.o: $(ADIR)/bootloader.bin
+	$(OBJCOPY) -I binary -O elf32-avr --rename-section \
 	    .sec1=.bootloader,contents,alloc,load,readonly,code $< $@
 
 $(ADIR)/bootloader.lds:
@@ -95,4 +99,4 @@ clean: cleanhex
 cleanhex:
 	rm -f bathos.hex
 
-.PHONY: $(ADIR)/bootloader.lds $(ADIR)/bootloader.o
+.PHONY: $(ADIR)/bootloader.lds $(ADIR)/bootloader.o $(ADIR)/bootloader.bin
