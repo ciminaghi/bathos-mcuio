@@ -162,3 +162,11 @@ config EXTERNAL_BOOTLOADER_PATH
        help
          Path of hex file containing external bootloader (placed in top 4k of
 	 ATMEGA flash).
+
+config RUN_BOOTLOADER_ON_1200_BPS
+       bool "Run bootloader when 1200 bps is set"
+       depends on USB_UART
+	help
+	  Die and run bootloader when a 1200 baud setting is detected
+	  on the usb-uart port. This is required for compatibility with
+	  Arduino fw updater.

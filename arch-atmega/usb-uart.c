@@ -525,6 +525,7 @@ ISR(USB_COM_vect, __attribute__((section(".text.ISR"))))
 			usb_ack_out();
 			usb_send_in();
 
+#ifdef CONFIG_RUN_BOOTLOADER_ON_1200_BPS
 			/* Check for baudrate 1200 and force a restart
 			 * (required for compatibility with Arduino IDE */
 			if (*((uint32_t*)(&__data.cdc_line_coding[0]))
@@ -532,6 +533,7 @@ ISR(USB_COM_vect, __attribute__((section(".text.ISR"))))
 				*(uint16_t *)0x0800 = 0x7777;
 				wdt_enable(WDTO_120MS);
 			}
+#endif
 			return;
 		}
 		if (bRequest == CDC_SET_CONTROL_LINE_STATE &&
