@@ -406,6 +406,8 @@ static int __i2c_handle_go(void)
 		/* Send a single byte */
 		if (__i2c_bitbang_send_byte(c) < 0) {
 			pr_debug("NAK received sending byte\n");
+			/* Throw away remaining data */
+			i2c_data.obuf_tail = i2c_data.obuf_head;
 			__i2c_bitbang_end_transaction(NAK_RECEIVED);
 			break;
 		}
