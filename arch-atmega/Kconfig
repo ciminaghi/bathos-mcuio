@@ -45,91 +45,16 @@ config ATMEGA_SPI
        help
          Add a SPI driver for the atmega
 
-choice
-	prompt "Bathos console"
-
-config CONSOLE_DEBUG_BITBANG
-       bool "Console on debug bitbang"
-       depends on DEBUG_BITBANG
-       help
-         This option selects the debug bitbang console as the console device.
-	 This console only works as an output.
-	 See Documentation/atmega for more details.
-
-config CONSOLE_UART
-       bool "Console on UART"
-       help
-         This option selects a console on the chip's UART device
-
-config CONSOLE_USB_UART
-       bool "Console on usb (ACM device)"
-       depends on USB_UART
-       help
-	 This option selects a console via USB
-
-config CONSOLE_NULL
-       bool "Null console"
-       help
-	 Select this when you don't want any console
-
-endchoice
-
 config CONSOLE
        string
        default "avr-uart" if CONSOLE_UART
        default "usb-uart" if CONSOLE_USB_UART
-
-config EARLY_CONSOLE
-       bool "Setup an early console"
-       depends on !CONSOLE_USB_UART
-
-choice
-	prompt "Bathos stdin"
-
-config STDIN_CONSOLE
-       bool "Stdin from console"
-       help
-         Take standard input from selected console
-
-config STDIN_UART
-       bool "Stdin from UART"
-       depends on UART
-       help
-	 Get standard input from uart
-
-config STDIN_USB_UART
-       bool "Stdin from USB-UART"
-       depends on USB_UART
-       help
-         Get standard input from usb-uart device
-endchoice
 
 config STDIN
        string
        default CONSOLE if STDIN_CONSOLE
        default "avr-uart" if STDIN_UART
        default "usb-uart" if STDIN_USB_UART
-
-choice
-	prompt "Bathos stdout"
-
-config STDOUT_CONSOLE
-       bool "Stdout to console"
-       help
-         Send stdandard output to selected console
-
-config STDOUT_UART
-       bool "Stdout to UART"	
-       depends on UART
-       help
-         Send standard output from uart
-
-config STDOUT_USB_UART
-       bool "Stdout to USB-UART"
-       depends on USB_UART
-       help
-         Send standard output to usb-uart device
-endchoice
 
 config STDOUT
        string
