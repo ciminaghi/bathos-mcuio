@@ -109,5 +109,43 @@ config HAVE_USB_UART
 config HAVE_SPI
        bool
 
+choice
+	prompt "Bathos console"
+
+config CONSOLE_DEBUG_BITBANG
+       bool "Console on debug bitbang"
+       depends on DEBUG_BITBANG
+       help
+         This option selects the debug bitbang console as the console device.
+
+if HAVE_UART
+
+config CONSOLE_UART
+       bool "Console on UART"
+       help
+         This option selects a UART as the console device
+
+endif
+
+if HAVE_USB_UART
+
+config CONSOLE_USB_UART
+       bool "Console on USB-UART"
+       help
+         This option selects a USB-UART device as the console device
+
+endif
+
+config CONSOLE_NULL
+       bool "Null console"
+       help
+	 Select this when you don't want any console
+
+endchoice
+
+config EARLY_CONSOLE
+       bool "Setup an early console"
+       depends on !CONSOLE_USB_UART
+
 
    source "tasks/Kconfig"
