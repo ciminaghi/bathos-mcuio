@@ -1,8 +1,8 @@
 
 ifeq ($(CONFIG_CPU),"cortex-m0")
 # Using thumb for version 7 ARM core:
-CFLAGS  = -march=armv7-m -mthumb -mabi=aapcs
-ASFLAGS = -march=armv7-m -mthumb -mabi=aapcs
+CFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+ASFLAGS = $(CFLAGS)
 LDFLAGS = -nostdlib -nostartfiles
 endif
 
