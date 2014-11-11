@@ -8,9 +8,11 @@ struct bathos_pipe *bathos_stdin;
  * Dummy console (used when no console is selected and console_putc()
  * is not available
  */
-void __attribute__((weak)) console_putc(int c)
+#ifdef CONFIG_CONSOLE_NULL
+void console_putc(int c)
 {
 }
+#endif
 
 void __attribute__((weak)) putc(int c)
 {
