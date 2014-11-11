@@ -47,6 +47,11 @@ config MACH
        default "lpc1343" if MACH_LPC1343
        default "kl25z" if MACH_KL25Z
 
+config STDOUT
+       string
+       default CONSOLE if STDOUT_CONSOLE
+
+
 if EMBED_DRIVERS
 
 choice
