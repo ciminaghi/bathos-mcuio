@@ -144,4 +144,67 @@ config EARLY_CONSOLE
        depends on !CONSOLE_USB_UART
 
 
+choice
+	prompt "Bathos stdin"
+
+config STDIN_CONSOLE
+       bool "Stdin from console"
+       help
+         Take standard input from selected console
+
+if HAVE_UART
+
+config STDIN_UART
+       bool "Stdin from UART"
+       depends on HAVE_UART
+       help
+	 Get standard input from uart
+
+endif
+
+if HAVE_USB_UART
+
+config STDIN_USB_UART
+       bool "Stdin from USB-UART"
+       depends on HAVE_USB_UART
+       help
+         Get standard input from usb-uart device
+
+endif
+
+endchoice
+
+
+choice
+	prompt "Bathos stdout"
+
+config STDOUT_CONSOLE
+       bool "Stdout to console"
+       help
+         Send stdandard output to selected console
+
+if HAVE_UART
+
+config STDOUT_UART
+       bool "Stdout to UART"
+       depends on UART
+       help
+         Send standard output from uart
+
+endif
+
+if HAVE_USB_UART
+
+config STDOUT_USB_UART
+       bool "Stdout to USB-UART"
+       depends on USB_UART
+       help
+         Send standard output to usb-uart device
+
+endif
+
+endchoice
+
+
+
    source "tasks/Kconfig"
