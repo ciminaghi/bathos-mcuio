@@ -85,4 +85,14 @@ endif
 
    source "drivers/Kconfig"
 
+config HAVE_UART
+       bool
+
+config HAVE_USB_UART
+       bool
+
+config HAVE_SPI
+       bool
+
+
    source "tasks/Kconfig"
