@@ -1,0 +1,23 @@
+config DEBUG_BITBANG
+       bool "Debug bitbang driver"
+       default n
+       help
+         Add a debug bitbang driver
+
+if DEBUG_BITBANG
+
+config BB_CLOCK_GPIO
+       int "Bitbang driver clock gpio number"
+       help
+	 Guess what
+
+config BB_DATA_GPIO
+       int "Bitbang driver data gpio number"
+       help
+         Guess what
+
+config CONSOLE
+       string
+       default "debug-bitbang" if CONSOLE_DEBUG_BITBANG
+
+endif
