@@ -43,3 +43,31 @@ struct bathos_dev __bitbang_dev __attribute__((section(".bathos_devices"))) = {
 	.ops = &bitbang_dev_ops,
 };
 #endif
+
+struct hw_stackframe {
+	uint32_t r0;
+	uint32_t r1;
+	uint32_t r2;
+	uint32_t r3;
+	uint32_t r12;
+	uint32_t lr;
+	void *pc;
+	uint32_t psr;
+};
+
+void __attribute__((naked)) hard_fault_handler(uint32_t lr, void *psp,
+					       void *msp)
+{
+	struct hw_stackframe *frame;
+
+	/* Find the active stack pointer (MSP or PSP) */
+	if(lr & 0x4)
+		frame = psp;
+	else
+		frame = msp;
+
+	printf("** HARD FAULT **\r\n pc=%p\r\n  msp=%p\r\n  psp=%p\r\n",
+	       frame->pc, msp, psp);
+
+	while(1);
+}
