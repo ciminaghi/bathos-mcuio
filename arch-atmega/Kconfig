@@ -28,17 +28,20 @@ config MACH
 
 config ATMEGA_USB_UART
        bool "Atmega Usb-uart driver"
+       select HAVE_USB_UART
        depends on HAVE_USB
        help
          Add an UART over USB driver for the atmega
 
 config ATMEGA_UART
        bool "Atmega UART driver"
+       select HAVE_UART
        help
          Add an UART driver for the atmega
 
 config ATMEGA_SPI
        bool "Atmega SPI driver"
+       select HAVE_SPI
        help
          Add a SPI driver for the atmega
 
