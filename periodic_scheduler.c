@@ -23,7 +23,7 @@ static int pts_init(void)
 	return 0;
 }
 
-rom_initcall(pts_init);
+core_initcall(pts_init);
 
 static void pts_handle(struct event_handler_data *d)
 {
