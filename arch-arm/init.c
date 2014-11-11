@@ -9,18 +9,37 @@
 #include <bathos/init.h>
 #include <bathos/pipe.h>
 #include <bathos/shell.h>
+#include <bathos/debug_bitbang.h>
 #include <generated/autoconf.h>
 #include <arch/hw.h>
+#include <bathos/gpio.h>
 
-int stdio_init(void)
+#ifndef CONFIG_STDOUT
+#define CONFIG_STDOUT "null"
+#endif
+#ifndef CONFIG_STDIN
+#define CONFIG_STDIN "null"
+#endif
+
+void stdio_init(void)
 {
-	return 0;
+	bathos_stdout = pipe_open(CONFIG_STDOUT, BATHOS_MODE_OUTPUT, NULL);
+	bathos_stdin = pipe_open(CONFIG_STDIN, BATHOS_MODE_INPUT, NULL);
 }
-rom_initcall(stdio_init);
+core_initcall(stdio_init);
 
+#if defined CONFIG_EARLY_CONSOLE
 int bathos_setup(void)
 {
-	/* Call low level machine init (clocks, plls, ...) */
-	mach_ll_init();
-	return 0;
+	console_early_init();
+	console_putc('.');
+	do_initcalls();
 }
+#endif
+
+#ifdef CONFIG_DEBUG_BITBANG
+struct bathos_dev __bitbang_dev __attribute__((section(".bathos_devices"))) = {
+	.name = "debug-bitbang",
+	.ops = &bitbang_dev_ops,
+};
+#endif
