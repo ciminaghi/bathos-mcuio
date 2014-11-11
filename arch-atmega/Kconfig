@@ -43,11 +43,6 @@ config MACH
        default "atmega8" if MACH_ATMEGA8
        default "atmega32u4" if MACH_ATMEGA32U4
 
-config DEBUG_BITBANG
-       bool "Debug bitbang driver"
-       help
-         Add a debug bitbang driver
-
 config USB_UART
        bool "Usb-uart driver"
        depends on HAVE_USB
@@ -97,7 +92,6 @@ config CONSOLE
        string
        default "avr-uart" if CONSOLE_UART
        default "usb-uart" if CONSOLE_USB_UART
-       default "debug-console" if CONSOLE_DEBUG_BITBANG
 
 config EARLY_CONSOLE
        bool "Setup an early console"
