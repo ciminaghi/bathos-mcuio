@@ -11,6 +11,7 @@ void clocks_init(void)
 	volatile uint8_t *regs8 = (void *)regs;
 	uint8_t tmp;
 
+	regs[REG_COPC] = 0;
 	/* OUTDIV1 = 0, OUTDIV4 = 2 */
 	regs[REG_CLKDIV1] = 0x00020000UL;
 	/* CLKS = 0, FRDIV = 0, IREFS = 1, IRCLKEN = 1, IREFSTEN = 0 */
