@@ -36,7 +36,7 @@ static int system_timer_init(void)
 	return 0;
 }
 
-rom_initcall(system_timer_init);
+core_initcall(system_timer_init);
 
 static struct scheduled_tick *alloc_tick(void)
 {
