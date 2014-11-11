@@ -1,54 +1,49 @@
-OUTPUT_FORMAT("elf32-littlearm")
-OUTPUT_ARCH(arm)
-ENTRY(_entry_rom)
+ENTRY(_romboot_start)
 
 regs = 0;
-jiffies = 0x40018008;
 
+/* Warning: linker script valid for flash boot only */
 SECTIONS
 {
-	. = 0x0;
-        .text.boot : {
-                    *(.vectors);
-                    *(.text.romboot);
-                    *(.text.anyboot);
-        }
-	.text : {
+	.text 0x00000000: {
+		*(.vectors);
+		. = 0x400;
+		*(.flash_config)
+		. = 0x410;
+		*(.text.romboot)
 		*(.text)
 	}
+
+	. = ALIGN(16);
+	.etext = .;
+
 	.rodata : {
 		*(.rodata)
 		romcall_begin = .;
 		*(.init0);
-		romcall_end = .;	
-		 bathos_devices_start =	 .;
-                *(.bathos_devices);
-                bathos_devices_end = .;
-                . = ALIGN(4);
-                __task_begin = .;
-                *(.task);
-                __task_end = .;
-		. = ALIGN(16);
-		_erom = .;
+		romcall_end = .;
+	       . = ALIGN(16);
+	       _erom = .;
 	}
 
-	.data 0x10000400: AT(_erom) {
+	. = ALIGN(16);
+	_erom = .;
+
+	.data 0x1ffff000: AT(_erom) {
 		_sdata = .;
 		*(.data);
+		bathos_devices_start =  .;
+		*(.bathos_devices);
+		bathos_devices_end = .;
 		_edata = .;
 	}
 
 	.bss : {
-		. = ALIGN(16);
-		__bss_start = .;
+	        . = ALIGN(16);
+		__bss_start__ = .;
 		*(.bss);
+		*(COMMON);
 		. = ALIGN(16);
-		__bss_end = .;
+		__bss_end__ = .;
 	}
-	/DISCARD/ : { *(.text.ramboot); }
 }
-
-PROVIDE(printf = pp_printf);
-PROVIDE(sprintf = pp_sprintf);
-PROVIDE(vprintf = pp_sprintf);
-PROVIDE(vsprintf = pp_vsprintf);
