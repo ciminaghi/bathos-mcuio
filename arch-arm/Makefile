@@ -11,7 +11,7 @@ MACH_DIR = mach-$(shell echo $(CONFIG_MACH))
 
 CFLAGS += -I$(ADIR)/$(MACH_DIR)
 
-BOOT_OBJ = $(ADIR)/cpu-$(shell echo $(CONFIG_CPU))/boot.o
+BOOT_OBJ = $(ADIR)/$(MACH_DIR)/boot.o $(MACH_SUBDIR)/init.o
 # No io.o for this arch
 IO_OBJ =
 MACH_SUBDIR = $(ADIR)/mach-$(shell echo $(CONFIG_MACH))
@@ -21,7 +21,7 @@ LIBARCH = $(ADIR)/libarch.a
 LIBARCH_OBJS = $(ADIR)/init.o
 
 ifeq ($(CONFIG_MACH_KL25Z),y)
-LIBARCH_OBJS += $(MACH_SUBDIR)/init.o $(MACH_SUBDIR)/clock.o
+LIBARCH_OBJS += $(MACH_SUBDIR)/clock.o
 LDS = $(MACH_SUBDIR)/bathos.lds
 endif
 
