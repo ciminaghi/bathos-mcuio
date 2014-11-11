@@ -19,7 +19,7 @@ int avr_bathos_main(void)
 	MCUSR = 0;
 	wdt_disable();
 	udelay_init();
-#if defined CONFIG_USB_UART
+#if defined CONFIG_ATMEGA_USB_UART
 	/* Without this, USB doesn't seem to work well */
 	mdelay(200);
 #endif
