@@ -94,5 +94,6 @@ if ARCH_ARM
    source "arch-arm/Kconfig"
 endif
 
+   source "drivers/Kconfig"
 
    source "tasks/Kconfig"
