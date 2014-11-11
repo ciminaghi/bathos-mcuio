@@ -15,7 +15,11 @@ SECTIONS
 		initcall_end = .;
 	}
 	.data : {
-		*(.data);      
+		*(.data);
+		. = ALIGN(16);
+                __task_begin = .;
+                *(.task);
+                __task_end = .;
 	}
 	.text : {
 		. = ALIGN(2);
