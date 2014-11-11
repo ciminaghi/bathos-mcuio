@@ -49,15 +49,15 @@ AOBJ = $(ADIR)/main.o $(ADIR)/idle.o $(ADIR)/uart-mux-yun.o $(ADIR)/gpio.o \
 	$(ADIR)/adc.o $(ADIR)/pwm.o
 endif
 
-ifeq ($(CONFIG_USB_UART),y)
+ifeq ($(CONFIG_ATMEGA_USB_UART),y)
 AOBJ += $(ADIR)/usb-uart.o
 endif
 
-ifeq ($(CONFIG_UART),y)
+ifeq ($(CONFIG_ATMEGA_UART),y)
 AOBJ += $(ADIR)/uart.o
 endif
 
-ifeq ($(CONFIG_SPI),y)
+ifeq ($(CONFIG_ATMEGA_SPI),y)
 AOBJ += $(ADIR)/spi.o
 endif
 

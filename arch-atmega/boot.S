@@ -24,13 +24,13 @@
 	nop /* 22 */
 	nop /* 24 */
 	nop /* 26 */
-#if defined CONFIG_USB_UART
+#if defined CONFIG_ATMEGA_USB_UART
 	rjmp __vector_10   /* 28 */
 #else
 	nop
 #endif
 	nop /* 2a */
-#if defined CONFIG_USB_UART
+#if defined CONFIG_ATMEGA_USB_UART
 	rjmp __vector_11   /* 2c */
 #else
 	nop
@@ -61,12 +61,12 @@
 	rjmp __vector_23 /* 5c */
 	nop /* 5e */
 	nop /* 60 */
-#if defined CONFIG_SPI
+#if defined CONFIG_ATMEGA_SPI
 	rjmp __vector_24 /* 62 */
 #else
 	nop
 #endif
-#if defined CONFIG_UART
+#if defined CONFIG_ATMEGA_UART
 	rjmp __vector_25 /* 64 */
 #else
 	nop
