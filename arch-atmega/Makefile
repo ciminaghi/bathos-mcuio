@@ -39,10 +39,6 @@ AOBJ = $(ADIR)/main.o $(ADIR)/idle.o $(ADIR)/uart-mux-yun.o $(ADIR)/gpio.o \
 	$(ADIR)/adc.o $(ADIR)/pwm.o
 endif
 
-ifeq ($(CONFIG_DEBUG_BITBANG),y)
-AOBJ += $(ADIR)/debug-bitbang.o
-endif
-
 ifeq ($(CONFIG_USB_UART),y)
 AOBJ += $(ADIR)/usb-uart.o
 endif
