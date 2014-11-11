@@ -63,7 +63,7 @@ static int generic_udelay_init(void)
 }
 
 #ifndef ARCH_NEEDS_INTERRUPTS_FOR_JIFFIES
-subsys_initcall(generic_udelay_init);
+/* subsys_initcall(generic_udelay_init); */
 #else
 int udelay_init(void)
 {
