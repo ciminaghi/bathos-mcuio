@@ -43,21 +43,21 @@ config MACH
        default "atmega8" if MACH_ATMEGA8
        default "atmega32u4" if MACH_ATMEGA32U4
 
-config USB_UART
-       bool "Usb-uart driver"
+config ATMEGA_USB_UART
+       bool "Atmega Usb-uart driver"
        depends on HAVE_USB
        help
-         Add an UART over USB driver
+         Add an UART over USB driver for the atmega
 
-config UART
-       bool "UART driver"
+config ATMEGA_UART
+       bool "Atmega UART driver"
        help
-         Add an UART driver
+         Add an UART driver for the atmega
 
-config SPI
-       bool "SPI driver"
+config ATMEGA_SPI
+       bool "Atmega SPI driver"
        help
-         Add a SPI driver
+         Add a SPI driver for the atmega
 
 choice
 	prompt "Bathos console"
