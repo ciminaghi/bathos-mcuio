@@ -47,3 +47,10 @@ config  KL25Z_OSC_FREQ
 	int "KL25Z external oscillator frequency"
 	depends on KL25Z_MCG_BLPE
 	default 8000000
+
+config OPENSDA_DEBUG
+       bool "Config for debugging with opensda"
+       help
+         This adds an infinite loop just after _romboot_start to let the
+	 user connect to the target before actually booting bathos
+
