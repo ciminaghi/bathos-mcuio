@@ -137,7 +137,10 @@ ASFLAGS += -g -Wall
 
 # Our target
 bathos.bin: bathos
-	$(OBJCOPY) -O binary $^ $@
+	$(OBJCOPY) --pad-to 0x2000 --gap-fill 0xff -O binary $^ $@
+
+%.hex: %
+	$(OBJCOPY) --pad-to 0x2000 --gap-fill 0xff -O ihex $< $@
 
 bathos: bathos.o
 	$(CC) bathos.o $(LDFLAGS) -o $@
