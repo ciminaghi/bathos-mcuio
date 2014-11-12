@@ -6,6 +6,10 @@ ASFLAGS = $(CFLAGS)
 LDFLAGS = -nostdlib -nostartfiles
 endif
 
+ifeq ($(CONFIG_OPENSDA_DEBUG),y)
+ASFLAGS += -DOPENSDA_DEBUG
+endif
+
 CPU_DIR = cpu-$(shell echo $(CONFIG_CPU))
 MACH_DIR = mach-$(shell echo $(CONFIG_MACH))
 
