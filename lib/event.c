@@ -13,7 +13,7 @@
 #include <bathos/allocator.h>
 #include <bathos/circ_buf.h>
 
-#define PENDING_EVENTS_POOL_SIZE 32
+#define PENDING_EVENTS_POOL_SIZE 64
 
 /*
  * Pending events are stored in a circular buffer, no list of pending events,
