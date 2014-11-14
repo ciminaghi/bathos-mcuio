@@ -3,6 +3,7 @@
  * General Public License version 2 (GPLv2)
  * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
  */
+/* #define DEBUG */
 
 /*
  * bitbang i2c mcuio function, some code taken from
@@ -23,6 +24,10 @@
 #include <tasks/mcuio.h>
 
 #include "mcuio-function.h"
+
+#define I2C_MCUIO_BUF_MAX_SIZE 0x100
+#define I2C_MCUIO_IBUF_MAX_SIZE I2C_MCUIO_BUF_MAX_SIZE
+#define I2C_MCUIO_OBUF_MAX_SIZE I2C_MCUIO_BUF_MAX_SIZE
 
 extern struct mcuio_function mcuio_bitbang_i2c;
 declare_extern_event(mcuio_irq);
@@ -47,9 +52,6 @@ enum i2c_event {
 	I2C_RESET,
 };
 
-#define OBUF_LOW_WATERMARK 4
-#define IBUF_HI_WATERMARK  (32 - 4)
-
 static struct mcuio_i2c_data {
 	int udelay;
 	int timeout;
@@ -67,6 +69,10 @@ static struct mcuio_i2c_data {
 	enum i2c_transaction_state state;
 } i2c_data;
 
+#define OBUF_LOW_WATERMARK  0
+#define OBUF_HIGH_WATERMARK (((sizeof(i2c_data.buffer) - 1) / 8) * 8)
+#define IBUF_HI_WATERMARK   (((sizeof(i2c_data.buffer) - 1) / 8) * 8)
+
 #define MCUIO_CLASS_I2C_CONTROLLER 0x8
 
 #if defined CONFIG_MCUIO_BITBANG_I2C_SDA
@@ -81,27 +87,42 @@ static struct mcuio_i2c_data {
 # define GPIO_SCL 7
 #endif
 
-#define I2C_MCUIO_SADDR	   0x008
-#define I2C_MCUIO_STATUS   0x00c
-#define	  TRANSACTION_OK       0x1
-#define	  BUSY		       0x2
-#define	  NAK_RECEIVED	       0x80
-#define   INVALID_LEN          0x81
-#define I2C_MCUIO_CFG	   0x010
-#define I2C_MCUIO_BRATE	   0x014
-#define I2C_MCUIO_CMD	   0x018
-#define	  START_TRANSACTION 0x1
+/*
+ * Xfer data register (xfers are limited to 255 bytes)
+ *
+ * Byte  0   -> slave address
+ * Byte  1   -> obuf length
+ * Byte  2   -> ibuf length
+ */
+#define I2C_MCUIO_XFER_DATA	0x008
+#define I2C_REG_START		I2C_MCUIO_XFER_DATA
 
-#define I2C_MCUIO_INTEN	   0x01c
-#define I2C_MCUIO_BUF_SIZE 0x020
-#define I2C_MCUIO_OBUF_LEN 0x024
-#define I2C_MCUIO_IBUF_LEN 0x028
-#define I2C_MCUIO_OBUF_HEAD 0x02c
-#define I2C_MCUIO_OBUF_TAIL 0x030
-#define I2C_MCUIO_IBUF_HEAD 0x034
-#define I2C_MCUIO_IBUF_TAIL 0x038
-#define I2C_MCUIO_OBUF	   0x040
-#define I2C_MCUIO_IBUF	   (I2C_MCUIO_OBUF + I2C_MCUIO_OBUF_MAX_SIZE)
+/*
+ * Status register:
+ *
+ * Byte 0 -> flags
+ * Byte 1 -> ibuf count
+ * Byte 2 -> obuf space
+ */
+#define I2C_MCUIO_STATUS	0x00c
+#define	  TRANSACTION_OK	  0x01
+#define	  OBUF_LO_WM_REACHED	  0x02
+#define	  IBUF_HI_WM_REACHED	  0x04
+#define	  NAK_RECEIVED		  0x80
+#define	  INVALID_LEN		  0x81
+
+#define I2C_MCUIO_CFG		0x010
+#define I2C_MCUIO_BRATE		0x014
+#define I2C_MCUIO_CMD		0x018
+#define	  START_TRANSACTION	  0x1
+#define	  INTEN			  0x2
+#define I2C_REG_END		0x03f
+
+#define I2C_MCUIO_BUF_SIZE	0x020
+
+#define I2C_MCUIO_OBUF		0x040
+#define I2C_MCUIO_IBUF		(I2C_MCUIO_OBUF + I2C_MCUIO_OBUF_MAX_SIZE)
+
 
 static const struct mcuio_func_descriptor PROGMEM i2c_bitbang_descr = {
 	.device = CONFIG_MCUIO_BITBANG_I2C_DEVICE,
@@ -115,7 +136,7 @@ static const unsigned int PROGMEM i2c_bitbang_descr_length =
     sizeof(i2c_bitbang_descr);
 
 static const unsigned int PROGMEM i2c_bitbang_registers_length =
-	I2C_MCUIO_IBUF_TAIL + sizeof(uint32_t) - I2C_MCUIO_SADDR;
+	I2C_REG_END - I2C_REG_START + 1;
 
 static const unsigned int PROGMEM i2c_bitbang_obuf_length =
 	sizeof(i2c_data.buffer);
@@ -399,7 +420,7 @@ static int __i2c_handle_go(void)
 		break;
 	case SENDING_DATA:
 	{
-		int done, count;
+		int done, count, togo;
 		uint8_t c = i2c_data.buffer[i2c_data.obuf_tail];
 
 		pr_debug("SENDING_DATA state, c = %u\n", c);
@@ -426,10 +447,12 @@ static int __i2c_handle_go(void)
 		}
 		count = CIRC_CNT(i2c_data.obuf_head, i2c_data.obuf_tail,
 				 sizeof(i2c_data.buffer));
+		togo = i2c_data.obuf_len - i2c_data.data_cnt;
 		pr_debug("count = %d\n", count);
-		if (count == OBUF_LOW_WATERMARK) {
+		if (count == OBUF_LOW_WATERMARK && count < togo) {
 			pr_debug("hit lower watermark\n");
 			/* Trigger out low watermark interrupt */
+			i2c_data.status = OBUF_LO_WM_REACHED;
 			__i2c_bitbang_trigger_irq();
 		}
 
@@ -519,6 +542,7 @@ static int __i2c_handle_go(void)
 		pr_debug("space = %d\n", space);
 		if (space == IBUF_HI_WATERMARK) {
 			pr_debug("triggering irq\n");
+			i2c_data.status = IBUF_HI_WM_REACHED;
 			__i2c_bitbang_trigger_irq();
 		}
 
@@ -550,7 +574,7 @@ static void __i2c_bitbang_do_transaction(struct event_handler_data *ed)
 		__i2c_handle_reset();
 		break;
 	case I2C_GO:
-		while(__i2c_handle_go());
+		while (__i2c_handle_go());
 		break;
 	default:
 		printf("i2c do trans %d\n", evt);
@@ -564,9 +588,6 @@ declare_event_handler(i2c_transaction, NULL,
 static int __i2c_bitbang_start_transaction(void)
 {
 	pr_debug("__i2c_bitbang_start_transaction s%d\n", i2c_data.status);
-	if (i2c_data.status & BUSY)
-		return -EBUSY;
-	i2c_data.status |= BUSY;
 	return trigger_event(&event_name(i2c_transaction), (void *)I2C_GO,
 			     EVT_PRIO_MAX);
 }
@@ -582,14 +603,27 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 	for (i = 0; i < size; i += sizeof(uint32_t)) {
 		out = &__out[i / sizeof(uint32_t)];
 		switch (i + offset + r->start) {
-		case I2C_MCUIO_SADDR:
+		case I2C_MCUIO_XFER_DATA:
 			/* Slave address */
-			*out = (uint32_t)i2c_data.slave_address;
+			*out = mcuio_htonl(i2c_data.slave_address |
+					   ((uint32_t)i2c_data.obuf_len << 8) |
+					   ((uint32_t)i2c_data.ibuf_len << 16));
 			break;
 		case I2C_MCUIO_STATUS:
 			/* Status */
-			*out = (uint32_t)i2c_data.status;
-			if (*out) {
+		{
+			uint32_t icount, ospace;
+
+			icount = CIRC_CNT(i2c_data.ibuf_head,
+					  i2c_data.ibuf_tail,
+					  sizeof(i2c_data.buffer));
+			ospace = CIRC_SPACE(i2c_data.obuf_head,
+					    i2c_data.obuf_tail,
+					    sizeof(i2c_data.buffer));
+			*out = mcuio_htonl(i2c_data.status |
+					   (icount << 8) |
+					   (ospace << 16));
+			if (i2c_data.status) {
 				/* Automatically clear interrupt */
 				int f = &mcuio_bitbang_i2c -
 					mcuio_functions_start;
@@ -609,6 +643,7 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 				}
 			}
 			break;
+		}
 		case I2C_MCUIO_CFG:
 		case I2C_MCUIO_BRATE:
 			/* unsupported at the moment */
@@ -618,32 +653,10 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 			/* command always reads back 0 */
 			*out = 0;
 			break;
-		case I2C_MCUIO_INTEN:
-			/* interrupt enable */
-			*out = i2c_data.int_enable;
-			break;
 		case I2C_MCUIO_BUF_SIZE:
 			/* Buffer size */
-			*out = sizeof(i2c_data.buffer);
+			*out = mcuio_ntohl(sizeof(i2c_data.buffer));
 			break;
-		case I2C_MCUIO_OBUF_HEAD:
-			*out = i2c_data.obuf_head;
-			break;
-		case I2C_MCUIO_OBUF_TAIL:
-			*out = i2c_data.obuf_tail;
-			break;
-		case I2C_MCUIO_IBUF_HEAD:
-			*out = i2c_data.ibuf_head;
-			break;
-		case I2C_MCUIO_IBUF_TAIL:
-			*out = i2c_data.ibuf_tail;
-			break;
-		case I2C_MCUIO_OBUF_LEN:
-			*out = i2c_data.obuf_len;
-			break;
-		case I2C_MCUIO_IBUF_LEN:
-			*out = i2c_data.ibuf_len;
-			break;			
 		default:
 			return -EPERM;
 		}
@@ -657,12 +670,19 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 {
 	unsigned i, size = fill ? sizeof(uint64_t) : sizeof(uint32_t);
 	for (i = 0; i < size; i += sizeof(uint32_t)) {
-		uint32_t in = __in[i / sizeof(uint32_t)];
+		uint32_t in = mcuio_ntohl(__in[i / sizeof(uint32_t)]);
 		switch (i + offset + r->start) {
-		case I2C_MCUIO_SADDR:
-			/* Slave address */
-			i2c_data.slave_address = in;
+		case I2C_MCUIO_XFER_DATA:
+		{
+			/* Transfer data */
+			i2c_data.slave_address = in & 0xff;
+			i2c_data.obuf_len = (in >> 8) & 0xfff;
+			i2c_data.ibuf_len = (in >> 20) & 0xfff;
+			pr_debug("XFER_DATA: a = 0x%02x ol = %u il = %u\n",
+				 i2c_data.slave_address, i2c_data.obuf_len,
+				 i2c_data.ibuf_len);
 			break;
+		}
 		case I2C_MCUIO_STATUS:
 			return -EPERM;
 		case I2C_MCUIO_CFG:
@@ -678,37 +698,12 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 				if (stat < 0)
 					return stat;
 			}
+			i2c_data.int_enable = (in & INTEN);
 			break;
 		}
-		case I2C_MCUIO_INTEN:
-			/* interrupt enable */
-			i2c_data.int_enable = in;
-			break;
 		case I2C_MCUIO_BUF_SIZE:
 			/* Buffer size, cannot be written */
 			return -EPERM;
-		case I2C_MCUIO_OBUF_LEN:
-			i2c_data.obuf_len = in;
-			break;
-		case I2C_MCUIO_IBUF_LEN:
-			i2c_data.ibuf_len = (int32_t)in;
-			pr_debug("i2c_data.ibuf_len set to %d\n",
-				 i2c_data.ibuf_len);
-			break;
-		case I2C_MCUIO_OBUF_HEAD:
-			i2c_data.obuf_head = in;
-			if (i2c_data.state == AWAITING_OUTPUT_DATA) {
-				__i2c_bitbang_next_state(SENDING_DATA);
-				__trigger_go_event();
-			}
-			break;
-		case I2C_MCUIO_IBUF_TAIL:
-			i2c_data.ibuf_tail = in;
-			if (i2c_data.state == AWAITING_INPUT_SPACE) {
-				__i2c_bitbang_next_state(RECEIVING_DATA);
-				__trigger_go_event();
-			}
-			break;
 		default:
 			return -EPERM;
 		}
@@ -720,6 +715,96 @@ static int i2c_bitbang_registers_wrdw(const struct mcuio_range *r,
 const struct mcuio_range_ops PROGMEM i2c_bitbang_registers_rw_ops = {
 	.rd = { NULL, NULL, i2c_bitbang_registers_rddw, NULL, },
 	.wr = { NULL, NULL, i2c_bitbang_registers_wrdw, NULL, },
+};
+
+int i2c_bitbang_obuf_wrb(const struct mcuio_range *r, unsigned offset,
+			 const uint32_t *__in, int fill)
+{
+	int space_to_end, space, sz, l, written = 0;
+	const uint8_t *in = (const uint8_t *)__in;
+
+	sz = fill ? sizeof(uint64_t) : sizeof(uint8_t);
+	space = CIRC_SPACE(i2c_data.obuf_head, i2c_data.obuf_tail,
+			   sizeof(i2c_data.buffer));
+	if (sz > space)
+		return -EINVAL;
+	space_to_end = CIRC_SPACE_TO_END(i2c_data.obuf_head,
+					 i2c_data.obuf_tail,
+					 sizeof(i2c_data.buffer));
+	l = min(sz, space_to_end);
+	memcpy(&i2c_data.buffer[i2c_data.obuf_head], in, l);
+	sz -= l;
+	space -= l;
+	written += l;
+	in += l;
+	if (sz > 0) {
+		l = min(sz, space);
+		memcpy(&i2c_data.buffer[0], in, l);
+		written += l;
+		space -= l;
+	}
+	i2c_data.obuf_head = (i2c_data.obuf_head + written) &
+		(sizeof(i2c_data.buffer) - 1);
+	if (i2c_data.state == AWAITING_OUTPUT_DATA) {
+		int togo = i2c_data.obuf_len - i2c_data.data_cnt;
+		int have = CIRC_CNT(i2c_data.obuf_head,
+				    i2c_data.obuf_tail,
+				    sizeof(i2c_data.buffer));
+		if (have >= min(togo, OBUF_HIGH_WATERMARK)) {
+			__i2c_bitbang_next_state(SENDING_DATA);
+			__trigger_go_event();
+		}
+	}
+	return sz;
+}
+
+const struct mcuio_range_ops PROGMEM i2c_bitbang_obuf_wr_ops = {
+	/* Can't read the output buffer anyway */
+	.rd = { NULL, NULL, NULL, NULL, },
+	/* Only byte access is allowed */
+	.wr = { i2c_bitbang_obuf_wrb, NULL, NULL, NULL, },
+};
+
+int i2c_bitbang_ibuf_rdb(const struct mcuio_range *r, unsigned offset,
+			 uint32_t *__out, int fill)
+{
+	int count_to_end, count, sz, l, read = 0;
+	uint8_t *out = (uint8_t *)__out;
+
+	sz = fill ? sizeof(uint64_t) : sizeof(uint8_t);
+	count = CIRC_CNT(i2c_data.ibuf_head, i2c_data.ibuf_tail,
+			 sizeof(i2c_data.buffer));
+	if (sz > count)
+		return -EINVAL;
+	count_to_end = CIRC_CNT_TO_END(i2c_data.ibuf_head,
+				       i2c_data.ibuf_tail,
+				       sizeof(i2c_data.buffer));
+	l = min(sz, count_to_end);
+	memcpy(out, &i2c_data.buffer[i2c_data.ibuf_tail], l);
+	sz -= l;
+	count -= l;
+	read += l;
+	out += l;
+	if (sz > 0) {
+		l = min(sz, count);
+		memcpy(out, &i2c_data.buffer[0], l);
+		read += l;
+		count -= l;
+	}
+	i2c_data.ibuf_tail = (i2c_data.ibuf_tail + read) &
+		(sizeof(i2c_data.buffer) - 1);
+	if (i2c_data.state == AWAITING_INPUT_SPACE) {
+		__i2c_bitbang_next_state(RECEIVING_DATA);
+		__trigger_go_event();
+	}
+	return sz;
+}
+
+const struct mcuio_range_ops PROGMEM i2c_bitbang_ibuf_rd_ops = {
+	/* Only byte access is allowed */
+	.rd = { i2c_bitbang_ibuf_rdb, NULL, NULL, NULL, },
+	/* Can't write the input buffer anyway */
+	.wr = { NULL, NULL, NULL, NULL, },
 };
 
 static const struct mcuio_range PROGMEM i2c_bitbang_ranges[] = {
@@ -737,20 +822,19 @@ static const struct mcuio_range PROGMEM i2c_bitbang_ranges[] = {
 		.rd_target = NULL,
 		.ops = &i2c_bitbang_registers_rw_ops,
 	},
-	/* dwords 0x40 .. 0x13f, output buffer, read/write */
+	/* dwords 0x40 .. 0x13f, output buffer, write only */
 	{
 		.start = 0x40,
 		.length = &i2c_bitbang_obuf_length,
-		.rd_target = i2c_data.buffer,
 		.wr_target = i2c_data.buffer,
-		.ops = &default_mcuio_range_ram_ops,
+		.ops = &i2c_bitbang_obuf_wr_ops,
 	},
 	/* dwords 0x140 .. 0x240, input buffer, read only */
 	{
 		.start = 0x140,
 		.length = &i2c_bitbang_ibuf_length,
 		.rd_target = i2c_data.buffer,
-		.ops = &default_mcuio_range_ro_ram_ops,
+		.ops = &i2c_bitbang_ibuf_rd_ops,
 	},
 };
 
