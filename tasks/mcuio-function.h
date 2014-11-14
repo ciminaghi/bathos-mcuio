@@ -13,6 +13,14 @@
 #define PROGMEM
 #endif
 
+#ifndef mcuio_ntohl
+#define mcuio_ntohl(a) a
+#endif
+
+#ifndef mcuio_htonl
+#define mcuio_htonl(a) a
+#endif
+
 struct mcuio_range;
 struct mcuio_function;
 
