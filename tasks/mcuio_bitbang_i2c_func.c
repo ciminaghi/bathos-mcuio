@@ -315,11 +315,6 @@ static int __i2c_bitbang_send_acknak(int is_ack)
 	return 0;
 }
 
-static void __i2c_bitbang_trig_evt_error(void)
-{
-	pr_debug("__i2c_bitbang_trig_evt_error\n");
-}
-
 static int __trigger_go_event(void)
 {
 	pr_debug("triggering evt I2C_GO\n");
@@ -333,7 +328,6 @@ static int __trigger_go_event(void)
  */
 static int __i2c_bitbang_next_state(enum i2c_transaction_state s)
 {
-	int stat, n;
 	i2c_data.state = s;
 
 	pr_debug("__i2c_bitbang_next_state %d\n", s);
