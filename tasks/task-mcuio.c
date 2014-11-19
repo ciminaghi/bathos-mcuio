@@ -221,6 +221,7 @@ static void __mcuio_send_error_to_host(struct mcuio_data *d,
 {
 	p->data[0] = e;
 	mcuio_packet_set_error(p);
+	dump_packet(p);
 	pipe_write(d->output_pipe, (const char *)p, sizeof(*p));
 }
 
