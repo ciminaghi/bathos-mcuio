@@ -64,7 +64,7 @@ void pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt,
 		return;
 	list_for_each_entry(p, &dev->pipes, list) {
 		if (trigger_event(evt, p, prio) < 0) {
-			pr_debug("WARN: missing pipe evt\n");
+			printf("WARN: missing pipe evt\n");
 		}
 	}
 }
