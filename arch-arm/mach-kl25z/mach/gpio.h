@@ -7,6 +7,7 @@
 #define __GPIO_MACH_KLZ25_H__
 
 #include <bathos/io.h>
+#include "hw.h"
 
 static inline void gpio_set(int gpio, int value)
 {

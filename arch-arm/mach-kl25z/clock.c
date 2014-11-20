@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <arch/hw.h>
+#include <mach/hw.h>
 #include <generated/autoconf.h>
 
 
