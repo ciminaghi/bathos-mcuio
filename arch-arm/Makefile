@@ -24,6 +24,10 @@ MACH_SUBDIR = $(ADIR)/mach-$(shell echo $(CONFIG_MACH))
 LIBARCH = $(ADIR)/libarch.a
 LIBARCH_OBJS = $(ADIR)/init.o
 
+ifeq ($(CONFIG_KL25Z_BOARD_FREEDOG),y)
+  LIBARCH_OBJS +=  $(ADIR)/$(MACH_DIR)/plat-freedog.o
+endif
+
 ifeq ($(CONFIG_MACH_KL25Z),y)
 LIBARCH_OBJS += $(MACH_SUBDIR)/clock.o $(MACH_SUBDIR)/jiffies.o
 AOBJ += $(MACH_SUBDIR)/idle.o
