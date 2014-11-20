@@ -31,5 +31,15 @@ endif
 
 # FIXME: add lpc1343 and 2104 files here
 
+ifeq ($(CONFIG_MBED_DRIVERS),y)
+  MBED_DIR = $(shell echo $(CONFIG_MBED_PATH))
+
+  CFLAGS += -I$(MBED_DIR)/libraries/mbed/hal \
+    -I$(MBED_DIR)/libraries/mbed/targets/cmsis \
+    -I$(MBED_DIR)/libraries/mbed/api
+
+  include $(ADIR)/$(MACH_DIR)/mbed.mk
+endif
+
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
