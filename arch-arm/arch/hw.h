@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <bathos/io.h>
 
-#include <mach/hw.h>
+#include <mach/hw-freq.h>
 
 extern void clocks_init(void);
 extern void machine_ll_init(void);
