@@ -6,9 +6,6 @@
 #ifndef __KL25Z_HW_H__
 #define __KL25Z_HW_H__
 
-#define CPU_FREQ		(12 * 1000 * 1000)
-#define HZ			100
-
 
 #define REG_SOPT1		(0x40047000 / 4) /* write */
 
