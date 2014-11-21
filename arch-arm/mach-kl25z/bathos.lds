@@ -42,6 +42,7 @@ SECTIONS
 	        . = ALIGN(16);
 		__bss_start__ = .;
 		*(.bss);
+		*(.bss.*);
 		*(COMMON);
 		. = ALIGN(16);
 		__bss_end__ = .;
