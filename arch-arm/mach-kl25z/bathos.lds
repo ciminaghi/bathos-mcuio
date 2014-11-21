@@ -29,7 +29,7 @@ SECTIONS
 	. = ALIGN(16);
 	_erom = .;
 
-	.data 0x1ffff000: AT(_erom) {
+	.data 0x1ffff0c0: AT(_erom) {
 		_sdata = .;
 		*(.data);
 		bathos_devices_start =  .;
