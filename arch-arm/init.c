@@ -35,6 +35,7 @@ int bathos_setup(void)
 	console_early_init();
 	console_putc('.');
 	do_initcalls();
+	return 0;
 }
 #endif
 
