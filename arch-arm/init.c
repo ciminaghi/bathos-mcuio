@@ -15,10 +15,11 @@
 #define CONFIG_STDIN "null"
 #endif
 
-void stdio_init(void)
+int stdio_init(void)
 {
 	bathos_stdout = pipe_open(CONFIG_STDOUT, BATHOS_MODE_OUTPUT, NULL);
 	bathos_stdin = pipe_open(CONFIG_STDIN, BATHOS_MODE_INPUT, NULL);
+	return 0;
 }
 core_initcall(stdio_init);
 
