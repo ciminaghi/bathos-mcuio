@@ -20,6 +20,7 @@ static void console_gpio_init(void)
 static int mach_ll_init(void)
 {
 	clocks_init();
+	jiffies_init();
 	console_gpio_init();
 	return 0;
 }
