@@ -6,6 +6,22 @@
 #ifndef __KL25Z_HW_H__
 #define __KL25Z_HW_H__
 
+#define REG_PIT_MCR		(0x40037000 / 4)
+#define PIT_MCR_FRZ_MASK	0x1u
+#define PIT_MCR_MDIS_MASK	0x2u
+
+#define REG_PIT_LTMR64H		(0x400370E0 / 4)
+#define REG_PIT_LTMR64L		(0x400370E4 / 4)
+#define REG_PIT_LDVAL(ch)	((0x40037100 + (ch)*0x10) / 4)
+#define REG_PIT_CVAL(ch)	((0x40037104 + (ch)*0x10) / 4)
+
+#define REG_PIT_TCTRL(ch)	((0x40037108 + (ch)*0x10) / 4)
+#define PIT_TCTRL_TEN_MASK	0x1u
+#define PIT_TCTRL_TIE_MASK	0x2u
+#define PIT_TCTRL_CHN_MASK	0x4u
+
+#define REG_PIT_TFLG(ch)	((0x4003710C + (ch)*0x10) / 4)
+#define PIT_TFLG_TIF_MASK	0x1u
 
 #define REG_SOPT1		(0x40047000 / 4) /* write */
 
