@@ -1,7 +1,7 @@
 /*
  * Copyright (c) dog hunter AG - Zug - CH
  * General Public License version 2 (GPLv2)
- * Author: Davide Ciminaghi <ciminaghi@gnudd.com>
+ * Author: Aurelio Colosimo <aurelio@aureliocolosimo.it>
  */
 
 #ifndef __ADC_ATMEGA32U4_H__
