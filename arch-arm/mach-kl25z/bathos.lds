@@ -7,6 +7,7 @@ ram_vectors = 0x1ffff000;
 SECTIONS
 {
 	.text 0x00000000: {
+		rom_vectors = .;
 		*(.vectors);
 		. = 0x400;
 		*(.flash_config)
