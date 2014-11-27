@@ -11,6 +11,8 @@
 
 #ifdef CONFIG_MBED_DRIVERS
 #include <cmsis_nvic.h>
+#else
+#include <cpu-cortex-m0/nvic.h>
 #endif
 
 static void pit_irq_handler(void)
@@ -29,7 +31,8 @@ void jiffies_init(void)
 	NVIC_SetVector(PIT_IRQn, (uint32_t)pit_irq_handler);
 	NVIC_EnableIRQ(PIT_IRQn);
 #else
-#error irqs unsupported if CONFIG_MBED_DRIVERS not set
+	nvic_set_handler(NVIC_IRQ_PIT, pit_irq_handler);
+	nvic_enable(NVIC_IRQ_PIT);
 #endif
 
 	/* Use channel 0 to generate irqs for jiffies update */
