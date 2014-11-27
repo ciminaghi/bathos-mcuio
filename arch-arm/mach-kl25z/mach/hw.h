@@ -107,7 +107,27 @@
 #define REG_SOPT5		(0x40048010 / 4)
 #define REG_SOPT7		(0x40048018 / 4)
 #define REG_SDID		(0x40048024 / 4)
+
 #define REG_SCGC4		(0x40048034 / 4)
+#define SIM_SCGC4_I2C0_MASK		0x40
+#define SIM_SCGC4_I2C0_SHIFT		6
+#define SIM_SCGC4_I2C1_MASK		0x80
+#define SIM_SCGC4_I2C1_SHIFT		7
+#define SIM_SCGC4_UART0_MASK		0x400
+#define SIM_SCGC4_UART0_SHIFT		10
+#define SIM_SCGC4_UART1_MASK		0x800
+#define SIM_SCGC4_UART1_SHIFT		11
+#define SIM_SCGC4_UART2_MASK		0x1000
+#define SIM_SCGC4_UART2_SHIFT		12
+#define SIM_SCGC4_USBOTG_MASK		0x40000
+#define SIM_SCGC4_USBOTG_SHIFT		18
+#define SIM_SCGC4_CMP_MASK		0x80000
+#define SIM_SCGC4_CMP_SHIFT		19
+#define SIM_SCGC4_SPI0_MASK		0x400000u
+#define SIM_SCGC4_SPI0_SHIFT		22
+#define SIM_SCGC4_SPI1_MASK		0x800000u
+#define SIM_SCGC4_SPI1_SHIFT		23
+
 #define REG_SCGC5		(0x40048038 / 4)
 
 /* SCGC5 Bit Fields */
@@ -308,6 +328,33 @@
 #define REG_GPIO_PDIR(port)	(((GPIO_PORT_BASE + (port)*0x40 + 0x10) / 4))
 #define REG_GPIO_PDDR(port)	(((GPIO_PORT_BASE + (port)*0x40 + 0x14) / 4))
 
+#define REG_UART_BDH(n)		(0x4006a000 + (n)*0x1000)
+#define REG_UART_BDL(n)		(0x4006a001 + (n)*0x1000)
+#define REG_UART_C1(n)		(0x4006a002 + (n)*0x1000)
+
+#define REG_UART_C2(n)		(0x4006a003 + (n)*0x1000)
+#define UART_C2_TIE_MASK	0x80
+#define UART_C2_TCIE_MASK	0x40
+#define UART_C2_RIE_MASK	0x20
+#define UART_C2_ILIE_MASK	0x10
+#define UART_C2_TE_MASK		0x08
+#define UART_C2_RE_MASK		0x04
+#define UART_C2_RWU_MASK	0x02
+#define UART_C2_SBK_MASK	0x01
+
+#define REG_UART_S1(n)		(0x4006a004 + (n)*0x1000)
+#define UART_S1_TDRE_MASK	0x80
+#define UART_S1_TC_MASK		0x40
+#define UART_S1_RDRF_MASK	0x20
+#define UART_S1_IDLE_MASK	0x10
+#define UART_S1_OR_MASK		0x08
+#define UART_S1_NF_MASK		0x04
+#define UART_S1_FE_MASK		0x02
+#define UART_S1_PF_MASK		0x01
+
+#define REG_UART_S2(n)		(0x4006a005 + (n)*0x1000)
+#define REG_UART_C3(n)		(0x4006a006 + (n)*0x1000)
+#define REG_UART_D(n)		(0x4006a007 + (n)*0x1000)
 
 extern void clocks_init();
 
