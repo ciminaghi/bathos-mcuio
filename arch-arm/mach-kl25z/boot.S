@@ -70,7 +70,7 @@ _hard_fault_handler:
 	mov    r0, lr
 	mrs  r1, psp
 	mrs  r2, msp
-	b	hard_fault_handler
+	bl	hard_fault_handler
 
 
 trapme:
