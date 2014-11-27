@@ -13,6 +13,10 @@ ifeq ($(CONFIG_DEBUG_BITBANG),y)
 DRV_OBJS += drivers/debug_bitbang.o
 endif
 
+ifeq ($(CONFIG_MBED_DRIVERS),y)
+  DRV_OBJS += drivers/mbed/adc.o
+endif
+
 $(LIBDRIVERS): $(DRV_OBJS)
 	$(AR) r $@ $(DRV_OBJS)
 
