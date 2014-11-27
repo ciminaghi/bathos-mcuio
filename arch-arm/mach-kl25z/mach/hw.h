@@ -6,6 +6,36 @@
 #ifndef __KL25Z_HW_H__
 #define __KL25Z_HW_H__
 
+#define NVIC_IRQ_DMA0 		0
+#define NVIC_IRQ_DMA1 		1
+#define NVIC_IRQ_DMA2 		2
+#define NVIC_IRQ_DMA3 		3
+#define NVIC_IRQ_FTFA 		5
+#define NVIC_IRQ_PMC 		6
+#define NVIC_IRQ_LLWU		7
+#define NVIC_IRQ_I2C0		8
+#define NVIC_IRQ_I2C1		9
+#define NVIC_IRQ_SPI0		10
+#define NVIC_IRQ_SPI1		11
+#define NVIC_IRQ_UART0		12
+#define NVIC_IRQ_UART1		13
+#define NVIC_IRQ_UART2		14
+#define NVIC_IRQ_ADC0		15
+#define NVIC_IRQ_CMP0		16
+#define NVIC_IRQ_TPM0		17
+#define NVIC_IRQ_TPM1		18
+#define NVIC_IRQ_TPM2		19
+#define NVIC_IRQ_RTC		20
+#define NVIC_IRQ_RTC_SEC	21
+#define NVIC_IRQ_PIT		22
+#define NVIC_IRQ_USBOTG		24
+#define NVIC_IRQ_DAC0		25
+#define NVIC_IRQ_TSI0		26
+#define NVIC_IRQ_MCG		27
+#define NVIC_IRQ_LPTMR0		28
+#define NVIC_IRQ_PORTA		30
+#define NVIC_IRQ_PORTD		31
+
 #define REG_PIT_MCR		(0x40037000 / 4)
 #define PIT_MCR_FRZ_MASK	0x1u
 #define PIT_MCR_MDIS_MASK	0x2u
