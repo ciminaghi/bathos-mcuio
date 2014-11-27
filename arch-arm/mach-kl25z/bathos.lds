@@ -1,6 +1,7 @@
 ENTRY(_romboot_start)
 
 regs = 0;
+ram_vectors = 0x1ffff000;
 
 /* Warning: linker script valid for flash boot only */
 SECTIONS
