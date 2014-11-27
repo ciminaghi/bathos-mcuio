@@ -37,4 +37,14 @@ static inline void nvic_disable(uint32_t irqn)
 	regs[REG_NVIC_ICER] = 1 << irqn;
 }
 
+static inline void nvic_clear_pending(uint32_t irqn)
+{
+	regs[REG_NVIC_ICPR] = 1 << irqn;
+}
+
+static inline void nvic_set_pending(uint32_t irqn)
+{
+	regs[REG_NVIC_ISPR] = 1 << irqn;
+}
+
 #endif /* ___CORTEX_M0_NVIC_H__ */

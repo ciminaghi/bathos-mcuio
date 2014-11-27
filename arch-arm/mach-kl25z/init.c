@@ -2,8 +2,10 @@
 #include <arch/hw.h>
 #include <bathos/gpio.h>
 #include <bathos/init.h>
+#include <cpu-cortex-m0/nvic.h>
 
 unsigned long jiffies;
+volatile uint32_t *vectors = rom_vectors;
 
 #ifdef CONFIG_CONSOLE_DEBUG_BITBANG
 static void console_gpio_init(void)
@@ -20,6 +22,7 @@ static void console_gpio_init(void)
 static int mach_ll_init(void)
 {
 	clocks_init();
+	nvic_init_ram();
 	jiffies_init();
 	console_gpio_init();
 	return 0;
