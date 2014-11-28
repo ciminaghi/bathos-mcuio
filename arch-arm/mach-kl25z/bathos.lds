@@ -14,6 +14,9 @@ SECTIONS
 		. = 0x410;
 		*(.text.romboot)
 		*(.text)
+		mcuio_functions_start = .;
+		*(.mcuio_functions);
+		mcuio_functions_end = .;
 	}
 
 	. = ALIGN(16);
