@@ -2,6 +2,7 @@
 #include <arch/hw.h>
 #include <bathos/gpio.h>
 #include <bathos/init.h>
+#include <bathos/event.h>
 #include <cpu-cortex-m0/nvic.h>
 
 unsigned long jiffies;
@@ -25,6 +26,7 @@ static int mach_ll_init(void)
 	nvic_init_ram();
 	jiffies_init();
 	console_gpio_init();
+	events_init();
 	return 0;
 }
 rom_initcall(mach_ll_init);
