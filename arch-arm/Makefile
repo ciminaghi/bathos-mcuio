@@ -26,6 +26,7 @@ LIBARCH_OBJS = $(ADIR)/init.o
 
 ifeq ($(CONFIG_KL25Z_BOARD_FREEDOG),y)
   LIBARCH_OBJS +=  $(ADIR)/$(MACH_DIR)/plat-freedog.o
+  AOBJ += $(MACH_SUBDIR)/uart-mux-freedog.o
 endif
 
 ifeq ($(CONFIG_MACH_KL25Z),y)
