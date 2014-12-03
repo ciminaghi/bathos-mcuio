@@ -4,6 +4,11 @@
  * Author: Aurelio Colosimo <aurelio@aureliocolosimo.it>
  */
 
+#include <bathos/init.h>
+#include <bathos/types.h>
+#include <bathos/gpio.h>
+#include <mach/gpio.h>
+
 /* ADCs */
 
 #define VRES_UV (5000000 / (1 << 10))
@@ -26,3 +31,30 @@ const uint32_t min_per = (1000000 / HZ);
 const uint32_t max_mul = 0xffffffff;
 
 #endif
+
+/* GPIOs */
+const unsigned int gpio_labels_size = MCUIO_NGPIO * 4;
+char gpio_labels_start[MCUIO_NGPIO * 4];
+const unsigned int gpio_caps_size = MCUIO_NGPIO;
+uint32_t gpio_caps_start[MCUIO_NGPIO];
+const unsigned int gpio_evts_caps_size = MCUIO_NGPIO;
+uint32_t gpio_evts_caps_start[MCUIO_NGPIO];
+
+static int __gpio_init(void)
+{
+	int i, n;
+	/* FIXME this configures a full-featured set of gpios. Must be fixed
+	 * with actual values */
+	for (i = 0; i < MCUIO_NGPIO; i++) {
+		n = i % 32;
+		gpio_labels_start[i*4 + 3] = 'A' + (i / 32);
+		gpio_labels_start[i*4 + 2] = '0' + (n / 10);
+		gpio_labels_start[i*4 + 1] = '0' + (n % 10);
+		gpio_labels_start[i*4] = '\0';
+		gpio_caps_start[i] = 0xffffffff;
+		gpio_evts_caps_start[i] = 0xffffffff;
+	}
+	return 0;
+}
+
+core_initcall(__gpio_init);
