@@ -166,6 +166,13 @@ config MCUIO_SHIELD_DEVICE_ID
 choice
 	prompt "Gpio names map"
 
+config MCUIO_GPIO_MAP_NULL
+	bool "no gpio map"
+	depends on MCUIO_GPIO
+	help
+	  This selects no gpio maps read from .cfg file. arch-implementation
+	  must provide the necessary data structs
+
 config MCUIO_GPIO_MAP_YUN
        bool "arduino yun gpio map"
        depends on MCUIO_GPIO && MACH_ATMEGA32U4
