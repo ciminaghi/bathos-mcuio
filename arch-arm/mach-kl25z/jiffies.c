@@ -6,6 +6,8 @@
 
 #include <bathos/init.h>
 #include <bathos/jiffies.h>
+#include <bathos/event.h>
+#include <bathos/sys_timer.h>
 #include <arch/hw.h>
 #include <mach/hw.h>
 
@@ -19,6 +21,7 @@ static void pit_irq_handler(void)
 {
 	jiffies++;
 	regs[REG_PIT_TFLG(0)] = PIT_TFLG_TIF_MASK;
+	trigger_event(&event_name(hw_timer_tick), NULL, EVT_PRIO_MAX);
 }
 
 void jiffies_init(void)
