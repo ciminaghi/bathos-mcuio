@@ -66,9 +66,10 @@ create_symbols_names_file() {
     local objf=$1
     local str=$2
     local f=$3
+    local p=$4
     local s
     for s in start end size ; do
-	echo "_binary_$(echo $objf | sed -e 's/\//_/g')_$s ${str}_${s}" >> $f
+	echo "_binary_$(echo $objf | sed -e 's/\//_/g')_$s ${str}_${s}_${p}" >> $f
     done
 }
 
@@ -90,8 +91,8 @@ create_obj() {
 	.data=$sec,contents,alloc,load,readonly,code $out $out
 }
 
-[ $# -lt 3 ] && \
-    { echo "Use $0 <obj-format> <gpio_cfg_file> <out_file>" ; exit 1 ; }
+[ $# -lt 6 ] && \
+    { echo "Use $0 <obj-format> <gpio_cfg_file> <port_index> <gpio_offset> <ngpios> <out_file>" ; exit 1 ; }
 
 f=$(tempfile --prefix=cobj)
 g=$(tempfile --prefix=eobj)
@@ -100,11 +101,18 @@ q=$(tempfile --prefix=esym)
 fmt=$1
 outcaps=$(tempfile --prefix=ocaps)
 outevts=$(tempfile --prefix=oevts)
-out=$3
+port=$3
+offs=$4
+ngpios=$5
+out=$6
 
 exec 9<$2
 
+lcnt=0
 while read -u 9 line ; do
+    lcnt=$((lcnt+1))
+    [ $lcnt -le $offs ] && { lcnt=$((lcnt+1)) ; continue ; }
+    [ $lcnt -ge $(($offs + $ngpios)) ] && break
     # Skip comments and empty lines
     [ -n "$(echo -n $line | grep ^#.*)" ] && continue
     [ -n "$(echo -n $line | grep ^[[:space:]]*$)" ] && continue
@@ -131,8 +139,8 @@ while read -u 9 line ; do
     >>$g echo -n -e $(printf "\\\x%02x" $item)
 done
 
-create_symbols_names_file $f gpio_caps $r
-create_symbols_names_file $g gpio_evts_caps $q
+create_symbols_names_file $f gpio_caps $r $port
+create_symbols_names_file $g gpio_evts_caps $q $port
 
 ret=0
 create_obj $f $fmt $r .text.gpio-caps $outcaps || ret=1
