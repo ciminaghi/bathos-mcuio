@@ -18,7 +18,6 @@
 #include <bathos/string.h>
 #include <bathos/io.h>
 #include <bathos/dev_ops.h>
-#include <cpu-cortex-m0/nvic.h>
 
 static uint8_t initialized;
 static struct bathos_dev __uart_dev;
