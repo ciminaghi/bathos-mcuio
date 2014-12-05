@@ -263,6 +263,7 @@ int usb_enable()
 	regs8[REG_USB0_CTL] |= USB_CTL_USBENSOFEN_MASK;
 	return 0;
 }
+device_initcall(usb_enable);
 
 int usb_disable()
 {
