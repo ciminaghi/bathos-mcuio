@@ -17,12 +17,12 @@
 struct usb_ops_t {
 	void (*reset)(void);
 	void (*sleep)(void);
-	void (*token)(int type, uint8_t *buf, int len);
-	void (*config)(int);
+	void (*token)(int type, int ep, uint8_t *buf, int len);
+	void (*sof)(void);
 };
 
-#define declare_usb_ops(r, s, t, c) struct usb_ops_t __usb_ops = { \
-		.reset = r, .sleep = s, .token = t, .config = c }
+#define declare_usb_ops(r, s, t, S) struct usb_ops_t __usb_ops = { \
+		.reset = r, .sleep = s, .token = t, .sof = S}
 
 /* These defines are for the 'type' argument of token_cb */
 #define USB_TOKEN_IN	0x9
@@ -58,10 +58,6 @@ struct usb_descriptor_list {
 	uint8_t		length;
 };
 
-/* Declare a usb_descr_list variable somewhere, setting the last element
- * to addr NULL */
-extern const struct usb_descriptor_list usb_descr_list[];
-
 /* Endpoint 0 size: 8 bytes is enough*/
 #define EP0_BUFSIZE 8
 
@@ -69,9 +65,15 @@ int usb_enable(void);
 
 int usb_disable(void);
 
-int usb_request_tx_ep(uint8_t ep);
+int usb_set_address(uint8_t addr);
+
+int usb_request_tx_ep(uint8_t ep, void *buf, int bufsize);
+
+int usb_release_tx_ep(uint8_t ep, int bufsize);
 
 int usb_request_rx_ep(uint8_t ep, void *buf, int bufsize);
+
+int usb_release_rx_ep(uint8_t ep, int bufsize);
 
 int usb_write(uint8_t ep, const uint8_t *buf, int len);
 

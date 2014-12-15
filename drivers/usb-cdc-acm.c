@@ -8,12 +8,15 @@
  * http://www.pjrc.com/teensy/usb_serial.html
  */
 
+/* #define DEBUG 1 */
+
 #include <bathos/usb.h>
 #include <bathos/bathos.h>
 #include <bathos/pipe.h>
 #include <bathos/init.h>
 #include <bathos/errno.h>
 #include <bathos/interrupt.h>
+#include <bathos/dev_ops.h>
 
 #define VENDOR_ID		0x2a03
 #define PRODUCT_ID		0x0001
@@ -31,9 +34,9 @@
 #define CDC_GET_LINE_CODING		0x21
 #define CDC_SET_CONTROL_LINE_STATE	0x22
 
-#define CDC_ACM_ENDPOINT	2
-#define CDC_RX_ENDPOINT		3
-#define CDC_TX_ENDPOINT		4
+#define CDC_ACM_ENDPOINT	1
+#define CDC_RX_ENDPOINT		2
+#define CDC_TX_ENDPOINT		3
 #define CDC_ACM_SIZE		16
 #define CDC_RX_SIZE		64
 #define CDC_TX_SIZE		64
@@ -42,11 +45,17 @@
 struct cdc_data {
 	volatile uint8_t usb_configuration;
 	uint8_t line_coding[7];
+	int open_mode;
+	int dev_initialized;
+	uint8_t *txbuf;
+	int txlen;
 };
 
 static struct cdc_data __data = {
 	.line_coding = {0x00, 0xE1, 0x00, 0x00, 0x00, 0x00, 0x08},
 };
+
+struct bathos_dev __usb_uart_dev;
 
 /* Descriptors are the data that your computer reads when it auto-detects
  * this USB device (called "enumeration" in USB lingo).  The most commonly
@@ -191,59 +200,190 @@ const struct usb_descriptor_list PROGMEM usb_descr_list[] = {
 
 static void reset_cb()
 {
-	pr_debug("usb rst\n");
+	console_putc('R');
 	__data.usb_configuration = 0;
+	__data.txlen = 0;
 }
 
 static void sleep_cb()
 {
-	pr_debug("usb slp\n");
+	console_putc('S');
 }
 
 #ifdef CONFIG_MACH_KL25Z
-	/* EP Buffers */
+/* KL25Z dma requires two buffers, for ping-pong even/odd handling */
+static uint8_t cdc_rx_buf[CDC_RX_SIZE * 2] __attribute__ ((aligned(4)));
+static uint8_t cdc_acm_buf[CDC_ACM_SIZE * 2] __attribute__ ((aligned(4)));
+static uint8_t cdc_tx_buf[CDC_TX_SIZE * 2] __attribute__ ((aligned(4)));
 #else
-	/* EP Buffers */
+static uint8_t cdc_rx_buf[CDC_RX_SIZE];
+static uint8_t cdc_acm_buf[CDC_ACM_SIZE];
+static uint8_t cdc_tx_buf[CDC_TX_SIZE];
 #endif
-static void config_cb(int c)
+
+#define _to_u16(l, h) ((uint16_t)h << 8 | l)
+
+static void __handle_token_setup(uint8_t *buf, int ep, int len)
 {
-	__data.usb_configuration = c;
-	/* FIXME: enable endpoints */
+	int i;
+	struct usb_tok_setup *s = (struct usb_tok_setup *)buf;
+	uint16_t s_wValue = _to_u16(s->wValueL, s->wValueH);
+	uint16_t s_wLength = _to_u16(s->wLengthL, s->wLengthH);
+	const struct usb_descriptor_list *d = NULL;
+
+	if (s->bmRequestType & 0x1f) {
+		/* Ignore any request but get line coding */
+		if (s->bRequest == CDC_GET_LINE_CODING)
+			usb_write(ep, __data.line_coding,
+				  sizeof(__data.line_coding));
+		else
+			usb_write(ep, NULL, 0);
+	}
+	else if (s->bRequest == 0x6) { /* get_descriptor */
+		for (i = 0; ; i++) {
+			d = &usb_descr_list[i];
+			if ((d->wValue == s_wValue) ||
+				(!d->addr)) {
+				break;
+			}
+		}
+		if (!d->addr) {
+			pr_debug("usb warning: unknown descr %02x\n", s_wValue);
+			/* FIXME A Request error would be the correct behaviour
+			 * here. See usb 2.0 specs, §9.2.7.
+			 * Tipically, >=2.0 hosts require the device_qualifier
+			 * descriptor (0x600) which should be replied with
+			 * an error request when high speed is not supported.
+			 */
+			usb_write(ep, NULL, 0);
+			return;
+		}
+		if (d->length)
+			len = d->length;
+		else
+			len = d->addr[0];
+		usb_write(ep, d->addr, min(len, s_wLength));
+	}
+	else if (s->bRequest == 0x5) { /* set_address */
+		usb_write(ep, NULL, 0);
+		usb_set_address(s->wValueL & 0x7f);
+	}
+	else if (s->bRequest == 0x9) { /* set_configuration */
+		usb_request_rx_ep(CDC_ACM_ENDPOINT, cdc_acm_buf, CDC_ACM_SIZE);
+		if (__data.open_mode & BATHOS_MODE_INPUT)
+			usb_request_rx_ep(CDC_RX_ENDPOINT, cdc_rx_buf,
+					  CDC_RX_SIZE);
+		if (__data.open_mode & BATHOS_MODE_OUTPUT)
+			usb_request_tx_ep(CDC_TX_ENDPOINT, NULL, CDC_TX_SIZE);
+		usb_write(ep, NULL, 0);
+		__data.usb_configuration = s_wValue;
+		return;
+	}
 }
 
-static void token_cb(int pid, uint8_t *buf, int len)
+static void token_cb(int pid, int ep, uint8_t *buf, int len)
 {
+	if (pid == USB_TOKEN_SETUP)
+		__handle_token_setup(buf, ep, len);
+	if (len && pid == USB_TOKEN_OUT && ep == CDC_RX_ENDPOINT &&
+		__data.open_mode & BATHOS_MODE_INPUT)
+		bathos_dev_push_chars(&__usb_uart_dev, (char*)buf, len);
 }
 
-declare_usb_ops(reset_cb, sleep_cb, token_cb, config_cb);
-
-static int usb_uart_open(struct bathos_pipe *pipe)
+static void sof_cb(void)
 {
-	usb_enable();
+	/* Flushes tx buffer at each sof (~1ms), even if not empty */
+	if (!__data.usb_configuration || !__data.txlen)
+		return;
+	usb_write(CDC_TX_ENDPOINT, __data.txbuf, __data.txlen);
+	__data.txlen = 0;
+#ifdef CONFIG_MACH_KL25Z
+	if (__data.txbuf == cdc_tx_buf)
+		__data.txbuf += CDC_TX_SIZE;
+	else
+		__data.txbuf -= CDC_TX_SIZE;
+#endif
+}
+declare_usb_ops(reset_cb, sleep_cb, token_cb, sof_cb);
+
+static int usb_uart_putc(void *priv, const char c)
+{
+	int flags;
+	if (!__data.usb_configuration)
+		return -EAGAIN;
+	interrupt_disable(flags);
+	__data.txbuf[__data.txlen++] = c;
+	/* FIXME if (__data.txlen == CDC_TX_SIZE) flush();*/
+	interrupt_restore(flags);
 	return 0;
 }
 
-static int usb_uart_read(struct bathos_pipe *pipe, char *buf, int len)
+static int usb_uart_rx_enable(void *priv)
 {
-	/* FIXME */
-	return -EINVAL;
+	if (__data.usb_configuration)
+		usb_request_rx_ep(CDC_RX_ENDPOINT, cdc_rx_buf, CDC_RX_SIZE);
+	return 0;
 }
 
-static int usb_uart_write(struct bathos_pipe *pipe, const char *buf, int len)
+static int usb_uart_tx_enable(void *priv)
 {
-	/* FIXME */
-	return -EINVAL;
+	if (__data.usb_configuration)
+		usb_request_tx_ep(CDC_TX_ENDPOINT, NULL, CDC_TX_SIZE);
+	return 0;
 }
 
-static void usb_uart_close(struct bathos_pipe *pipe)
+static int usb_uart_rx_disable(void *priv)
 {
-	usb_disable();
+	if (__data.usb_configuration)
+		usb_release_rx_ep(CDC_RX_ENDPOINT, CDC_RX_SIZE);
+	return 0;
+}
+
+static int usb_uart_tx_disable(void *priv)
+{
+	if (__data.usb_configuration)
+		usb_release_tx_ep(CDC_TX_ENDPOINT, CDC_TX_SIZE);
+	return 0;
+}
+
+static const struct bathos_ll_dev_ops uart_ll_dev_ops = {
+	.putc = usb_uart_putc,
+	.rx_enable = usb_uart_rx_enable,
+	.rx_disable = usb_uart_rx_disable,
+	.tx_enable = usb_uart_tx_enable,
+	.tx_disable = usb_uart_tx_disable,
+};
+
+int usb_uart_open(struct bathos_pipe *pipe)
+{
+	int stat;
+	void *priv;
+	if (!__data.dev_initialized) {
+		priv = bathos_dev_init(&uart_ll_dev_ops, NULL);
+		if (!priv)
+			return -ENODEV;
+		__usb_uart_dev.priv = priv;
+		__data.dev_initialized = 1;
+		__data.txbuf = cdc_tx_buf;
+		stat = bathos_dev_open(pipe);
+		if (stat) {
+			return stat;
+		}
+	}
+	__data.open_mode |= pipe->mode;
+	return 0;
+}
+
+void usb_uart_close(struct bathos_pipe *pipe)
+{
+	bathos_dev_close(pipe);
+	__data.open_mode = 0;
 }
 
 static const struct bathos_dev_ops PROGMEM uart_dev_ops = {
 	.open = usb_uart_open,
-	.read = usb_uart_read,
-	.write = usb_uart_write,
+	.read = bathos_dev_read,
+	.write = bathos_dev_write,
 	.close = usb_uart_close,
 	/* ioctl not implemented */
 };
