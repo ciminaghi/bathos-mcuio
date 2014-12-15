@@ -8,7 +8,7 @@ CONFIG_ARCH_ARM=y
 # CONFIG_ARCH_VERSATILE is not set
 # CONFIG_ARCH_UNIX is not set
 CONFIG_ARCH="arm"
-CONFIG_CROSS_COMPILE="/opt/gcc-arm-none-eabi-4_7-2013q2/bin/arm-none-eabi-"
+CONFIG_CROSS_COMPILE="arm-none-eabi-"
 # CONFIG_MMODE_RAM is not set
 # CONFIG_MMODE_FLASH is not set
 CONFIG_MEMORY_MODE=""
