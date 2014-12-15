@@ -32,8 +32,12 @@ endif
 ifeq ($(CONFIG_MACH_KL25Z),y)
 LIBARCH_OBJS += $(MACH_SUBDIR)/clock.o $(MACH_SUBDIR)/jiffies.o
 AOBJ += $(MACH_SUBDIR)/idle.o
-AOBJ += $(MACH_SUBDIR)/uart.o
+ifeq ($(CONFIG_KL25Z_USB_UART),y)
 AOBJ += $(MACH_SUBDIR)/usb-device.o
+endif
+ifeq ($(CONFIG_KL25Z_UART),y)
+AOBJ += $(MACH_SUBDIR)/uart.o
+endif
 LDS = $(MACH_SUBDIR)/bathos.lds
 endif
 
