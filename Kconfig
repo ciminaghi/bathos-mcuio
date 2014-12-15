@@ -187,7 +187,7 @@ if HAVE_UART
 
 config STDOUT_UART
        bool "Stdout to UART"
-       depends on UART
+       depends on HAVE_UART
        help
          Send standard output from uart
 
@@ -197,7 +197,7 @@ if HAVE_USB_UART
 
 config STDOUT_USB_UART
        bool "Stdout to USB-UART"
-       depends on USB_UART
+       depends on HAVE_USB_UART
        help
          Send standard output to usb-uart device
 
