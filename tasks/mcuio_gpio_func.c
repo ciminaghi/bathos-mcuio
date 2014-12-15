@@ -253,7 +253,7 @@ static int __gpio_clr_wr(const struct mcuio_range *r, unsigned offset,
 		return -1;
 	for (i = 0; i < n/8; i++)
 		status[i] |= ((uint8_t *)__in)[i];
-	return __gpio_data_wr(r, offset, status, width, fill);
+	return __gpio_data_wr(r, offset, status, fill, width);
 }
 
 
