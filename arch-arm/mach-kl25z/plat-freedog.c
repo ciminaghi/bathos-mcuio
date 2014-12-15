@@ -33,12 +33,9 @@ const uint32_t max_mul = 0xffffffff;
 #endif
 
 /* GPIOs */
-const unsigned int gpio_labels_size = MCUIO_NGPIO * 4;
 char gpio_labels_start[MCUIO_NGPIO * 4];
-const unsigned int gpio_caps_size = MCUIO_NGPIO;
-uint32_t gpio_caps_start[MCUIO_NGPIO];
-const unsigned int gpio_evts_caps_size = MCUIO_NGPIO;
-uint32_t gpio_evts_caps_start[MCUIO_NGPIO];
+char gpio_caps_start[MCUIO_NGPIO];
+char gpio_evts_caps_start[MCUIO_NGPIO];
 
 static int __gpio_init(void)
 {
@@ -51,8 +48,8 @@ static int __gpio_init(void)
 		gpio_labels_start[i*4 + 2] = '0' + (n / 10);
 		gpio_labels_start[i*4 + 1] = '0' + (n % 10);
 		gpio_labels_start[i*4] = '\0';
-		gpio_caps_start[i] = 0xffffffff;
-		gpio_evts_caps_start[i] = 0xffffffff;
+		gpio_caps_start[i] = 0xff;
+		gpio_evts_caps_start[i] = 0xff;
 	}
 	return 0;
 }
