@@ -8,7 +8,12 @@
 static void *uart_out(void *arg)
 {
 	char *s = arg;
+#ifdef CONFIG_STDOUT_UART
 	puts(s);
+#else
+	while (*s)
+		console_putc(*s);
+#endif
 	return arg;
 }
 
