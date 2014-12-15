@@ -9,7 +9,7 @@
 #include <bathos/io.h>
 #include "hw.h"
 
-#define MCUIO_NGPIO 160
+#define MCUIO_NGPIO 64
 
 static inline void gpio_set(int gpio, int value)
 {
