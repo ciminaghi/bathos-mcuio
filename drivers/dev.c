@@ -57,7 +57,7 @@ bathos_dev_init(const struct bathos_ll_dev_ops * PROGMEM ops, void *priv)
 	struct bathos_dev_data *out;
 
 	if (!ops || !ops->rx_enable || !ops->tx_enable || !ops->rx_disable ||
-	    !ops->rx_disable)
+	    !ops->tx_disable)
 		return NULL;
 	out = bathos_alloc_buffer(sizeof(*out));
 	if (!out)
