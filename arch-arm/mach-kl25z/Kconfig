@@ -54,3 +54,37 @@ config OPENSDA_DEBUG
          This adds an infinite loop just after _romboot_start to let the
 	 user connect to the target before actually booting bathos
 
+config KL25Z_USB_UART
+       bool "KL25Z Usb-uart driver"
+       select HAVE_USB_UART
+       help
+         Add an UART over USB driver for the KL25Z
+
+config KL25Z_UART
+	bool "KL25Z UART driver"
+	select HAVE_UART
+	help
+	  Add an UART driver for the KL25Z
+
+config CONSOLE
+	string
+	default "uart2" if CONSOLE_UART
+	default "usb-uart" if CONSOLE_USB_UART
+
+config STDIN
+	string
+	default CONSOLE if STDIN_CONSOLE
+	default "uart2" if STDIN_UART
+	default "usb-uart" if STDIN_USB_UART
+
+config STDOUT
+	string
+	default CONSOLE if STDOUT_CONSOLE
+	default "uart2" if STDOUT_UART
+	default "usb-uart" if STDOUT_USB_UART
+
+config COPY_STDOUT_TO_CONSOLE
+	bool "Copy stdout to console"
+	depends on !STDOUT_CONSOLE
+	help
+         Copy standard output to console
