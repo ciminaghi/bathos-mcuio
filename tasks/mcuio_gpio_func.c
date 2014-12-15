@@ -314,7 +314,11 @@ static int __gpio_modes_wr(const struct mcuio_range *r, unsigned offset,
 			break;
 		}
 		/* PULLUP, PULLDOWN and ODRAIN are presently ignored */
+#ifdef CONFIG_MACH_KL25Z
+		gpio_dir_af(i + start, in & OUTPUT, gpio_get(i + start), 1);
+#else
 		gpio_dir_af(i + start, in & OUTPUT, gpio_get(i + start), 0);
+#endif
 	}
 	return ret;
 }
