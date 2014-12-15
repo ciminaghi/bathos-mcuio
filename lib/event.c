@@ -13,7 +13,11 @@
 #include <bathos/allocator.h>
 #include <bathos/circ_buf.h>
 
+#ifdef CONFIG_ARCH_ATMEGA
 #define PENDING_EVENTS_POOL_SIZE 64
+#elif defined (CONFIG_ARCH_ARM)
+#define PENDING_EVENTS_POOL_SIZE 256
+#endif
 
 /*
  * Pending events are stored in a circular buffer, no list of pending events,
