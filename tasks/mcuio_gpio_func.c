@@ -20,24 +20,30 @@ extern struct mcuio_function gpio;
 declare_extern_event(gpio_evt);
 declare_extern_event(mcuio_irq);
 
-
-extern const unsigned int PROGMEM gpio_labels_size;
-extern const char PROGMEM gpio_labels_start[];
-extern const unsigned int PROGMEM gpio_caps_size;
-extern const uint32_t PROGMEM gpio_caps_start[];
-extern const unsigned int PROGMEM gpio_evts_caps_size;
-extern const uint32_t PROGMEM gpio_evts_caps_start[];
-
-static const unsigned int PROGMEM gpio_evts_status_length = 8;
-static const unsigned int PROGMEM gpio_data_length = 8;
-static const unsigned int PROGMEM gpio_modes_size = 0x200;
-static const unsigned int PROGMEM gpio_evts_masks_size = 0x200;
+#ifdef CONFIG_ARCH_ATMEGA
+extern const unsigned int gpio_labels_size;
+extern const unsigned int gpio_caps_size;
+extern const unsigned int gpio_evts_caps_size;
 static const unsigned int PROGMEM __gpio_labels_size =
 	(const unsigned int)&gpio_labels_size;
 static const unsigned int PROGMEM __gpio_caps_size =
 	(const unsigned int)&gpio_caps_size;
 static const unsigned int PROGMEM __gpio_evts_caps_size =
 	(const unsigned int)&gpio_evts_caps_size;
+#elif defined(CONFIG_MACH_KL25Z)
+const unsigned int __gpio_labels_size = 4 * MCUIO_NGPIO;
+const unsigned int __gpio_caps_size = MCUIO_NGPIO;
+const unsigned int __gpio_evts_caps_size = MCUIO_NGPIO;
+#endif
+
+extern const char PROGMEM gpio_labels_start[];
+extern const uint32_t PROGMEM gpio_caps_start[];
+extern const uint32_t PROGMEM gpio_evts_caps_start[];
+
+static const unsigned int PROGMEM gpio_evts_status_length = 8;
+static const unsigned int PROGMEM gpio_data_length = 8;
+static const unsigned int PROGMEM gpio_modes_size = 0x200;
+static const unsigned int PROGMEM gpio_evts_masks_size = 0x200;
 
 static const struct mcuio_func_descriptor PROGMEM gpio_descr = {
 	.device = CONFIG_MCUIO_GPIO_DEVICE,
