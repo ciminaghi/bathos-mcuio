@@ -453,12 +453,12 @@ const struct mcuio_range_ops PROGMEM gpio_evts_ops = {
 static void __handle_level_gpio_events(uint32_t *_gpio_events_status)
 {
 	uint32_t status[2];
-	gpio_data_rddw(NULL, 0, &status[0], 0);
-	gpio_data_rddw(NULL, 4, &status[1], 0);
-	_gpio_events_status[0] |= status[0] & gpio_events_high[0];
-	_gpio_events_status[1] |= status[1] & gpio_events_high[1];
-	_gpio_events_status[0] |= ~status[0] & gpio_events_low[0];
-	_gpio_events_status[1] |= ~status[1] & gpio_events_low[1];
+	int i;
+	for (i = 0; i < 2; i++) {
+		gpio_data_rddw(NULL, i * 4, &status[i], 0);
+		_gpio_events_status[i] |= status[i] & gpio_events_high[i];
+		_gpio_events_status[i] |= ~status[i] & gpio_events_low[i];
+	}
 }
 
 static int __gpio_evts_status_rd(const struct mcuio_range *r, unsigned offset,
@@ -601,13 +601,13 @@ static void gpio_evt_handle(struct event_handler_data *ed)
 {
 	uint32_t *evt_status = ed->data;
 	static struct mcuio_function_irq_data idata;
+	int i;
 
-	gpio_events_status[0] |=
-		(evt_status[0] & ~gpio_events_high[0] & ~gpio_events_low[0]);
-	evt_status[0] = 0;
-	gpio_events_status[1] |=
-		(evt_status[1] & ~gpio_events_high[1] & ~gpio_events_low[1]);
-	evt_status[1] = 0;
+	for (i = 0; i < 2; i++) {
+		gpio_events_status[i] |= (evt_status[i] &
+			~gpio_events_high[i] & ~gpio_events_low[i]);
+		evt_status[i] = 0;
+	}
 
 	__handle_level_gpio_events(gpio_events_status);
 
