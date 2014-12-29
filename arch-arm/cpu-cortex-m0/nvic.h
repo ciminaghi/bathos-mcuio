@@ -15,15 +15,6 @@ extern volatile uint32_t rom_vectors[];
 extern volatile uint32_t ram_vectors[];
 extern volatile uint32_t *vectors;
 
-#define interrupt_disable(flags) \
-	do { \
-		flags = regs[REG_NVIC_ISER]; \
-		regs[REG_NVIC_ICER] = 0xffffffff; \
-	} while(0)
-
-#define interrupt_restore(flags) \
-	regs[REG_NVIC_ISER] = flags
-
 static inline void nvic_init_ram()
 {
 	int i;
