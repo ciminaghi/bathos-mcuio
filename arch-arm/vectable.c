@@ -9,9 +9,8 @@
 #include <bathos/event.h>
 #include <bathos/init.h>
 #include <bathos/io.h>
+#include <bathos/irq.h>
 #include <mach/hw.h>
-
-typedef void (*ll_irq_handler)(void);
 
 #define VECTABLE_ALIGNMENT CONFIG_VECTABLE_ALIGNMENT
 
@@ -24,7 +23,7 @@ typedef void (*ll_irq_handler)(void);
 #define VECTORS __attribute__((aligned(VECTABLE_ALIGNMENT)))
 #endif
 
-#define STACK_ADDR ((ll_irq_handler)CONFIG_STACK_ADDR)
+#define STACK_ADDR ((bathos_irq_handler)CONFIG_STACK_ADDR)
 
 extern void _romboot_start(void);
 extern void _hard_fault_handler(void);
@@ -93,7 +92,7 @@ static void default_irq_handler(void)
  * to the proper value __before__ enabling interrupts and requesting irq
  * redirection (see relocate_vectors_table below).
   */
-ll_irq_handler vec_table[] VECTORS = {
+bathos_irq_handler vec_table[] VECTORS = {
 	[0] = STACK_ADDR,
 	[1] = _romboot_start,
 	[2] = bathos_nmi_handler,
@@ -109,4 +108,15 @@ static int relocate_vectors_table(void)
 	regs[REG_SCB_VTOR] = (uint32_t)vec_table;
 }
 core_initcall(relocate_vectors_table);
+
+int arch_set_irq_vector(int irq, bathos_irq_handler handler)
+{
+	int v = IRQNO_TO_VECTOR(irq);
+
+	if (v < 0 || v >= ARRAY_SIZE(vec_table))
+		return -EINVAL;
+
+	vec_table[IRQNO_TO_VECTOR(irq)] = handler;
+	return 0;
+}
 #endif
