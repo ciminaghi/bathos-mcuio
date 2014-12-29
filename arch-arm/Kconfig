@@ -21,7 +21,6 @@ choice
 config MACH_KL25Z
        bool "Freescale KL25Z pinco pallo"
        select CPU_CORTEX_M0
-       select EMBED_DRIVERS
 
 config MACH_LPC3143
        bool "NXP LPC1343"
