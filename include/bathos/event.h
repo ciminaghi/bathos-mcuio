@@ -8,6 +8,8 @@
 #define __EVENT_H__
 
 #include <linux/list.h>
+/* cat, xcat, str, xstr */
+#include <bathos/bathos.h>
 /* PROGMEM */
 #include <arch/bathos-arch.h>
 
@@ -91,10 +93,6 @@ extern void handle_events(void);
 
 extern const struct event PROGMEM events_start[], events_end[];
 
-#define cat(a,b) a##b
-#define xcat(a,b) cat(a,b)
-#define str(a) #a
-#define xstr(a) str(a)
 #define event_name(n) xcat(evt_,n)
 #define event_handlers_start(n) xcat(event_name(n),_handlers_start)
 #define event_handlers_end(n) xcat(event_name(n),_handlers_end)

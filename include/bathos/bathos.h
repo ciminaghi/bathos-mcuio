@@ -25,7 +25,10 @@
 	(type *)( (char *)__mptr - offsetof(type,member) );})
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
-
+#define cat(a,b) a##b
+#define xcat(a,b) cat(a,b)
+#define str(a) #a
+#define xstr(a) str(a)
 
 /* Other misc bathos stuff */
 extern int bathos_main(void);
