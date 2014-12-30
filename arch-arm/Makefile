@@ -43,6 +43,10 @@ endif
 LDS = $(MACH_SUBDIR)/bathos.lds
 endif
 
+ifeq ($(CONFIG_MACH_NRF51822),y)
+LDS = $(MACH_SUBDIR)/bathos.lds
+endif
+
 # FIXME: add lpc1343 and 2104 files here
 
 ifeq ($(CONFIG_MBED_DRIVERS),y)
