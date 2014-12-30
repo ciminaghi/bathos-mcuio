@@ -62,6 +62,10 @@ config MACH_VERSATILE
        help
          build for qemu versatile machine
 
+config MACH_NRF51822
+       bool "Nordic nrf51822"
+       select CPU_CORTEX_M0
+
 endchoice
 
 config THOS_QUARTZ
@@ -79,6 +83,7 @@ config MACH
        default "none" if MACH_NONE
        default "versatile" if MACH_VERSATILE
        default "kl25z" if MACH_KL25Z
+       default "nrf51822" if MACH_NRF51822
 
 if MACH_KL25Z
 	source arch-arm/mach-kl25z/Kconfig
