@@ -9,9 +9,6 @@ SECTIONS
 	.text 0x00000000: {
 		rom_vectors = .;
 		*(.vectors);
-		. = 0x400;
-		*(.flash_config)
-		. = 0x410;
 		*(.text.romboot)
 		*(.text)
 		mcuio_functions_start = .;
@@ -34,7 +31,7 @@ SECTIONS
 	. = ALIGN(16);
 	_erom = .;
 
-	.data 0x1ffff0c0: AT(_erom) {
+	.data 0x20000000: AT(_erom) {
 		_sdata = .;
 		*(.data);
 		bathos_devices_start =  .;
