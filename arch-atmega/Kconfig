@@ -176,6 +176,8 @@ config ADD_EXTERNAL_BOOTLOADER
 config EXTERNAL_BOOTLOADER_PATH
        string "External bootloader path"
        depends on ADD_EXTERNAL_BOOTLOADER
+       default "Caterina-Yun.hex" if BOARD_ARDUINOYUN
+       default "Caterina-LininoOne.hex" if BOARD_LININOONE
        help
          Path of hex file containing external bootloader (placed in top 4k of
 	 ATMEGA flash).
