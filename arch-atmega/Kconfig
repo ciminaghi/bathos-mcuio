@@ -21,6 +21,23 @@ config MACH_ATMEGA32U4
 
 endchoice
 
+if MACH_ATMEGA32U4
+
+choice
+	prompt "Target board for bathos"
+
+config BOARD_ARDUINOYUN
+	prompt "Build for Arduino Yun"
+	bool
+
+config BOARD_LININOONE
+	prompt "Build for Linino One"
+	bool
+
+endchoice
+
+endif
+
 config MACH
        string
        default "atmega8" if MACH_ATMEGA8
