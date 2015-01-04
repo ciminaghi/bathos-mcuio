@@ -318,8 +318,7 @@ static int __i2c_bitbang_send_acknak(int is_ack)
 static int __trigger_go_event(void)
 {
 	pr_debug("triggering evt I2C_GO\n");
-	return trigger_event(&event_name(i2c_transaction),
-			     (void *)I2C_GO, EVT_PRIO_MAX);
+	return trigger_event(&event_name(i2c_transaction), (void *)I2C_GO);
 }
 
 /*
@@ -347,7 +346,7 @@ static void __i2c_bitbang_trigger_irq(void)
 	idata.func = f;
 	idata.active = 1;
 	pr_debug("__i2c_bitbang_trigger_irq()\n");
-	if (trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX))
+	if (trigger_event(&event_name(mcuio_irq), &idata))
 		printf("i2c trg irq: evt err\n");
 }
 
@@ -582,8 +581,7 @@ declare_event_handler(i2c_transaction, NULL,
 static int __i2c_bitbang_start_transaction(void)
 {
 	pr_debug("__i2c_bitbang_start_transaction s%d\n", i2c_data.status);
-	return trigger_event(&event_name(i2c_transaction), (void *)I2C_GO,
-			     EVT_PRIO_MAX);
+	return trigger_event(&event_name(i2c_transaction), (void *)I2C_GO);
 }
 
 static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
@@ -624,7 +622,7 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 				idata.func = f;
 				idata.active = 0;
 				if (trigger_event(&event_name(mcuio_irq),
-						  &idata, EVT_PRIO_MAX))
+						  &idata))
 					printf("i2c reg rddw: evt err\n");
 				if (i2c_data.state != AWAITING_OUTPUT_DATA &&
 				    i2c_data.state != AWAITING_INPUT_SPACE &&
@@ -632,8 +630,7 @@ static int i2c_bitbang_registers_rddw(const struct mcuio_range *r,
 				    i2c_data.state != RECEIVING_DATA) {
 					trigger_event(&event_name(
 							      i2c_transaction),
-						      (void *)I2C_RESET,
-						      EVT_PRIO_MAX);
+						      (void *)I2C_RESET);
 				}
 			}
 			break;

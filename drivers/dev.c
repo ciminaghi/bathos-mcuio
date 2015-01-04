@@ -94,8 +94,7 @@ int bathos_dev_push_chars(struct bathos_dev *dev, const char *buf, int len)
 end:
 	if (CIRC_CNT(data->d.cb.head, data->d.cb.tail, data->d.cb.size) >
 	    data->rx_hwm)
-		pipe_dev_trigger_event(dev, &evt_pipe_input_ready,
-				       EVT_PRIO_MAX);
+		pipe_dev_trigger_event(dev, &evt_pipe_input_ready);
 	return out + l;
 }
 
@@ -154,8 +153,7 @@ int bathos_dev_read(struct bathos_pipe *pipe, char *buf, int len)
 	data->d.cb.tail = (data->d.cb.tail + l) & (data->d.cb.size - 1);
 
 	if (CIRC_CNT(data->d.cb.head, data->d.cb.tail, data->d.cb.size))
-		pipe_dev_trigger_event(pipe->dev, &evt_pipe_input_ready,
-				       EVT_PRIO_MAX);
+		pipe_dev_trigger_event(pipe->dev, &evt_pipe_input_ready);
 
 	return l;
 }

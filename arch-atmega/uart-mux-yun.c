@@ -164,7 +164,7 @@ static void __do_switch_usb_uart(void)
 		m = uart_data.usb_uart_mode == SPI ? "spi" : "uart";
 		break;
 	default:
-		if (trigger_event(&evt_shell_start, NULL, EVT_PRIO_MAX) < 0) {
+		if (trigger_event(&evt_shell_start, NULL) < 0) {
 			printf("error switching to shell mode\n");
 			return;
 		}
@@ -235,8 +235,7 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 
 		if (uart_data.usb_uart_mode == SHELL) {
 			/* Let the shell read the chars */
-			trigger_event(&evt_shell_input_ready,
-				      NULL, EVT_PRIO_MAX);
+			trigger_event(&evt_shell_input_ready, NULL);
 			goto done;
 		}
 
@@ -268,7 +267,7 @@ static void __pipe_input_handle(struct event_handler_data *ed)
 		goto done;
 	}
 	/* MCUIO uart_mode, trigger event for mcuio */
-	if (trigger_event(&evt_mcuio_data_ready, NULL, EVT_PRIO_MAX) < 0)
+	if (trigger_event(&evt_mcuio_data_ready, NULL) < 0)
 		printf("WARN: err on mcuio drdy evt\n");
 
 done:

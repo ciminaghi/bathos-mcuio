@@ -78,8 +78,7 @@ static void mcuio_irq_handle(struct event_handler_data *edata)
 	p->offset = 0xf80 + idata->func * sizeof(uint32_t);
 	p->type = mcuio_type_wrdw;
 	p->data[0] = (1 << idata->func);
-	if (trigger_event(&evt_mcuio_function_request, p,
-			  EVT_PRIO_MAX) < 0)
+	if (trigger_event(&evt_mcuio_function_request, p) < 0)
 		printf("WARNING: LOST INTERRUPT\n");
 }
 

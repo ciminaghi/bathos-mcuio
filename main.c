@@ -17,7 +17,7 @@ int bathos_errno;
  */
 void __attribute__((weak)) idle(void)
 {
-	trigger_event(&event_name(hw_timer_tick), NULL, EVT_PRIO_MAX);
+	trigger_event(&event_name(hw_timer_tick), NULL);
 }
 
 int bathos_main(void)

@@ -122,7 +122,7 @@ int events_init(void)
 }
 core_initcall(events_init);
 
-int trigger_event(const struct event *e, void *data, int evt_prio)
+int trigger_event(const struct event *e, void *data)
 {
 	struct pending_event *pe;
 	int h;
@@ -162,7 +162,7 @@ static void __handle_event(const struct event *__e, void *data)
 	}
 }
 
-int trigger_event_immediate(const struct event *e, void *data, int evt_prio)
+int trigger_event_immediate(const struct event *e, void *data)
 {
 	__handle_event(e, data);
 	return 0;
