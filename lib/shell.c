@@ -90,7 +90,7 @@ static void __shell_exit(struct shell_data *data)
 	printf("\nbye\n");
 	bathos_free_buffer(data, sizeof(*data));
 	data = NULL;
-	trigger_event(&evt_shell_termination, NULL, EVT_PRIO_MAX);
+	trigger_event(&evt_shell_termination, NULL);
 }
 
 static void __shell_input_handle(struct event_handler_data *ed)

@@ -51,5 +51,5 @@ volatile unsigned long jiffies;
 ISR(TIMER0_OVF_vect, __attribute__((section(".text.ISR"))))
 {
 	jiffies++;
-	trigger_event(&event_name(hw_timer_tick), NULL, EVT_PRIO_MAX);
+	trigger_event(&event_name(hw_timer_tick), NULL);
 }

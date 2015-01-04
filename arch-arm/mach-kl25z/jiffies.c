@@ -21,7 +21,7 @@ static void pit_irq_handler(void)
 {
 	jiffies++;
 	regs[REG_PIT_TFLG(0)] = PIT_TFLG_TIF_MASK;
-	trigger_event(&event_name(hw_timer_tick), NULL, EVT_PRIO_MAX);
+	trigger_event(&event_name(hw_timer_tick), NULL);
 }
 
 void jiffies_init(void)
