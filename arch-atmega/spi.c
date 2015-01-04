@@ -86,8 +86,7 @@ static int spi_read(struct bathos_pipe *pipe, char *buf, int len)
 	data->overrun = 0;
 
 	if (CIRC_CNT(data->cbufrx.head, data->cbufrx.tail, SPI_BUF_SIZE))
-		pipe_dev_trigger_event(&__spi_dev, &evt_pipe_input_ready,
-				       EVT_PRIO_MAX);
+		pipe_dev_trigger_event(&__spi_dev, &evt_pipe_input_ready);
 
 	interrupt_restore(flags);
 	return l;
@@ -151,7 +150,7 @@ ISR(SPI_STC_vect, __attribute__((section(".text.ISR"))))
 		}
 		if (!cnt_prev)
 			pipe_dev_trigger_event(&__spi_dev,
-				&evt_pipe_input_ready, EVT_PRIO_MAX);
+					       &evt_pipe_input_ready);
 	}
 
 }

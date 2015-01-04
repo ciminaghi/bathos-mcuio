@@ -56,7 +56,7 @@ static void gpio_sample(struct event_handler_data *__d)
 		ports[i] = s;
 	}
 	if (do_trigger)
-		trigger_event(&event_name(gpio_evt), events, EVT_PRIO_MAX);
+		trigger_event(&event_name(gpio_evt), events);
 }
 
 declare_event_handler(hw_timer_tick, NULL, gpio_sample, NULL);

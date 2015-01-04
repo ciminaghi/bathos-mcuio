@@ -13,15 +13,6 @@
 /* PROGMEM */
 #include <arch/bathos-arch.h>
 
-/* Definitions of event priorities (8 levels by default) */
-#ifndef EVT_PRIO_MIN
-#define EVT_PRIO_MIN 0
-#endif
-#ifndef EVT_PRIO_MAX
-#define EVT_PRIO_MAX 7
-#endif
-#define NEVT_PRIOS   (EVT_PRIO_MAX - EVT_PRIO_MIN + 1)
-
 struct event;
 struct event_handler_data;
 
@@ -82,10 +73,10 @@ extern int pending_events(void);
 /*
  * Trigger a generic event
  */
-extern int trigger_event(const struct event *, void *data, int evt_prio);
+extern int trigger_event(const struct event *, void *data);
 /* As above, but handlers are executed immediately */
-extern int trigger_event_immediate(const struct event *, void *data,
-				   int evt_prio);
+extern int trigger_event_immediate(const struct event *, void *data);
+
 /*
  * Invoke this from main loop
  */

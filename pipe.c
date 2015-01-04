@@ -55,15 +55,14 @@ struct bathos_dev * __attribute__((weak)) bathos_find_dev(struct bathos_pipe *p)
 	return NULL;
 }
 
-void pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt,
-			    int prio)
+void pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt)
 {
 	struct bathos_pipe *p;
 	if (!dev->pipes.next)
 		/* List not even initialized */
 		return;
 	list_for_each_entry(p, &dev->pipes, list) {
-		if (trigger_event(evt, p, prio) < 0) {
+		if (trigger_event(evt, p) < 0) {
 			printf("WARN: missing pipe evt\n");
 		}
 	}
@@ -110,7 +109,7 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 	list_add(&out->list, &dev->pipes);
 	e = mode == BATHOS_MODE_INPUT ? &evt_input_pipe_opened :
 	    &evt_output_pipe_opened;
-	trigger_event(e, out, EVT_PRIO_MAX);
+	trigger_event(e, out);
 	return out;
 }
 
@@ -123,8 +122,8 @@ int pipe_close(struct bathos_pipe *pipe)
 	}
 	e = pipe->mode == BATHOS_MODE_INPUT ? &evt_input_pipe_closed :
 		&evt_output_pipe_closed;
-	trigger_event(e, pipe, EVT_PRIO_MAX);
-	trigger_event(&event_name(pipe_really_closed), pipe, EVT_PRIO_MAX - 1);
+	trigger_event(e, pipe);
+	trigger_event(&event_name(pipe_really_closed), pipe);
 	return 0;
 }
 

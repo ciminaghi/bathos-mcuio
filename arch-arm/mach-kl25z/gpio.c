@@ -42,7 +42,7 @@ static void _gpio_irq_handler(int port)
 		regs[REG_PORT_ISFR(port)] |= (1 << j);
 	}
 	if (do_trigger)
-		trigger_event(&event_name(gpio_evt), events, EVT_PRIO_MAX);
+		trigger_event(&event_name(gpio_evt), events);
 }
 
 static void gpio_irq_porta(void)

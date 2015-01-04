@@ -17,9 +17,9 @@ static int nfds;
 static void trigger_event_for_pipe(struct bathos_pipe *p)
 {
 	if (p->mode & BATHOS_MODE_INPUT)
-		trigger_event(&evt_pipe_input_ready, p, EVT_PRIO_MAX);
+		trigger_event(&evt_pipe_input_ready, p);
 	if (p->mode & BATHOS_MODE_OUTPUT)
-		trigger_event(&evt_pipe_output_ready, p, EVT_PRIO_MAX);
+		trigger_event(&evt_pipe_output_ready, p);
 }
 
 /*
@@ -62,7 +62,7 @@ void idle(void)
 		return;
 	}
 end:
-	trigger_event(&event_name(hw_timer_tick), NULL, EVT_PRIO_MAX);
+	trigger_event(&event_name(hw_timer_tick), NULL);
 }
 
 static int pipe_opened_init(struct event_handler_data *data)
