@@ -419,8 +419,7 @@ ISR(USB_COM_vect, __attribute__((section(".text.ISR"))))
 		intbits = UEINTX;
 		if (intbits & (1<<RXOUTI)) {
 			pipe_dev_trigger_event(&__usb_uart_dev,
-					       &evt_pipe_input_ready,
-					       EVT_PRIO_MAX);
+					       &evt_pipe_input_ready);
 		}
 		UEINTX &= ~(NAKINI|NAKOUTI|RXSTPI|RXOUTI|STALLEDI|TXINI);
 	}

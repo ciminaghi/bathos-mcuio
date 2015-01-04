@@ -87,8 +87,7 @@ void on_hw_timer_tick(struct event_handler_data *d)
 	list_for_each_entry_safe(next, tmp, &scheduled_ticks, list) {
 		if (time_after(next->when, jiffies))
 			break;
-		trigger_event(&event_name(sys_timer_tick), next->data,
-			      EVT_PRIO_MAX);
+		trigger_event(&event_name(sys_timer_tick), next->data);
 		if (!list_is_last(&next->list, &scheduled_ticks)) {
 			struct scheduled_tick *t;
 			t = list_entry(next->list.next,

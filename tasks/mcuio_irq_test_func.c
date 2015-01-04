@@ -43,7 +43,7 @@ static int irq_test_status_rddw(const struct mcuio_range *r, unsigned offset,
 		irq_active = 0;
 		idata.func = &irq_test - mcuio_functions_start;
 		idata.active = irq_active;
-		trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX);
+		trigger_event(&event_name(mcuio_irq), &idata);
 	}
 	return sizeof(*__out);
 }
@@ -93,7 +93,7 @@ static void hwtimer_evt_handle(struct event_handler_data *ed)
 	irq_active = 1;
 	idata.func = &irq_test - mcuio_functions_start;
 	idata.active = irq_active;
-	trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX);
+	trigger_event(&event_name(mcuio_irq), &idata);
 }
 
 declare_event_handler(hw_timer_tick, NULL, hwtimer_evt_handle, NULL);

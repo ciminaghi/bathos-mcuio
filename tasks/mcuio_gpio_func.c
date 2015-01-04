@@ -485,7 +485,7 @@ static int __gpio_evts_status_rd(const struct mcuio_range *r, unsigned offset,
 	    (!gpio_events_status[0] && !gpio_events_status[1])) {
 		idata.func = &gpio - mcuio_functions_start;
 		idata.active = 0;
-		if (trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX))
+		if (trigger_event(&event_name(mcuio_irq), &idata))
 			printf("%s: evt error\n", __func__);
 	}
 	return ret;
@@ -615,7 +615,7 @@ static void gpio_evt_handle(struct event_handler_data *ed)
 
 	idata.func = &gpio - mcuio_functions_start;
 	idata.active = gpio_events_status[0] || gpio_events_status[1] ? 1 : 0;
-	trigger_event(&event_name(mcuio_irq), &idata, EVT_PRIO_MAX);
+	trigger_event(&event_name(mcuio_irq), &idata);
 }
 
 declare_event_handler(gpio_evt, NULL, gpio_evt_handle, NULL);
