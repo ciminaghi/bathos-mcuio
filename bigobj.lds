@@ -27,6 +27,9 @@ SECTIONS
 		events_start = .;
 		*(.events);
 		events_end = .;
+		interrupt_events_start = .;
+		*(.interrupt_events);
+		interrupt_events_end = .;
 		cmds_start = .;
 		*(.shell_cmds);
 		cmds_end = .;

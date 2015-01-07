@@ -12,6 +12,8 @@
 #include <bathos/bathos.h>
 /* PROGMEM */
 #include <arch/bathos-arch.h>
+/* ENOSYS */
+#include <bathos/errno.h>
 
 struct event;
 struct event_handler_data;
@@ -77,12 +79,23 @@ extern int trigger_event(const struct event *, void *data);
 /* As above, but handlers are executed immediately */
 extern int trigger_event_immediate(const struct event *, void *data);
 
+#ifdef CONFIG_INTERRUPT_EVENTS
+/* Trigger an interrupt event */
+extern int trigger_interrupt_event(int n);
+#else
+static inline int trigger_interrupt_event(int n)
+{
+	return -ENOSYS;
+}
+#endif /* CONFIG_INTERRUPT_EVENTS */
+
 /*
  * Invoke this from main loop
  */
 extern void handle_events(void);
 
-extern const struct event PROGMEM events_start[], events_end[];
+extern const struct event PROGMEM events_start[], events_end[],
+	interrupt_events_start[], interrupt_events_end[];
 
 #define event_name(n) xcat(evt_,n)
 #define event_handlers_start(n) xcat(event_name(n),_handlers_start)
@@ -123,5 +136,8 @@ extern const struct event PROGMEM events_start[], events_end[];
 
 #define declare_event_handler_with_priv(n, i, h, e, p) \
     __declare_event_handler(n, i, h, e, p)
+
+#define bathos_int_handler_name(intno) xcat(bathos_int_handler_,intno)
+#define bathos_int_handler_priv(intno) xcat(bathos_int_data_,intno)
 
 #endif /* __EVENT_H__ */

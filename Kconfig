@@ -61,6 +61,11 @@ config CROSS_COMPILE
        default "avr-" if ARCH_ATMEGA
        default ""
 
+config INTERRUPT_EVENTS
+       bool
+       default y if ARCH_ARM
+       default n
+
 choice
 	prompt "Memory mode"
 
