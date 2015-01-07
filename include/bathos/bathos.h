@@ -13,6 +13,7 @@
 
 /* Ever-needed definitions */
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
+#define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 #endif
