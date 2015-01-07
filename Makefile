@@ -43,6 +43,18 @@ ifndef TASK-y
   endif
 endif
 
+ifeq ($(CONFIG_NR_INTERRUPTS),)
+NR_INTERRUPTS=0
+INT_EVENTS_OBJS=
+INT_EVENTS_OBJ=
+else
+NR_INTERRUPTS:=$(CONFIG_NR_INTERRUPTS)
+INT_EVENTS_OBJS=$(foreach i,$(shell seq 0 $$(($(NR_INTERRUPTS) - 1))),\
+		  interrupt_event_$i.o)
+INT_EVENTS_OBJ=interrupt_events.o
+endif
+
+
 # First: the target. After that, we can include the arch Makefile
 all: bathos.bin bathos.hex
 
@@ -146,7 +158,13 @@ bathos: bathos.o
 	$(CC) bathos.o $(LDFLAGS) -o $@
 
 obj-y =  main.o sys_timer.o periodic_scheduler.o pipe.o version_data.o \
-$(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
+$(INT_EVENTS_OBJ) $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
+
+$(INT_EVENTS_OBJ): $(INT_EVENTS_OBJS)
+	$(LD) -r -o $@ $+
+
+interrupt_event_%.o: interrupt_event.c
+	$(CC) $(CFLAGS) -DINTNO=$* -c -o $@ $<
 
 bathos.o: silentoldconfig $(obj-y) $(ARCH_EXTRA)
 	$(LD) -r -T bigobj.lds $(obj-y) -o $@
