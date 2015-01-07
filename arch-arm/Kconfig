@@ -9,6 +9,10 @@ config CPU_CORTEX_M3
 config HAS_MEMORY_MODE
 	bool
 
+config NR_INTERRUPTS
+       int
+       default 32
+
 choice
 	prompt "SOC to build for"
 
