@@ -12,6 +12,8 @@
 #include <bathos/interrupt.h>
 #include <bathos/allocator.h>
 #include <bathos/circ_buf.h>
+#include <bathos/bitops.h>
+#include <bathos/ffs.h>
 
 #define PENDING_EVENTS_POOL_SIZE 64
 
@@ -27,6 +29,13 @@ static struct pending_event pe_buffer[PENDING_EVENTS_POOL_SIZE];
 #define PENDING_EVENTS_START_POOL_SIZE 32
 static struct pending_event *pe_buffer;
 #endif
+
+#ifdef CONFIG_INTERRUPT_EVENTS
+#define PENDING_FLAGS_SZ BITS_TO_LONGS(CONFIG_NR_INTERRUPTS)
+
+static unsigned long ie_pending_flags[PENDING_FLAGS_SZ];
+#endif /* CONFIG_INTERRUPT_EVENTS */
+
 
 #if !defined CONFIG_EVENTS_USE_ALLOCATOR
 static int __init_pending_events(void)
@@ -99,6 +108,7 @@ __get_evt_handler_ops(struct event_handler_ops *dst,
 int events_init(void)
 {
 	const struct event *__e;
+	/* Interrupt events are __not__ initialized */
 	for (__e = events_start; __e < events_end; __e++) {
 		struct event_handler_data *d, *__d;
 		static struct event evt;
@@ -145,9 +155,9 @@ int trigger_event(const struct event *e, void *data)
 static void __handle_event(const struct event *__e, void *data)
 {
 	struct event_handler_data *__d, *d;
-	static struct event_handler_data ehd;
-	static struct event_handler_ops eho;
-	static struct event evt;
+	struct event_handler_data ehd;
+	struct event_handler_ops eho;
+	struct event evt;
 	struct event *e;
 
 	e = __get_evt(&evt, __e);
@@ -168,10 +178,72 @@ int trigger_event_immediate(const struct event *e, void *data)
 	return 0;
 }
 
-void handle_events(void)
+#ifdef CONFIG_INTERRUPT_EVENTS
+int trigger_interrupt_event(int evno)
+{
+	if (evno >= CONFIG_NR_INTERRUPTS)
+		return -EINVAL;
+
+	set_bit(evno, ie_pending_flags);
+	return 0;
+}
+
+static void handle_interrupt_events(void)
+{
+	int w;
+	static unsigned long tmp[PENDING_FLAGS_SZ];
+	unsigned long flags;
+
+	interrupt_disable(flags);
+	memcpy(tmp, ie_pending_flags, sizeof(tmp));
+	memset(&ie_pending_flags, 0, sizeof(ie_pending_flags));
+	interrupt_restore(flags);
+
+	for (w = 0; w < CONFIG_NR_INTERRUPTS; w+=BITS_PER_LONG) {
+		int k = BITS_TO_LONGS(w);
+		unsigned long *l = &tmp[k];
+		const struct event *e = &interrupt_events_start[k];
+
+		do {
+			int i = ffs(*l);
+			if (!i)
+				break;
+			i--;
+			__handle_event(e + i, NULL);
+			*l &= ~BIT_MASK(i);
+		} while(1);
+	}
+}
+
+static int pending_interrupt_events(void)
+{
+	int w;
+
+	for (w = 0; w < BITS_TO_LONGS(CONFIG_NR_INTERRUPTS); w++)
+		if (ie_pending_flags[w])
+			return 1;
+	return 0;
+}
+#else /* !CONFIG_INTERRUPT_EVENTS */
+static void handle_interrupt_events(void)
+{
+}
+
+static int pending_interrupt_events(void)
+{
+	return 0;
+}
+#endif /* CONFIG_INTERRUPT_EVENTS */
+
+static inline int pending_regular_events(void)
+{
+	return CIRC_CNT(pe_head, pe_tail, pe_buffer_nevts);
+}
+
+static void handle_regular_events(void)
 {
 	struct event *e;
-	int i, n = pending_events();
+	int i, n = pending_regular_events();
 
 	for (i = 0; i < n; i++) {
 		struct pending_event *pe = &pe_buffer[pe_tail];
@@ -194,7 +266,15 @@ void handle_events(void)
 	}
 }
 
+void handle_events(void)
+{
+	handle_interrupt_events();
+	handle_regular_events();
+}
+
 int pending_events(void)
 {
-	return CIRC_CNT(pe_head, pe_tail, pe_buffer_nevts);
+	if (pending_interrupt_events())
+		return 1;
+	return pending_regular_events();
 }
