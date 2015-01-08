@@ -13,6 +13,10 @@ config NR_INTERRUPTS
        int
        default 32
 
+config STACK_ADDR
+       hex
+       default 0x20003000
+
 choice
 	prompt "SOC to build for"
 
