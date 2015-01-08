@@ -43,6 +43,8 @@ endif
 LDS = $(MACH_SUBDIR)/bathos.lds
 endif
 
+AOBJ += $(ADIR)/vectable.o
+
 ifeq ($(CONFIG_MACH_NRF51822),y)
 LDS = $(MACH_SUBDIR)/bathos.lds
 endif

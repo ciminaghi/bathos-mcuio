@@ -1,20 +1,11 @@
 .global _romboot_start
 .global _ramboot_start
 .global raise
+.global _hard_fault_handler
 .extern __bss_start__
 .extern __bss_end__
 .extern main
 .extern hard_fault_handler
-
-.section .vectors, "ax"
-vectors:
-	.word 0x20004000         /* Stack address */
-	.word _romboot_start + 1
-	.word nmi_handler + 1
-	.word _hard_fault_handler + 1
-	.rep 45                  /* Lazily, "reset" at each interrupt or trap */
-	.word trapme + 1 /* First instruction address */
-	.endr
 
 .section .text.romboot
 
