@@ -3,6 +3,9 @@ menu "ARM architecture configuration"
 config CPU_CORTEX_M0
        bool
 
+config CPU_CORTEX_M0_PLUS
+       bool
+
 config CPU_CORTEX_M3
        bool
 
@@ -17,7 +20,7 @@ config HAS_MEMORY_MODE
 
 config NR_INTERRUPTS
        int
-       default 32 if CPU_CORTEX_M0
+       default 32 if CPU_CORTEX_M0 || CPU_CORTEX_M0_PLUS
        default 240 if CPU_CORTEX_M3
        default 32
 
@@ -35,7 +38,7 @@ choice
 
 config MACH_KL25Z
        bool "Freescale KL25Z pinco pallo"
-       select CPU_CORTEX_M0
+       select CPU_CORTEX_M0_PLUS
 
 config MACH_LPC3143
        bool "NXP LPC1343"
@@ -58,6 +61,7 @@ endif
 config CPU
        string
        default "cortex-m0" if CPU_CORTEX_M0
+       default "cortex-m0" if CPU_CORTEX_M0_PLUS
        default "cortex-m3" if CPU_CORTEX_M3
        default "arm7" if CPU_ARM7
 
