@@ -26,6 +26,10 @@ config STACK_ADDR
        default 0x20003000 if MACH_KL25Z
        default 0x20003000 if MACH_NRF51822
 
+config VECTABLE_ALIGNMENT
+       int
+       default 64
+
 choice
 	prompt "SOC to build for"
 
