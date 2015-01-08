@@ -9,12 +9,14 @@
 .extern main
 .extern hard_fault_handler
 
+#define STACK_ADDR CONFIG_STACK_ADDR
+
 /* Provide a temporary vector table in case relocation has to be performed */
 #ifdef CONFIG_RELOCATE_VECTORS_TABLE
 .section .vectors, "ax"
 
 vectors:
-	.word 0x20003000         /* Stack address */
+	.word STACK_ADDR         /* Stack address */
 	.word _romboot_start + 1
 	.word nmi_handler + 1
 	.word _hard_fault_handler + 1
