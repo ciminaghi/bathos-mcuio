@@ -70,6 +70,14 @@ config HAVE_RELOCATE_INTERRUPT_TABLE
        bool
        default n
 
+config RELOCATE_VECTORS_TABLE
+       bool "Do relocation of vectors table to RAM (data section)"
+       depends on HAVE_RELOCATE_INTERRUPT_TABLE
+       help
+         This allows redirection of low level interrupt handlers, say no
+	 if unsure.
+       default n
+
 choice
 	prompt "Memory mode"
 
