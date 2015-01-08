@@ -2,7 +2,7 @@
 
 #include <generated/autoconf.h>
 
-#ifdef CONFIG_CPU_CORTEX_M0
+#if defined CONFIG_CPU_CORTEX_M0 || CONFIG_CPU_CORTEX_M0_PLUS
 #include <arch/bathos-arch-cortex-m.h>
 #include <cpu-cortex-m0/nvic.h>
 #endif
