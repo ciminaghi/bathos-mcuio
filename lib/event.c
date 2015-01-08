@@ -155,7 +155,7 @@ int trigger_event(const struct event *e, void *data)
 	return 0;
 }
 
-static void __handle_event(const struct event *__e, void *data)
+static void __handle_event(const struct event *__e, void *data, int ll)
 {
 	struct event_handler_data *__d, *d;
 	static struct event_handler_data ehd;
@@ -170,6 +170,10 @@ static void __handle_event(const struct event *__e, void *data)
 		d->ops = __get_evt_handler_ops(&eho,
 					       d);
 		d->data = data;
+		if (ll && d->ops->handle_ll) {
+			d->ops->handle_ll(d);
+			continue;
+		}
 		if (d->ops->handle)
 			d->ops->handle(d);
 	}
@@ -177,16 +181,23 @@ static void __handle_event(const struct event *__e, void *data)
 
 int trigger_event_immediate(const struct event *e, void *data)
 {
-	__handle_event(e, data);
+	__handle_event(e, data, 0);
 	return 0;
 }
 
 #ifdef CONFIG_INTERRUPT_EVENTS
 int trigger_interrupt_event(int evno)
 {
+	const struct event *e;
+
 	if (evno >= CONFIG_NR_INTERRUPTS)
 		return -EINVAL;
 
+	/* Start low level handler */
+	e = &interrupt_events_start[evno];
+	__handle_event(e, NULL, 1);
+
+	/* And get ready for executing high level handler */
 	set_bit(evno, ie_pending_flags);
 	return 0;
 }
@@ -204,7 +215,7 @@ static void handle_interrupt_events(void)
 
 			if (!i)
 				break;
-			__handle_event(e + i, NULL);
+			__handle_event(e + i, NULL, 0);
 			*l &= ~BIT_MASK(i);
 		} while(1);
 	}
