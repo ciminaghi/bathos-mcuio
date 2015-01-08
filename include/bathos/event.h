@@ -7,7 +7,6 @@
 #ifndef __EVENT_H__
 #define __EVENT_H__
 
-#include <linux/list.h>
 #include <generated/autoconf.h>
 /* cat, xcat, str, xstr */
 #include <bathos/bathos.h>
