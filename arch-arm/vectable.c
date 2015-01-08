@@ -37,6 +37,42 @@ void __attribute__((weak)) bathos_nmi_handler(void)
 {
 }
 
+struct hw_stackframe {
+	uint32_t r0;
+	uint32_t r1;
+	uint32_t r2;
+	uint32_t r3;
+	uint32_t r12;
+	uint32_t lr;
+	void *pc;
+	uint32_t psr;
+};
+
+void __attribute__((naked)) hard_fault_handler(uint32_t lr, void *psp,
+					       void *msp)
+{
+	struct hw_stackframe *frame;
+
+	/* Find the active stack pointer (MSP or PSP) */
+	if(lr & 0x4)
+		frame = psp;
+	else
+		frame = msp;
+
+	printf("** HARD FAULT **\r\n pc=%p\r\n  msp=%p\r\n  psp=%p\r\n",
+	       frame->pc, msp, psp);
+
+	while(1);
+}
+
+void __attribute__((naked)) _hard_fault_handler(void)
+{
+	asm("mov  r0, lr\n\
+	     mrs  r1, psp\n\
+	     mrs  r2, msp\n\
+	     bl	  hard_fault_handler\n");
+}
+
 /*
  * The default irq handler just reads the irq number and triggers the relevant
  * interrupt event

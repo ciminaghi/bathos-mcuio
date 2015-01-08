@@ -5,7 +5,7 @@
 .extern __bss_start__
 .extern __bss_end__
 .extern main
-.extern hard_fault_handler
+.extern _hard_fault_handler
 
 .section .text.romboot
 
@@ -50,14 +50,6 @@ dead:
 
 nmi_handler:
 	b nmi_handler
-
-	
-_hard_fault_handler:
-	mov    r0, lr
-	mrs  r1, psp
-	mrs  r2, msp
-	bl	hard_fault_handler
-
 
 trapme:
 	b trapme
