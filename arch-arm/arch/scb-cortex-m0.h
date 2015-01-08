@@ -20,12 +20,3 @@
 #define REG_SCB_CCR		(0xe000ed14 / 4)
 #define REG_SCB_SHP2		(0xe000ed1c / 4)
 #define REG_SCB_SHP3		(0xe000ed20 / 4)
-
-/* Interrupt Vector */
-#define NVIC_CORE_NUM		16
-#define NVIC_USER_NUM		32
-#define NVIC_IRQ_NMI 		( 2 - NVIC_CORE_NUM)
-#define NVIC_IRQ_HARD_FAULT 	( 3 - NVIC_CORE_NUM)
-#define NVIC_IRQ_SVCALL 	(11 - NVIC_CORE_NUM),
-#define NVIC_IRQ_PENDSV		(14 - NVIC_CORE_NUM),
-#define NVIC_IRQ_SYSTICK	(15 - NVIC_CORE_NUM),
