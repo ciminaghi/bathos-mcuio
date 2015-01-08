@@ -8,6 +8,7 @@
 #define __EVENT_H__
 
 #include <linux/list.h>
+#include <generated/autoconf.h>
 /* cat, xcat, str, xstr */
 #include <bathos/bathos.h>
 /* PROGMEM */
@@ -21,12 +22,17 @@ struct event_handler_data;
 /*
  * @init: initializes event handler. Returns pointer to private data struct
  *        to be passed on to handle
+ * @handle_ll: interrupt events only: low level handler, invoked from interrupt
+ *        context.
  * @handle: actually handles the event
  * @exit: invoked when no more events can be generated
  */
 struct event_handler_ops {
 	/* Initializes event handler. Returns pointer to priva */
 	int (*init)(struct event_handler_data *);
+#ifdef CONFIG_INTERRUPT_EVENTS
+	void (*handle_ll)(struct event_handler_data *);
+#endif
 	/* Chiamata per gestire l'evento */
 	void (*handle)(struct event_handler_data *);
 	/* Chiamata alla fine (eventiale) */
@@ -138,6 +144,7 @@ extern const struct event PROGMEM events_start[], events_end[],
     __declare_event_handler(n, i, h, e, p)
 
 #define bathos_int_handler_name(intno) xcat(bathos_int_handler_,intno)
+#define bathos_ll_int_handler_name(intno) xcat(bathos_ll_int_handler_,intno)
 #define bathos_int_handler_priv(intno) xcat(bathos_int_data_,intno)
 
 #endif /* __EVENT_H__ */
