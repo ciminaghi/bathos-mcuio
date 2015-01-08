@@ -6,6 +6,8 @@
 #ifndef __KL25Z_HW_H__
 #define __KL25Z_HW_H__
 
+#include <arch/scb-cortex-m0.h>
+
 #define NVIC_IRQ_DMA0 		0
 #define NVIC_IRQ_DMA1 		1
 #define NVIC_IRQ_DMA2 		2
