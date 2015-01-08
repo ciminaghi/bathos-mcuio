@@ -6,8 +6,8 @@
 .global _hard_fault_handler
 .extern __bss_start__
 .extern __bss_end__
+.extern _hard_fault_handler
 .extern main
-.extern hard_fault_handler
 
 #define STACK_ADDR CONFIG_STACK_ADDR
 
@@ -75,13 +75,6 @@ nmi_handler:
 	b nmi_handler
 
 	
-_hard_fault_handler:
-	mov    r0, lr
-	mrs  r1, psp
-	mrs  r2, msp
-	bl	hard_fault_handler
-
-
 trapme:
 	b trapme
 
