@@ -21,6 +21,11 @@ config NR_INTERRUPTS
        default 240 if CPU_CORTEX_M3
        default 32
 
+config STACK_ADDR
+       hex
+       default 0x20003000 if MACH_KL25Z
+       default 0x20003000 if MACH_NRF51822
+
 choice
 	prompt "SOC to build for"
 
