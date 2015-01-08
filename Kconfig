@@ -46,6 +46,10 @@ config INTERRUPT_EVENTS
        bool
        default n
 
+config HAVE_RELOCATE_INTERRUPT_TABLE
+       bool
+       default n
+
 choice
 	prompt "Memory mode"
 
