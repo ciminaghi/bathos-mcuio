@@ -66,6 +66,10 @@ config INTERRUPT_EVENTS
        default y if ARCH_ARM
        default n
 
+config HAVE_RELOCATE_INTERRUPT_TABLE
+       bool
+       default n
+
 choice
 	prompt "Memory mode"
 
