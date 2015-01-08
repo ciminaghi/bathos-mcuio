@@ -6,7 +6,8 @@
 
 #include <bathos/io.h>
 #include <bathos/types.h>
-#include "hw.h"
+#include <arch/nvic-cortex-m0.h>
+#include <arch/scb-cortex-m0.h>
 
 #ifndef ___CORTEX_M0_NVIC_H__
 #define ___CORTEX_M0_NVIC_H__
