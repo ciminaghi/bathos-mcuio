@@ -21,3 +21,6 @@ config CONSOLE
        default "debug-bitbang" if CONSOLE_DEBUG_BITBANG
 
 endif
+
+config FREESCALE_DRIVERS
+       bool
