@@ -27,7 +27,7 @@ struct bathos_dev_ops {
 	int (*open)(struct bathos_pipe *);
 	int (*read)(struct bathos_pipe *, char *buf, int len);
 	int (*write)(struct bathos_pipe *, const char *buf, int len);
-	void (*close)(struct bathos_pipe *);
+	int (*close)(struct bathos_pipe *);
 	int (*ioctl)(struct bathos_pipe *, struct bathos_ioctl_data *);
 };
 
