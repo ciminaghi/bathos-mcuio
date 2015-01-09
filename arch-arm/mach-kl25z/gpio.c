@@ -13,6 +13,7 @@
 #include <bathos/bitops.h>
 #include <bathos/errno.h>
 #include <bathos/init.h>
+#include <bathos/irq.h>
 
 #define IRQC_MASK 0xf
 #define IRQC_SHIFT 16
@@ -45,22 +46,20 @@ static void _gpio_irq_handler(int port)
 		trigger_event(&event_name(gpio_evt), events);
 }
 
-static void gpio_irq_porta(void)
+void bathos_int_handler_name(NVIC_IRQ_PORTA)(struct event_handler_data *d)
 {
 	_gpio_irq_handler(PORTA);
 }
 
-static void gpio_irq_portd(void)
+void bathos_int_handler_name(NVIC_IRQ_PORTD)(struct event_handler_data *d)
 {
 	_gpio_irq_handler(PORTD);
 }
 
 static int gpio_irq_init(void)
 {
-	nvic_set_handler(NVIC_IRQ_PORTA, gpio_irq_porta);
-	nvic_set_handler(NVIC_IRQ_PORTD, gpio_irq_portd);
-	nvic_enable(NVIC_IRQ_PORTD);
-	nvic_enable(NVIC_IRQ_PORTA);
+	bathos_enable_irq(NVIC_IRQ_PORTD);
+	bathos_enable_irq(NVIC_IRQ_PORTA);
 	return 0;
 }
 core_initcall(gpio_irq_init);
