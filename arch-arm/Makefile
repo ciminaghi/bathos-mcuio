@@ -33,6 +33,10 @@ ifeq ($(CONFIG_HAS_CORTEXM_SYSTICKTMR),y)
 AOBJ += $(ADIR)/systicktmr.o
 endif
 
+ifeq ($(CONFIG_KL25Z_UART),y)
+AOBJ += $(MACH_SUBDIR)/kl25.o
+endif
+
 ifeq ($(CONFIG_MACH),"kl25z")
 AOBJ += $(MACH_DIR)/clock.o $(MACH_DIR)/gpio.o
 LDS = $(MACH_DIR)/bathos.lds
