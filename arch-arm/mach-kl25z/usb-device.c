@@ -19,6 +19,8 @@
 #include <bathos/stdio.h>
 #include <bathos/string.h>
 #include <bathos/allocator.h>
+#include <bathos/event.h>
+#include <bathos/irq.h>
 #include <bathos/io.h>
 
 extern struct usb_ops_t __usb_ops;
@@ -164,7 +166,7 @@ int usb_set_address(uint8_t addr)
 	return 0;
 }
 
-static void __usb_irq_handler(void)
+void bathos_ll_int_handler_name(NVIC_IRQ_USBOTG)(void)
 {
 	uint8_t mask;
 	uint8_t stat;
@@ -237,23 +239,22 @@ static void __usb_irq_handler(void)
 
 int usb_enable()
 {
-	nvic_set_handler(NVIC_IRQ_USBOTG, __usb_irq_handler);
 	regs8[REG_USB0_INTEN] = USB_ISTAT_USBRST_MASK | USB_ISTAT_TOKDNE_MASK |
 		USB_ISTAT_SOFTOK_MASK |
 		USB_ISTAT_SLEEP_MASK | USB_ISTAT_ERROR_MASK;
 	regs8[REG_USB0_ERREN] = 0xff;
 	regs8[REG_USB0_USBCTRL] = 0;
-	nvic_enable(NVIC_IRQ_USBOTG);
 	regs8[REG_USB0_USBTRC0] |= 0x40;
 	regs8[REG_USB0_CONTROL] |= USB_CONTROL_DPPULLOPNONOTG_MASK;
 	regs8[REG_USB0_CTL] |= USB_CTL_USBENSOFEN_MASK;
+	bathos_enable_irq(NVIC_IRQ_USBOTG);
 	return 0;
 }
 device_initcall(usb_enable);
 
 int usb_disable()
 {
-	nvic_disable(NVIC_IRQ_USBOTG);
+	bathos_disable_irq(NVIC_IRQ_USBOTG);
 	regs8[REG_USB0_CONTROL] &= ~USB_CONTROL_DPPULLOPNONOTG_MASK;
 	regs8[REG_USB0_ENDPT(0)] = 0;
 	regs8[REG_USB0_CTL] &= ~USB_CTL_USBENSOFEN_MASK;
