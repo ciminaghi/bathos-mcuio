@@ -125,9 +125,10 @@ static int uart_mux_yun_write(struct bathos_pipe *pipe, const char *buf,
 	return pipe_write(uart_data.uartpipe, buf, len);
 }
 
-static void uart_mux_yun_close(struct bathos_pipe *pipe)
+static int uart_mux_yun_close(struct bathos_pipe *pipe)
 {
 	pipe_close(uart_data.uartpipe);
+	return 0;
 }
 
 static const struct bathos_dev_ops PROGMEM uart_mux_yun_dev_ops = {
