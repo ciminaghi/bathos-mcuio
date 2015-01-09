@@ -105,4 +105,11 @@
 #define UICR_BASE	0x10001000UL
 #define GPIO_BASE	0x50000000UL
 
+/* MPU */
+#define REG_MPU_PERR0		((MPU_BASE + 0x528) / 4)
+#define REG_MPU_RLENR0		((MPU_BASE + 0x52c) / 4)
+#define REG_MPU_PROTENSET0	((MPU_BASE + 0x600) / 4)
+#define REG_MPU_PROTENSET1	((MPU_BASE + 0x604) / 4)
+#define REG_MPU_DISDBG		((MPU_BASE + 0x608) / 4)
+
 #endif /* __NRF51822_HW_H__ */
