@@ -14,6 +14,10 @@ ifeq ($(CONFIG_DEBUG_BITBANG),y)
 DRV_OBJS += drivers/debug_bitbang.o
 endif
 
+ifeq ($(CONFIG_FREESCALE_DRIVERS),y)
+  DRV_OBJS += drivers/freescale-uart.o
+endif
+
 $(LIBDRIVERS): $(DRV_OBJS)
 	$(AR) r $@ $(DRV_OBJS)
 
