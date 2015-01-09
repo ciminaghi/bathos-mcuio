@@ -38,7 +38,7 @@ ifeq ($(CONFIG_KL25Z_USB_UART),y)
 AOBJ += $(MACH_SUBDIR)/usb-device.o
 endif
 ifeq ($(CONFIG_KL25Z_UART),y)
-AOBJ += $(MACH_SUBDIR)/uart.o
+AOBJ += $(MACH_SUBDIR)/kl25-uart.o
 endif
 LDS = $(MACH_SUBDIR)/bathos.lds
 endif
