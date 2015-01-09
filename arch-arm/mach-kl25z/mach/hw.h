@@ -330,34 +330,6 @@
 #define REG_GPIO_PDIR(port)	(((GPIO_PORT_BASE + (port)*0x40 + 0x10) / 4))
 #define REG_GPIO_PDDR(port)	(((GPIO_PORT_BASE + (port)*0x40 + 0x14) / 4))
 
-#define REG_UART_BDH(n)		(0x4006a000 + (n)*0x1000)
-#define REG_UART_BDL(n)		(0x4006a001 + (n)*0x1000)
-#define REG_UART_C1(n)		(0x4006a002 + (n)*0x1000)
-
-#define REG_UART_C2(n)		(0x4006a003 + (n)*0x1000)
-#define UART_C2_TIE_MASK	0x80
-#define UART_C2_TCIE_MASK	0x40
-#define UART_C2_RIE_MASK	0x20
-#define UART_C2_ILIE_MASK	0x10
-#define UART_C2_TE_MASK		0x08
-#define UART_C2_RE_MASK		0x04
-#define UART_C2_RWU_MASK	0x02
-#define UART_C2_SBK_MASK	0x01
-
-#define REG_UART_S1(n)		(0x4006a004 + (n)*0x1000)
-#define UART_S1_TDRE_MASK	0x80
-#define UART_S1_TC_MASK		0x40
-#define UART_S1_RDRF_MASK	0x20
-#define UART_S1_IDLE_MASK	0x10
-#define UART_S1_OR_MASK		0x08
-#define UART_S1_NF_MASK		0x04
-#define UART_S1_FE_MASK		0x02
-#define UART_S1_PF_MASK		0x01
-
-#define REG_UART_S2(n)		(0x4006a005 + (n)*0x1000)
-#define REG_UART_C3(n)		(0x4006a006 + (n)*0x1000)
-#define REG_UART_D(n)		(0x4006a007 + (n)*0x1000)
-
 #define REG_USB0_PERID		(0x40072000 / 1)
 #define REG_USB0_IDCOMP		(0x40072004 / 1)
 #define REG_USB0_REV		(0x40072008 / 1)
