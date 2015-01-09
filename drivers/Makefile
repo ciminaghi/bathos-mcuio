@@ -19,6 +19,10 @@ ifeq ($(CONFIG_MBED_DRIVERS),y)
   DRV_OBJS += drivers/mbed/adc.o
 endif
 
+ifeq ($(CONFIG_FREESCALE_DRIVERS),y)
+  DRV_OBJS += drivers/freescale-uart.o
+endif
+
 $(LIBDRIVERS): $(DRV_OBJS)
 	$(AR) r $@ $(DRV_OBJS)
 
