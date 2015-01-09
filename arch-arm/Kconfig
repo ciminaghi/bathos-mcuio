@@ -46,6 +46,7 @@ config MACH_KL25Z
        select HAS_CORTEXM_SYSTICKTMR
        select HAVE_GPIOS
        select HAVE_GPIO_EVENTS
+       select FREESCALE_DRIVERS
 
 endchoice
 
