@@ -32,4 +32,77 @@
 #define SWI4_IRQ	24
 #define SWI5_IRQ	25
 
+/* Peripheral ids */
+#define POWER_ID	0x00
+#define CLOCK_ID	0x00
+#define MPU_ID		0x00
+#define PU_ID		0x00
+#define AMLI_ID		0x00
+#define RADIO_ID	0x01
+#define UART0_ID	0x02
+#define SPI0_ID		0x03
+#define TWI0_ID		0x03
+#define SPI1_ID		0x04
+#define TWI1_ID		0x04
+#define SPIS1_ID	0x04
+#define GPIO_ID		0x06
+#define GPIOTE_ID	0x06
+#define ADC_ID		0x07
+#define TIMER0_ID	0x08
+#define TIMER1_ID	0x09
+#define TIMER2_ID	0x0a
+#define RTC0_ID		0x0b
+#define TEMP_ID		0x0c
+#define RNG_ID		0x0d
+#define ECB_ID		0x0e
+#define AAR_ID		0x0f
+#define CCM_ID		0x0f
+#define WDT_ID		0x10
+#define RTC1_ID		0x11
+#define QDEC_ID		0x12
+#define LPCOMP_ID	0x13
+#define COMP_ID		0x13
+#define SWI_ID		0x14
+#define NVMC_ID		0x1e
+#define PPI_ID		0x1f
+
+/* Peripheral modules base addresses */
+
+#define BASE(id) (0x40000000U + (0x1000 * (id)))
+
+#define POWER_BASE	BASE(POWER_ID)
+#define CLOCK_BASE	BASE(CLOCK_ID)
+#define MPU_BASE	BASE(MPU_ID)
+#define PU_BASE		BASE(PU_ID)
+#define AMLI_BASE	BASE(AMLI_ID)
+#define RADIO_BASE	BASE(RADIO_ID)
+#define UART0_BASE	BASE(UART0_ID)
+#define SPI0_BASE	BASE(SPIO_ID)
+#define TWI0_BASE	BASE(TWI0_ID)
+#define SPI1_BASE	BASE(SPI1_ID)
+#define TWI1_BASE	BASE(TWI1_ID)
+#define SPIS1_BASE	BASE(SPIS1_ID)
+#define GPIOTE_BASE	BASE(GPIOTE_ID)
+#define ADC_BASE	BASE(ADC_ID)
+#define TIMER0_BASE	BASE(TIMER0_ID)
+#define TIMER1_BASE	BASE(TIMER1_ID)
+#define TIMER2_BASE	BASE(TIMER2_ID)
+#define RTC0_BASE	BASE(RTC0_ID)
+#define TEMP_BASE	BASE(TEMP_ID)
+#define RNG_BASE	BASE(RNG_ID)
+#define ECB_BASE	BASE(ECB_ID)
+#define AAR_BASE	BASE(AAR_ID)
+#define CCM_BASE	BASE(CCM_ID)
+#define WDT_BASE	BASE(WDT_ID)
+#define RTC1_BASE	BASE(RTC1_ID)
+#define QDEC_BASE	BASE(QDEC_ID)
+#define LPCOMP_BASE	BASE(LPCOMP_ID)
+#define COMP_BASE	BASE(COMP_ID)
+#define SWI_BASE	BASE(SWI_ID)
+#define NVMC_BASE	BASE(NVMC_ID)
+#define PPI_BASE	BASE(PPI_ID)
+#define FICR_BASE	0x10000000UL
+#define UICR_BASE	0x10001000UL
+#define GPIO_BASE	0x50000000UL
+
 #endif /* __NRF51822_HW_H__ */
