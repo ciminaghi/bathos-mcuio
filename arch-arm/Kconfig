@@ -18,6 +18,9 @@ config EMBED_DRIVERS
 config HAS_MEMORY_MODE
 	bool
 
+config HAS_CORTEXM_SYSTICKTMR
+       bool
+
 config NR_INTERRUPTS
        int
        default 32 if CPU_CORTEX_M0 || CPU_CORTEX_M0_PLUS
