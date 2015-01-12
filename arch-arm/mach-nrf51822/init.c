@@ -65,6 +65,7 @@ static void do_machine_quirks(void)
 static int mach_ll_init(void)
 {
 	do_machine_quirks();
+	console_gpio_init();
 	return 0;
 }
 rom_initcall(mach_ll_init);
