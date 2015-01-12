@@ -30,7 +30,7 @@ ifeq ($(CONFIG_KL25Z_BOARD_FREEDOG),y)
 endif
 
 ifeq ($(CONFIG_MACH_KL25Z),y)
-LIBARCH_OBJS += $(MACH_SUBDIR)/clock.o $(MACH_SUBDIR)/jiffies.o
+LIBARCH_OBJS += $(MACH_SUBDIR)/clock.o
 AOBJ += $(MACH_SUBDIR)/idle.o
 AOBJ += $(MACH_SUBDIR)/gpio.o
 CFLAGS += -DHAVE_GPIO_EVENTS
