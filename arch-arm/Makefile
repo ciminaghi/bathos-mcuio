@@ -30,5 +30,11 @@ LIBARCH_OBJS = $(ADIR)/init.o
 
 AOBJ += $(ADIR)/vectable.o $(ADIR)/nvic.o
 
+ifeq ($(CONFIG_HAS_CORTEXM_SYSTICKTMR),y)
+CFLAGS += -DARCH_NEEDS_INTERRUPT_FOR_JIFFIES=1
+
+AOBJ += $(ADIR)/systicktmr.o
+endif
+
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
