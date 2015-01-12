@@ -112,4 +112,33 @@
 #define REG_MPU_PROTENSET1	((MPU_BASE + 0x604) / 4)
 #define REG_MPU_DISDBG		((MPU_BASE + 0x608) / 4)
 
+/* GPIO */
+#define REG_GPIO_OUT    ((GPIO_BASE + 0x504) / 4)
+#define REG_GPIO_OUTSET ((GPIO_BASE + 0x508) / 4)
+#define REG_GPIO_OUTCLR ((GPIO_BASE + 0x50c) / 4)
+#define REG_GPIO_IN     ((GPIO_BASE + 0x510) / 4)
+#define REG_GPIO_DIR    ((GPIO_BASE + 0x514) / 4)
+#define REG_GPIO_DIRSET ((GPIO_BASE + 0x518) / 4)
+#define REG_GPIO_DIRCLR ((GPIO_BASE + 0x51c) / 4)
+#define REG_PIN_CNF(i)  ((GPIO_BASE + 0x700 + (i) * 4) / 4)
+
+#define PIN_CNF_DIR_IN	(0 << 0)
+#define PIN_CNF_DIR_OUT (1 << 0)
+#define PIN_CNF_IN_CON	(0 << 1)
+#define PIN_CNF_IN_DIS	(1 << 1)
+#define PIN_CNF_NOPULL	(0 << 2)
+#define PIN_CNF_PULLDN	(1 << 2)
+#define PIN_CNF_PULLUP	(2 << 2)
+#define PIN_CNF_S0S1	(0 << 8)
+#define PIN_CNF_H0S1	(1 << 8)
+#define PIN_CNF_S0H1	(2 << 8)
+#define PIN_CNF_H0H1	(3 << 8)
+#define PIN_CNF_D0S1	(4 << 8)
+#define PIN_CNF_D0H1	(5 << 8)
+#define PIN_CNF_S0D1	(6 << 8)
+#define PIN_CNF_H0D1	(7 << 8)
+#define PIN_CNF_SNS_DIS (0 << 16)
+#define PIN_CNF_SNS_HI	(1 << 16)
+#define PIN_CNF_SNS_LO	(2 << 16)
+
 #endif /* __NRF51822_HW_H__ */
