@@ -44,10 +44,12 @@ config MACH_KL25Z
        select CPU_CORTEX_M0_PLUS
        select HAVE_RELOCATE_INTERRUPT_TABLE
        select FREESCALE_DRIVERS
+       select HAS_CORTEXM_SYSTICKTMR
 
 config MACH_LPC3143
        bool "NXP LPC1343"
        select HAS_MEMORY_MODE
+       select HAS_CORTEXM_SYSTICKTMR
        help
 	  This architecture builds for LPC1343 and similar processors,
 	  by NXP.  This is the original architecture for Thos.
