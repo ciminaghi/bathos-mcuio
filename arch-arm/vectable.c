@@ -10,6 +10,8 @@
 #include <bathos/init.h>
 #include <bathos/io.h>
 #include <bathos/irq.h>
+#include <bathos/jiffies.h>
+#include <bathos/sys_timer.h>
 #include <mach/hw.h>
 
 #define VECTABLE_ALIGNMENT CONFIG_VECTABLE_ALIGNMENT
@@ -72,6 +74,13 @@ void __attribute__((naked)) _hard_fault_handler(void)
 	     bl	  hard_fault_handler\n");
 }
 
+/* Interrupt handler for CORTEX-M system tick timer, vector 0xf everywhere */
+static void default_systick_handler(void)
+{
+	jiffies++;
+	trigger_event(&event_name(hw_timer_tick), NULL);
+}
+
 /*
  * The default irq handler just reads the irq number and triggers the relevant
  * interrupt event
@@ -97,7 +106,8 @@ bathos_irq_handler vec_table[] VECTORS = {
 	[1] = _romboot_start,
 	[2] = bathos_nmi_handler,
 	[3] = _hard_fault_handler,
-	[4 ... 15] = dummy_exc_handler,
+	[4 ... 14] = dummy_exc_handler,
+	[15] = default_systick_handler,
 	/* Irq */
 	[16 ... 16 + CONFIG_NR_INTERRUPTS - 1] = default_irq_handler,
 };
