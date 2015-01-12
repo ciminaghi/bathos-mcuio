@@ -43,6 +43,10 @@ endif
 LDS = $(MACH_SUBDIR)/bathos.lds
 endif
 
+ifeq ($(CONFIG_HAS_CORTEXM_SYSTICKTMR),y)
+AOBJ += $(ADIR)/systicktmr.o
+endif
+
 AOBJ += $(ADIR)/vectable.o
 
 ifeq ($(CONFIG_MACH_NRF51822),y)
