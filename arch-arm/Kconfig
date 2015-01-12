@@ -12,6 +12,9 @@ config HAS_MEMORY_MODE
 config HAS_CORTEXM_SYSTICKTMR
        bool
 
+config CORTEXM_SYSTICKTMR_USE_EXT_CLOCK
+       bool
+
 config NR_INTERRUPTS
        int
        default 32
