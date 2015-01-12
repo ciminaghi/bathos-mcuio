@@ -390,6 +390,4 @@
 
 extern void clocks_init();
 
-extern void jiffies_init();
-
 #endif /* __KL25Z_HW_H__ */
