@@ -66,6 +66,7 @@ static int mach_ll_init(void)
 {
 	do_machine_quirks();
 	console_gpio_init();
+	console_putc('.');
 	return 0;
 }
 rom_initcall(mach_ll_init);
