@@ -8,6 +8,7 @@
 
 #include <bathos/jiffies.h>
 #include <bathos/event.h>
+#include <bathos/sys_timer.h>
 
 #ifdef ARCH_NEEDS_INTERRUPT_FOR_JIFFIES
 static inline void inc_jiffies(void)
