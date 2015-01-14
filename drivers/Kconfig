@@ -31,3 +31,7 @@ config AMBA_DRIVERS
 config USB_CONFIG_FILE
        string "Usb configuration file"
        default "configs/freedog_usb_config" if KL25Z_BOARD_FREEDOG
+
+config NRF5X_DRIVERS
+       bool
+
