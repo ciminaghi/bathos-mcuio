@@ -5,6 +5,7 @@
  */
 #include <bathos/jiffies.h>
 #include <bathos/event.h>
+#include <bathos/sys_timer.h>
 
 static inline void bathos_arm_sys_tick_timer_handler(void)
 {
