@@ -61,6 +61,7 @@ config MACH_LPC3143
 config MACH_NRF51822
        bool "Nordic nrf51822"
        select CPU_CORTEX_M0
+       select NRF51_DRIVERS
 
 endchoice
 
