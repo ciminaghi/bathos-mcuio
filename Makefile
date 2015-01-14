@@ -49,8 +49,9 @@ INT_EVENTS_OBJS=
 INT_EVENTS_OBJ=
 else
 NR_INTERRUPTS:=$(CONFIG_NR_INTERRUPTS)
-INT_EVENTS_OBJS=$(shell for((i=0;i<$(NR_INTERRUPTS);i++)) ; \
+INT_EVENTS_OBJS=$(shell for i in $$(seq 0 $$(($(NR_INTERRUPTS) - 1))) ; \
 			do echo interrupt_event_$$i.o ; done)
+
 INT_EVENTS_OBJ=interrupt_events.o
 endif
 
