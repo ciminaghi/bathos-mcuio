@@ -113,6 +113,10 @@ endif
 
    source "drivers/Kconfig"
 
+config HAVE_IRQ_CONTROLLER
+       default y if ARCH_ARM
+       bool
+
 config HAVE_UART
        bool
 
