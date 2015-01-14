@@ -51,6 +51,9 @@ AOBJ += $(ADIR)/vectable.o
 
 ifeq ($(CONFIG_MACH_NRF51822),y)
 LDS = $(MACH_SUBDIR)/bathos.lds
+
+AOBJ += $(MACH_SUBDIR)/nrf51822.o
+
 endif
 
 # FIXME: add lpc1343 and 2104 files here
