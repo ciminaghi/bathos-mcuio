@@ -23,6 +23,10 @@ ifeq ($(CONFIG_FREESCALE_DRIVERS),y)
   DRV_OBJS += drivers/freescale-uart.o
 endif
 
+ifeq ($(CONFIG_NRF51_DRIVERS),y)
+  DRV_OBJS += drivers/nrf51-rtc.o
+endif
+
 $(LIBDRIVERS): $(DRV_OBJS)
 	$(AR) r $@ $(DRV_OBJS)
 
