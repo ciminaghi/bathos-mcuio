@@ -13,6 +13,7 @@
 #include <bathos/jiffies.h>
 #include <bathos/sys_timer.h>
 #include <mach/hw.h>
+#include <arch/systick.h>
 
 #define VECTABLE_ALIGNMENT CONFIG_VECTABLE_ALIGNMENT
 
@@ -77,8 +78,7 @@ void __attribute__((naked)) _hard_fault_handler(void)
 /* Interrupt handler for CORTEX-M system tick timer, vector 0xf everywhere */
 static void default_systick_handler(void)
 {
-	jiffies++;
-	trigger_event(&event_name(hw_timer_tick), NULL);
+	bathos_arm_sys_tick_timer_handler();
 }
 
 /*
