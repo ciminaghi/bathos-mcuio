@@ -29,6 +29,10 @@ ifeq ($(CONFIG_AMBA_DRIVERS),y)
   DRV_OBJS += drivers/pl011-uart.o
 endif
 
+ifeq ($(CONFIG_NRF5X_DRIVERS),y)
+  DRV_OBJS += drivers/nrf5x-rtc.o
+endif
+
 $(LIBDRIVERS): $(DRV_OBJS)
 	$(AR) r $@ $(DRV_OBJS)
 
