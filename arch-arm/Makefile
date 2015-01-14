@@ -48,6 +48,7 @@ AOBJ += $(ADIR)/systicktmr.o
 endif
 
 AOBJ += $(ADIR)/vectable.o
+AOBJ += $(ADIR)/nvic.o
 
 ifeq ($(CONFIG_MACH_NRF51822),y)
 LDS = $(MACH_SUBDIR)/bathos.lds
