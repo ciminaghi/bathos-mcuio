@@ -24,3 +24,6 @@ endif
 
 config FREESCALE_DRIVERS
        bool
+
+config NRF51_DRIVERS
+       bool
