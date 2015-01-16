@@ -45,7 +45,6 @@ endif
 
 ifeq ($(CONFIG_HAS_CORTEXM_SYSTICKTMR),y)
 CFLAGS += -DARCH_NEEDS_INTERRUPT_FOR_JIFFIES=1
-
 AOBJ += $(CPU_DIR)/systicktmr.o
 endif
 
@@ -58,6 +57,10 @@ endif
 ifeq ($(CONFIG_MACH),"versatile")
 AOBJ += $(MACH_DIR)/irq.o $(MACH_DIR)/timer.o $(MACH_DIR)/versatile-pb.o
 LDS = $(MACH_DIR)/bathos.lds
+endif
+
+ifeq ($(CONFIG_FAMILY),"nrf5x")
+AOBJ += $(FAMILY_DIR)/clock.o
 endif
 
 ifeq ($(CONFIG_MACH),"nrf51822")
