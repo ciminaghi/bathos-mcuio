@@ -63,6 +63,7 @@ static void do_machine_quirks(void)
 static int mach_ll_init(void)
 {
 	do_machine_quirks();
+	clocks_init();
 	console_gpio_init();
 	console_putc('.');
 	return 0;
