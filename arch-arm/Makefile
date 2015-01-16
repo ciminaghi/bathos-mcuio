@@ -51,6 +51,8 @@ AOBJ += $(ADIR)/vectable.o
 AOBJ += $(ADIR)/nvic.o
 
 ifeq ($(CONFIG_MACH_NRF51822),y)
+AOBJ += $(MACH_SUBDIR)/clock.o
+
 LDS = $(MACH_SUBDIR)/bathos.lds
 
 AOBJ += $(MACH_SUBDIR)/nrf51822.o
