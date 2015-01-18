@@ -10,6 +10,7 @@
 #include <bathos/pipe.h>
 #include <bathos/shell.h>
 #include <bathos/debug_bitbang.h>
+#include <bathos/delay.h>
 #include <generated/autoconf.h>
 #include <arch/hw.h>
 #include <bathos/gpio.h>
@@ -38,6 +39,18 @@ int bathos_setup(void)
 	return 0;
 }
 #endif
+
+/*
+ * We get here after bathos setup, but with interrupts enabled
+ * This is the place were initializations needing interrupts enabled
+ * can be done
+ */
+int arm_bathos_main(void)
+{
+	if (udelay_init() < 0)
+		printf("Warning: error in udelay init\n");
+	return bathos_main();
+}
 
 #ifdef CONFIG_DEBUG_BITBANG
 struct bathos_dev __bitbang_dev __attribute__((section(".bathos_devices"))) = {
