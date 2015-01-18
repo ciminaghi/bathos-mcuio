@@ -24,7 +24,6 @@ int bathos_setup(void)
 
 	/* Turn red led on */
 	timer_init();
-	events_init();
 
 	do_initcalls();
 

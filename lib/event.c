@@ -120,6 +120,7 @@ int events_init(void)
 	}
 	return __init_pending_events();
 }
+core_initcall(events_init);
 
 int trigger_event(const struct event *e, void *data, int evt_prio)
 {
