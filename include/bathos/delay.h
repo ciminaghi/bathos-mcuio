@@ -28,6 +28,11 @@ static inline void udelay(int usec)
  * later on, when interrupts are enabled
  */
 extern int udelay_init(void);
+#else
+static inline int udelay_init(void)
+{
+	return 0;
+}
 #endif
 
 static inline void mdelay(int m)
