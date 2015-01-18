@@ -38,6 +38,10 @@ _romboot_start:
 #if defined OPENSDA_DEBUG
 	b	_romboot_start
 #endif
+
+	/* Start with interrupts disabled */
+	ldr	r0, =1
+	msr 	primask, r0
 	
 	/* Copy data to RAM */
 	ldr	r0, =_sdata
@@ -67,6 +71,10 @@ _ramboot_start:
 	b	0b
 1:
 	bl bathos_setup
+
+	/* Enable interrupts and start main */
+	ldr	r0, =0
+	msr 	primask, r0
 	bl arm_bathos_main
 dead:
 	b  dead
