@@ -22,7 +22,6 @@ static int mach_ll_init(void)
 {
 	clocks_init();
 	console_gpio_init();
-	events_init();
 	return 0;
 }
 rom_initcall(mach_ll_init);
