@@ -67,7 +67,7 @@ _ramboot_start:
 	b	0b
 1:
 	bl bathos_setup
-	bl bathos_main
+	bl arm_bathos_main
 dead:
 	b  dead
 
