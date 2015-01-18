@@ -65,7 +65,7 @@ _ramboot_start:
 	/* Enable interrupts and start main */
 	ldr	r0, =0
 	msr 	primask, r0
-	bl bathos_main
+	bl 	arm_bathos_main
 dead:
 	b	dead
 
