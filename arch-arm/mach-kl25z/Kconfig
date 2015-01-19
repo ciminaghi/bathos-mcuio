@@ -37,6 +37,11 @@ config  KL25Z_BOARD_ANY
 	  This configures a generic kl25z based board
 endchoice
 
+config  BOARD
+        string
+	default "freedog" if KL25Z_BOARD_FREEDOG
+	default "kl25z-any" if KL25Z_BOARD_ANY
+
 config  KL25Z_RESONATOR_FREQ
 	depends on KL25Z_MCG_FEI
 	int "KL25Z external resonator frequency"
