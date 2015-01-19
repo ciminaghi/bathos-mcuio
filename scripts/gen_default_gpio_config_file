@@ -1,0 +1,46 @@
+#!/bin/bash
+#set -x
+
+[ $# -lt 3 ] && { echo "Use $0 <arch> <board> <config file path>" ; exit 1 ; }
+
+echo "Generating default GPIO config file $3"
+
+arch=$1
+board=$2
+path=$3
+f=$(basename $path)
+
+if echo $arch | grep "atmega" ; then
+   ngpios=40
+   port_width=8
+   nports=5
+elif echo $arch | grep "arm" ; then
+   if echo $board | grep "freedog" || echo $board | grep "kl25" ; then
+      ngpios=160
+      port_width=32
+      nports=5
+   elif echo $board | grep "nrf51" ; then
+      ngpios=32
+      port_width=32
+      nports=1
+   else
+      echo "Unknown ARM board $board, defaulting to single port of 32 gpios"
+      ngpios=32
+      port_width=32
+      nports=1
+   fi
+else
+   { echo "Unknown architecture $arch" ; exit 2 ; }
+fi
+
+port_names=(A B C D E F G H)
+
+for i in $(seq 0 $(($ngpios - 1))) ; do
+
+    port=$(($i/$port_width))
+    pin=$(($i%$port_width))
+
+    printf "# Chip's GPIO$i, PT${port_names[$port]}%02d\n" ${pin} >> $path
+    printf "\"P${port_names[$port]}%02d\",INPUT|OUTPUT|PULLUP|PULLDOWN\n" ${pin} >> $path
+
+done
