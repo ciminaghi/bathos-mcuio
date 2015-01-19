@@ -3,6 +3,7 @@
 -include $(CURDIR)/.config
 ARCH ?= $(patsubst "%",%,$(CONFIG_ARCH))
 BOARD ?= $(patsubst "%",%,$(CONFIG_BOARD))
+PACKAGE = $(patsubst "%",%,$(CONFIG_MACH_PACKAGE))
 CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
 MODE ?= $(patsubst "%",%,$(CONFIG_MEMORY_MODE))
 BATHOS_GIT=$(shell ./scripts/get_version)
