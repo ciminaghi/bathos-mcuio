@@ -31,6 +31,10 @@ config	KL25Z_BOARD_FREEDOG
 	help
 	  This build bathos for a Freedog board
 
+config  KL25Z_BOARD_ANY
+	bool "Generic KL25Z based board"
+	help
+	  This configures a generic kl25z based board
 endchoice
 
 config  KL25Z_RESONATOR_FREQ
