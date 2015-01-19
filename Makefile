@@ -136,9 +136,9 @@ ifneq ($(CONFIG_MCUIO_GPIO_MAP_NULL),y)
     else ifeq ($(CONFIG_MCUIO_GPIO_MAP_YUN_LUCKY),y)
       MCUIO_GPIO_CONFIG_FILE=lucky-gpios.cfg
     else
-	ifeq ($(CONFIG_MCUIO_GPIO_MAP_ATMEGA32U4),y)
-          MCUIO_GPIO_CONFIG_FILE=generic-atmega32u4-gpios.cfg
-        endif
+      # For generic boards (any), pick a cfg file based on package variant
+      __PACKAGE=$(shell echo $(BOARD) | grep "any" && echo $(PACKAGE)-)
+      MCUIO_GPIO_CONFIG_FILE=$(ARCH)-$(BOARD)-$(__PACKAGE)gpios.cfg
     endif
   endif
   GPIOS_NAMES_FILE = $(patsubst %.cfg, tasks/%-names.o,\
