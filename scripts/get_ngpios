@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 [ $# -lt 1 ] && { echo "Use $0 <gpio_config_file>" ; exit 1 ; }
 
