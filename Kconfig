@@ -104,6 +104,10 @@ config HAVE_PWMS
        default y if ARCH_ATMEGA
        default n
 
+config GPIO_PORTS_WIDTH
+       int
+       default 8 if ARCH_ATMEGA
+
 config HAVE_UART
        bool
 
