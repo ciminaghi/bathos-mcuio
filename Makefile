@@ -2,6 +2,7 @@
 # But we must remove the quotes from these Kconfig values
 -include $(CURDIR)/.config
 ARCH ?= $(patsubst "%",%,$(CONFIG_ARCH))
+BOARD ?= $(patsubst "%",%,$(CONFIG_BOARD))
 CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
 MODE ?= $(patsubst "%",%,$(CONFIG_MEMORY_MODE))
 BATHOS_GIT=$(shell ./scripts/get_version)
