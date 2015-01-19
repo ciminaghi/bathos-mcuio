@@ -165,6 +165,11 @@ bathos.bin: bathos
 bathos: bathos.o
 	$(CC) bathos.o $(LDFLAGS) -o $@
 
+# This target is needed to generate a default version of the gpio config file
+# Will be removed when all boards have their gpio config file.
+tasks/$(MCUIO_GPIO_CONFIG_FILE):
+	scripts/gen_default_gpio_config_file $(ARCH) $(BOARD) $@
+
 obj-y =  main.o sys_timer.o periodic_scheduler.o pipe.o version_data.o \
 $(INT_EVENTS_OBJ) $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 
