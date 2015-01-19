@@ -10,6 +10,10 @@ config	NRF51822_BOARD_RB_51822
 	  This builds bathos for a Redbear Engineering NRF51822 board
 endchoice
 
+config  BOARD
+        string
+	default "rb-nrf51822" if NRF51822_BOARD_RB_51822
+
 config OPENSDA_DEBUG
        bool "Config for debugging with opensda"
        help
