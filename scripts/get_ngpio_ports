@@ -1,0 +1,14 @@
+#!/bin/bash
+# set -x
+
+[ $# -lt 2 ] && { echo "Use $0 <ngpios> <gpio ports width>" ; exit 1 ; }
+
+n=$1
+w=$2
+
+out=$(($n/$w))
+
+[ $(($n%$w)) -gt 0 ] && out=$(($out + 1))
+
+echo $out
+
