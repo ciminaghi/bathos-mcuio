@@ -128,17 +128,10 @@ TOBJ := $(patsubst tasks/arch/%, tasks-$(ARCH)/%, $(TOBJ))
 VPATH := tasks-$(ARCH)
 
 ifeq ($(CONFIG_MCUIO_GPIO),y)
-  ifndef MCUIO_GPIO_CONFIG_FILE
-    ifeq ($(CONFIG_MCUIO_GPIO_MAP_YUN),y)
-      MCUIO_GPIO_CONFIG_FILE=yun-gpios.cfg
-    else ifeq ($(CONFIG_MCUIO_GPIO_MAP_YUN_LUCKY),y)
-      MCUIO_GPIO_CONFIG_FILE=lucky-gpios.cfg
-    else
-      # For generic boards (any), pick a cfg file based on package variant
-      __PACKAGE=$(shell echo $(BOARD) | grep "any" && echo $(PACKAGE)-)
-      MCUIO_GPIO_CONFIG_FILE=$(ARCH)-$(BOARD)-$(__PACKAGE)gpios.cfg
-    endif
-  endif
+  # Find out name for gpio config file
+  # For generic boards (any), pick a cfg file based on package variant
+  __PACKAGE=$(shell echo $(BOARD) | grep "any" && echo $(PACKAGE)-)
+  MCUIO_GPIO_CONFIG_FILE=$(ARCH)-$(BOARD)-$(__PACKAGE)gpios.cfg
   GPIOS_NAMES_FILE = $(patsubst %.cfg, tasks/%-names.o,\
 	$(MCUIO_GPIO_CONFIG_FILE))
   GPIOS_CAPS_FILE = $(patsubst %.cfg, tasks/%-caps.o, $(MCUIO_GPIO_CONFIG_FILE))
