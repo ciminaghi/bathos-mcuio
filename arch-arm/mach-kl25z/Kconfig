@@ -22,6 +22,39 @@ config  KL25Z_MCG_BLPE
 endchoice
 
 choice
+	prompt "KL25Z pinout variant"
+	default KL25Z_84 if KL25Z_BOARD_FREEDOG
+
+config  KL25Z_84
+	bool "84 pins"
+	help
+	  Select the 84 pins package
+
+config  KL25Z_64
+	bool "64 pins"
+	help
+	  Select the 64 pins package
+
+config  KL25Z_48
+	bool "48 pins"
+	help
+	  Select the 48 pins package
+
+config  KL25Z_32
+	bool "32 pins"
+	help
+	  Select the 32 pins package
+
+endchoice
+
+config  MACH_PACKAGE
+	string
+	default "84" if KL25Z_84
+	default "64" if KL25Z_64
+	default "48" if KL25Z_48
+	default "32" if KL25Z_32
+
+choice
 	prompt "KL25Z based boards"
 	default BOARD_FREEDOG
 
