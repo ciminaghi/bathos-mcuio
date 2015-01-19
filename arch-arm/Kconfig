@@ -69,6 +69,10 @@ if MACH_KL25Z
     source arch-arm/mach-kl25z/Kconfig
 endif
 
+if MACH_NRF51822
+    source arch-arm/mach-nrf51822/Kconfig
+endif
+
 config CPU
        string
        default "cortex-m0" if CPU_CORTEX_M0

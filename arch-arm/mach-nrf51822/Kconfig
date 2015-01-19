@@ -1,0 +1,17 @@
+
+
+choice
+	prompt "NRF81522 based boards"
+	default NRF51822_BOARD_RB_51822
+
+config	NRF51822_BOARD_RB_51822
+	bool "Redbear NRF51822 board"
+	help
+	  This builds bathos for a Redbear Engineering NRF51822 board
+endchoice
+
+config OPENSDA_DEBUG
+       bool "Config for debugging with opensda"
+       help
+         This adds an infinite loop just after _romboot_start to let the
+	 user connect to the target before actually booting bathos
