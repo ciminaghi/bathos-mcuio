@@ -113,6 +113,11 @@ endif
 
    source "drivers/Kconfig"
 
+config GPIO_PORTS_WIDTH
+       int
+       default 8 if ARCH_ATMEGA
+       default 32 if ARCH_ARM
+
 config HAVE_IRQ_CONTROLLER
        default y if ARCH_ARM
        bool
