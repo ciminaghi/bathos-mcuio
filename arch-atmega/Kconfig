@@ -2,29 +2,36 @@
 config HAVE_USB
        bool
 
-choice
-	prompt "Target machine for bathos"
-	default MACH_ATMEGA32U4
-
 config MACH_ATMEGA8
-       prompt "Build for an ATMEGA8"
        bool
-       help
-         Build for an atmega8 MPU
 
 config MACH_ATMEGA32U4
-       prompt "Build for and ATMEGA 32U4"
        bool
        select HAVE_USB
-       help
-         Build for an atmega 32U4 MPU
-
-endchoice
 
 config MACH
        string
        default "atmega8" if MACH_ATMEGA8
        default "atmega32u4" if MACH_ATMEGA32U4
+
+choice
+	prompt "Target board for bathos"
+
+config BOARD_YUN
+       bool
+	prompt "Build for a Yun board"
+	select MACH_ATMEGA32U4
+
+config BOARD_ANY_ATMEGA32U4
+       bool
+        prompt "Build for no specific atmega32u4 board"
+
+endchoice
+
+config BOARD
+       string
+       default "yun" if BOARD_YUN
+       default "any" if BOARD_ANY_ATMEGA32U4
 
 config ATMEGA_USB_UART
        bool "Atmega Usb-uart driver"
