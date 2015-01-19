@@ -129,7 +129,6 @@ TOBJ := $(patsubst tasks/arch/%, tasks-$(ARCH)/%, $(TOBJ))
 VPATH := tasks-$(ARCH)
 
 ifeq ($(CONFIG_MCUIO_GPIO),y)
-ifneq ($(CONFIG_MCUIO_GPIO_MAP_NULL),y)
   # Find out name for gpio config file
   # For generic boards (any), pick a cfg file based on package variant
   __PACKAGE=$(shell echo $(BOARD) | grep "any" && echo $(PACKAGE)-)
@@ -140,7 +139,6 @@ ifneq ($(CONFIG_MCUIO_GPIO_MAP_NULL),y)
   TOBJ += $(GPIOS_NAMES_FILE) $(GPIOS_CAPS_FILE)
   MCUIO_NGPIO := $(shell scripts/get_ngpios tasks/$(MCUIO_GPIO_CONFIG_FILE))
   CFLAGS += -DMCUIO_NGPIO=$(MCUIO_NGPIO)
-endif
 endif
 
 # Generic flags
