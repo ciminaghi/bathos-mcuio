@@ -45,8 +45,12 @@ $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
 
 ifeq ($(MCU),atmega32u4)
-AOBJ = $(ADIR)/main.o $(ADIR)/idle.o $(ADIR)/uart-mux-yun.o $(ADIR)/gpio.o \
+AOBJ = $(ADIR)/main.o $(ADIR)/idle.o $(ADIR)/gpio.o \
 	$(ADIR)/adc.o $(ADIR)/pwm.o
+endif
+
+ifeq ($(CONFIG_BOARD),yun)
+AOBJ += $(ADIR)/uart-mux-yun.o
 endif
 
 ifeq ($(CONFIG_ATMEGA_USB_UART),y)
