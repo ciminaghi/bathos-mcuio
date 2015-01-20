@@ -94,4 +94,16 @@ static inline int gpio_request_events(int gpio, int flags)
 extern int gpio_request_events(int gpio, int flags);
 #endif /* CONFIG_HAVE_GPIO_EVENTS */
 
+/*
+ * gpio_to_af() must be implemented for machines having a specific alternate
+ * function for gpio selection. In case a specific machine implements
+ * gpio_to_af, HAVE_GPIO_TO_AF must be defined
+ */
+#ifndef HAVE_GPIO_TO_AF
+static inline int gpio_to_af(int gpio)
+{
+	return 0;
+}
+#endif /* HAVE_GPIO_TO_AF */
+
 #endif /* __BATHOS_GPIO_H__ */
