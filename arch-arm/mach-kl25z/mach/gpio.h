@@ -9,8 +9,6 @@
 #include <bathos/io.h>
 #include "hw.h"
 
-#define MCUIO_NGPIO 64
-
 static inline void gpio_set(int gpio, int value)
 {
 	int port = GPIO_PORT(gpio);
