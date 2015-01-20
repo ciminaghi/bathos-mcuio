@@ -9,6 +9,14 @@
 #include <bathos/io.h>
 #include "hw.h"
 
+#define HAVE_GPIO_TO_AF 1
+
+/* Alternate function for gpios is 1 */
+static inline int gpio_to_af(int gpio)
+{
+	return 1;
+}
+
 static inline void gpio_set(int gpio, int value)
 {
 	int port = GPIO_PORT(gpio);
