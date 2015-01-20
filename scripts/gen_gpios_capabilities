@@ -83,8 +83,10 @@ create_obj() {
     local symfile=$3
     local sec=$4
     local out=$5
-    ${OBJCOPY} --redefine-syms=$symfile -I binary -O $fmt $f $out || return 1
-    ${OBJCOPY} --rename-section \
+    [ "$ARCH" = arm ] && BARG="-B $ARCH"
+    ${OBJCOPY} --redefine-syms=$symfile $BARG -I binary -O $fmt $f $out || \
+	return 1
+    ${OBJCOPY} $BARG --rename-section \
 	.data=$sec,contents,alloc,load,readonly,code $out $out
 }
 
