@@ -19,12 +19,12 @@ done
 
 ret=0
 
+[ "$ARCH" = "arm" ] && BARG="-B arm"
+
 # FIXME: reverse bytes only if the user asks to do so
-${OBJCOPY} --reverse-bytes=4 \
+${OBJCOPY} $BARG --reverse-bytes=4 \
+--rename-section .data=.text.gpio-labels,contents,alloc,load,readonly,code \
     --redefine-syms=$r -I binary -O $fmt $f $out || ret=1
-${OBJCOPY} --rename-section \
-    .data=.text.gpio-labels,contents,alloc,load,readonly,code $out $out || \
-    ret=1
 
 rm $f $r
 
