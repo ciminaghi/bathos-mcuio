@@ -174,13 +174,15 @@ version_data.o:
 	scripts/gen_version_data $(BATHOS_GIT) $$(scripts/get_bin_format) \
 	$@
 
-$(GPIOS_NAMES_FILE): tasks/%-names.o: tasks/%.cfg
-	export CC=$(CC) OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
-	scripts/gen_gpios_names $$(scripts/get_bin_format) $< $@
+$(GPIOS_NAMES_FILE): tasks/%-names.o: tasks/%.cfg main.o
+	export CC=$(CC) LD=${LD} OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
+	scripts/gen_gpios_names $$(scripts/get_bin_format) $< $@ ; \
+	if [ "$(ARCH)" = "arm" ] ; then scripts/arm_fix_elf $@ main.o ; fi
 
 $(GPIOS_CAPS_FILE): tasks/%-caps.o: tasks/%.cfg
 	export CC=$(CC) LD=${LD} OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
-	scripts/gen_gpios_capabilities $$(scripts/get_bin_format) $< $@
+	scripts/gen_gpios_capabilities $$(scripts/get_bin_format) $< $@ ; \
+	if [ "$(ARCH)" = "arm" ] ; then scripts/arm_fix_elf $@ main.o ; fi
 
 clean:
 	rm -f bathos.bin bathos *.o *~
