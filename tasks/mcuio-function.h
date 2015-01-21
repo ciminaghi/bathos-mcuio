@@ -42,6 +42,7 @@ struct mcuio_range {
 	const void * PROGMEM rd_target;
 	void *wr_target;
 	const struct mcuio_range_ops * PROGMEM ops;
+	const void *priv;
 };
 
 struct mcuio_function_runtime {
