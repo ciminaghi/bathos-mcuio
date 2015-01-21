@@ -35,7 +35,7 @@ port_names=(A B C D E F G H)
 for i in $(seq 0 $(($ngpios - 1))) ; do
 
     port=$(($i/$port_width))
-    pin=$(($i%$port_width))
+    printf -v pin %02d $(($i%$port_width))
 
     echo "# Chip's GPIO$i, PT${port_names[$port]}${pin}" >> $path
     echo "\"P${port_names[$port]}${pin}\",INPUT|OUTPUT|PULLUP|PULLDOWN" >> $path
