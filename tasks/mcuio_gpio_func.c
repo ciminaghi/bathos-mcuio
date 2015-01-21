@@ -15,68 +15,43 @@
 #include <tasks/mcuio.h>
 
 #include "mcuio-function.h"
+#include "mcuio_gpio_func.h"
 
 extern struct mcuio_function gpio;
 declare_extern_event(gpio_evt);
 declare_extern_event(mcuio_irq);
 
-extern const unsigned int gpio_labels_size;
-extern const unsigned int gpio_caps_size;
-extern const unsigned int gpio_evts_caps_size;
-static const unsigned int PROGMEM __gpio_labels_size =
-	(const unsigned int)&gpio_labels_size;
-static const unsigned int PROGMEM __gpio_caps_size =
-	(const unsigned int)&gpio_caps_size;
-static const unsigned int PROGMEM __gpio_evts_caps_size =
-	(const unsigned int)&gpio_evts_caps_size;
-
-extern const char PROGMEM gpio_labels_start[];
-extern const uint32_t PROGMEM gpio_caps_start[];
-extern const uint32_t PROGMEM gpio_evts_caps_start[];
-
-static const unsigned int PROGMEM gpio_evts_status_length = 8;
-static const unsigned int PROGMEM gpio_data_length = 8;
-static const unsigned int PROGMEM gpio_modes_size = 0x200;
-static const unsigned int PROGMEM gpio_evts_masks_size = 0x200;
-
-static const struct mcuio_func_descriptor PROGMEM gpio_descr = {
-	.device = CONFIG_MCUIO_GPIO_DEVICE,
-	.vendor = CONFIG_MCUIO_GPIO_VENDOR,
-	.rev = 0,
-	/* GPIOs class */
-	.class = 0x00000002,
-};
-
-static const unsigned int PROGMEM gpio_descr_length = sizeof(gpio_descr);
-
-/* FIXME !! Does not work in case of multiple instances */
-static uint32_t gpio_events_status[2];
-
-static uint32_t gpio_events_falling[2];
-static uint32_t gpio_events_rising[2];
-static uint32_t gpio_events_enable[2];
-static uint32_t gpio_events_high[2];
-static uint32_t gpio_events_low[2];
-
-static const uint32_t PROGMEM gpio_ro_range1[] = {
-	/* FIXME: MAKE THIS CONFIGURABLE !! */
-    [0] = 'T' | (((unsigned long)'E') << 8) | (((unsigned long)'S') << 16) | \
-    (((unsigned long)'T') << 24),
-	/* Number of gpios is defined on the command line */
-	[1] = MCUIO_NGPIO,
-};
-
-static const unsigned int PROGMEM gpio_ro_range1_length =
-	sizeof(gpio_ro_range1);
+#ifdef ARCH_IS_HARVARD
+static inline const struct mcuio_gpio_port_data *
+__get_port_data(const struct mcuio_gpio_port_data * PROGMEM pd,
+		struct mcuio_gpio_port_data *out)
+{
+	memcpy_P(out, pd, sizeof(*out));
+	return out;
+}
+#else
+static inline const struct mcuio_gpio_port_data *
+__get_port_data(const struct mcuio_gpio_port_data * PROGMEM pd,
+		struct mcuio_gpio_port_data *out)
+{
+	return pd;
+}
+#endif
 
 /* WARNING: ASSUMES width = 8 or 16 or 32 */
 static int __gpio_data_wr(const struct mcuio_range *r, unsigned offset,
 			  const void *__in, int fill, int width)
 {
-	int start = offset * 8, n = width, i;
+	int n = width, i;
+	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd =
+		__get_port_data(_pd, &__pd);
+	int ngpio = pd->gpio_end - pd->gpio_start + 1;
+	int start = pd->gpio_start + offset * 8;
 
 	if (fill)
-		n = min(MCUIO_NGPIO, sizeof(uint64_t));
+		n = min(ngpio, sizeof(uint64_t));
 	for (i = 0; i < n; i += width) {
 		if (__gpio_set_portw(start + i, (__in + i/8), width) < 0) {
 			/*
@@ -135,10 +110,15 @@ static int gpio_data_wrq(const struct mcuio_range *r, unsigned offset,
 static int __gpio_data_rd(const struct mcuio_range *r, unsigned offset,
 			  void *__out, int fill, int width)
 {
-	int start = offset * 8, n = width, i;
+	int n = width, i;
+	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
+	int ngpio = pd->gpio_end - pd->gpio_start + 1;
+	int start = pd->gpio_start + offset * 8;
 
 	if (fill)
-		n = min(MCUIO_NGPIO, sizeof(uint64_t));
+		n = min(ngpio, sizeof(uint64_t));
 	for (i = 0; i < n; i += width) {
 		if (__gpio_get_portw(start + i, (__out + i/8), width) < 0) {
 			/*
@@ -201,10 +181,14 @@ static int __gpio_set_wr(const struct mcuio_range *r, unsigned offset,
 			 const void *__in, int fill, int width)
 {
 	int n = width, i;
+	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
+	int ngpio = pd->gpio_end - pd->gpio_start + 1;
 	uint8_t status[8];
 
 	if (fill)
-		n = min(MCUIO_NGPIO, sizeof(uint64_t)*8);
+		n = min(ngpio, sizeof(uint64_t)*8);
 	if (__gpio_data_rd(r, offset, &status, fill, width) < 0)
 		return -1;
 	for (i = 0; i < n/8; i++)
@@ -246,10 +230,14 @@ static int __gpio_clr_wr(const struct mcuio_range *r, unsigned offset,
 			 const void *__in, int fill, int width)
 {
 	int n = width, i;
+	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
+	int ngpio = pd->gpio_end - pd->gpio_start + 1;
 	uint8_t status[8];
 
 	if (fill)
-		n = min(MCUIO_NGPIO, sizeof(uint64_t)*8);
+		n = min(ngpio, sizeof(uint64_t)*8);
 	if (__gpio_data_rd(r, offset, &status, fill, width) < 0)
 		return -1;
 	for (i = 0; i < n/8; i++)
@@ -297,9 +285,15 @@ const struct mcuio_range_ops PROGMEM gpio_clr_ops = {
 static int __gpio_modes_wr(const struct mcuio_range *r, unsigned offset,
 			   const void *__in, int fill, int width)
 {
-	int start = offset, n = width/8, i, ret;
+	int n = width/8, i, ret;
+	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
+	int ngpio = pd->gpio_end - pd->gpio_start + 1;
+	int start = offset + pd->gpio_start;
+
 	if (fill)
-		n = min(MCUIO_NGPIO, sizeof(uint64_t));
+		n = min(ngpio, sizeof(uint64_t));
 	ret = n;
 	for (i = 0; i < n && ret > 0; i++) {
 		uint8_t in = ((uint8_t *)__in)[i];
@@ -341,9 +335,15 @@ static int gpio_modes_wrq(const struct mcuio_range *r, unsigned offset,
 static int __gpio_modes_rd(const struct mcuio_range *r, unsigned offset,
 			   void *__out, int fill, int width)
 {
-	int start = offset, n = width/8, i, ret, dir = 0;
+	int n = width, i;
+	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
+	int ngpio = pd->gpio_end - pd->gpio_start + 1;
+	int start = pd->gpio_start + offset, ret, dir = 0;
+
 	if (fill)
-		n = min(MCUIO_NGPIO, sizeof(uint64_t)/8);
+		n = min(ngpio, sizeof(uint64_t)/8);
 	ret = n;
 	for (i = 0; i < n && ret > 0; i++) {
 		uint8_t *out = &((uint8_t *)__out)[i];
@@ -387,22 +387,28 @@ const struct mcuio_range_ops PROGMEM gpio_modes_ops = {
 static int __gpio_evts_rd(const struct mcuio_range *r, unsigned offset,
 			  void *__out, int fill, int width)
 {
-	int start = offset, n = width/8, i, ret;
+	int n = width/8, i;
+	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
+	int ngpio = pd->gpio_end - pd->gpio_start + 1;
+	int start = offset + pd->gpio_start, ret;
 	uint8_t *out = __out;
+	struct mcuio_gpio_port_status *s = pd->status;
 	if (fill)
-		n = min(MCUIO_NGPIO, sizeof(uint64_t)/8);
+		n = min(ngpio, sizeof(uint64_t)/8);
 	ret = n;
 	for (i = 0; i < n && ret > 0; i++, out++) {
 		*out = 0;
-		if (test_bit(i + start, gpio_events_falling))
+		if (test_bit(i + start, s->gpio_events_falling))
 			*out |= GPIO_EVT_FALLING;
-		if (test_bit(i + start, gpio_events_rising))
+		if (test_bit(i + start, s->gpio_events_rising))
 			*out |= GPIO_EVT_RISING;
-		if (test_bit(i + start, gpio_events_high))
+		if (test_bit(i + start, s->gpio_events_high))
 			*out |= GPIO_EVT_HIGH;
-		if (test_bit(i + start, gpio_events_low))
+		if (test_bit(i + start, s->gpio_events_low))
 			*out |= GPIO_EVT_LOW;
-		if (test_bit(i + start, gpio_events_enable))
+		if (test_bit(i + start, s->gpio_events_enable))
 			*out |= GPIO_EVT_ENABLE;
 	}
 	return ret;
@@ -417,22 +423,28 @@ static int gpio_evts_rddw(const struct mcuio_range *r, unsigned offset,
 static int __gpio_evts_wr(const struct mcuio_range *r, unsigned offset,
 			  const void *__in, int fill, int width)
 {
-	int start = offset, n = width/8, i, ret, stat;
+	int n = width/8, i;
+	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
+	int ngpio = pd->gpio_end - pd->gpio_start + 1;
+	int start = pd->gpio_start + offset, ret, stat;
 	const uint8_t *in = __in;
+	struct mcuio_gpio_port_status *s = pd->status;
 	if (fill)
-		n = min(MCUIO_NGPIO, sizeof(uint64_t)/8);
+		n = min(ngpio, sizeof(uint64_t)/8);
 	ret = n;
 	for (i = 0; i < n; i++, in++) {
 		if (*in & GPIO_EVT_FALLING)
-			set_bit(i + start, gpio_events_falling);
+			set_bit(i + start, s->gpio_events_falling);
 		if (*in & GPIO_EVT_RISING)
-			set_bit(i + start, gpio_events_rising);
+			set_bit(i + start, s->gpio_events_rising);
 		if (*in & GPIO_EVT_HIGH)
-			set_bit(i + start, gpio_events_high);
+			set_bit(i + start, s->gpio_events_high);
 		if (*in & GPIO_EVT_LOW)
-			set_bit(i + start, gpio_events_low);
+			set_bit(i + start, s->gpio_events_low);
 		if (*in & GPIO_EVT_ENABLE)
-			set_bit(i + start, gpio_events_enable);
+			set_bit(i + start, s->gpio_events_enable);
 		stat = gpio_request_events(i + start, *in);
 		if (stat < 0)
 			return stat;
@@ -452,40 +464,48 @@ const struct mcuio_range_ops PROGMEM gpio_evts_ops = {
 	.wr = { NULL, NULL, gpio_evts_wrdw, NULL, },
 };
 
-static void __handle_level_gpio_events(uint32_t *_gpio_events_status)
+static void __handle_level_gpio_events(const struct mcuio_gpio_port_data *pd)
 {
+	struct mcuio_gpio_port_status *s = pd->status;
 	uint32_t status[2];
 	int i;
+
 	for (i = 0; i < 2; i++) {
 		gpio_data_rddw(NULL, i * 4, &status[i], 0);
-		_gpio_events_status[i] |= status[i] & gpio_events_high[i];
-		_gpio_events_status[i] |= ~status[i] & gpio_events_low[i];
+		s->gpio_events_status[i] |= status[i] & s->gpio_events_high[i];
+		s->gpio_events_status[i] |= ~status[i] & s->gpio_events_low[i];
 	}
 }
 
 static int __gpio_evts_status_rd(const struct mcuio_range *r, unsigned offset,
 				 void *__out, int fill, int width)
 {
-	int start = offset, n = width/8, i, ret;
+	int n = width/8, i;
+	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
+	int ngpio = pd->gpio_end - pd->gpio_start + 1;
+	int start = offset + pd->gpio_start, ret;
 	static struct mcuio_function_irq_data idata;
 	uint32_t prev_gpio_events_status[2];
+	uint32_t *gpio_events_status = pd->status->gpio_events_status;
 	uint8_t *out = __out, *ptr = &((uint8_t *)gpio_events_status)[start];
 	if (fill)
-		n = min(MCUIO_NGPIO, sizeof(uint64_t)/8);
+		n = min(ngpio, sizeof(uint64_t)/8);
 	ret = n;
 	memcpy(prev_gpio_events_status, gpio_events_status,
-	       sizeof(gpio_events_status));
+	       sizeof(prev_gpio_events_status));
 	for (i = 0; i < n && ret > 0; i++, out++, ptr++) {
 		/* Read and automatically clear */
 		*out = *ptr;
 		*ptr = 0;
 	}
 
-	__handle_level_gpio_events(gpio_events_status);
+	__handle_level_gpio_events(pd);
 
 	if ((prev_gpio_events_status[0] || prev_gpio_events_status[1]) &&
 	    (!gpio_events_status[0] && !gpio_events_status[1])) {
-		idata.func = &gpio - mcuio_functions_start;
+		idata.func = pd->function - mcuio_functions_start;
 		idata.active = 0;
 		if (trigger_event(&event_name(mcuio_irq), &idata))
 			printf("%s: evt error\n", __func__);
@@ -504,120 +524,35 @@ const struct mcuio_range_ops PROGMEM gpio_evts_status_ops = {
 	.wr = { NULL, NULL, NULL, NULL, },
 };
 
-static const struct mcuio_range PROGMEM gpio_ranges[] = {
-	/* GPIO func descriptor */
-	{
-		.start = 0,
-		.length = &gpio_descr_length,
-		.rd_target = &gpio_descr,
-		.ops = &default_mcuio_range_ro_ops,
-	},
-	/* dwords 0x8 and 0xc, port name and number of gpios */
-	{
-		.start = 8,
-		.length = &gpio_ro_range1_length,
-		.rd_target = (char *)gpio_ro_range1,
-		.ops = &default_mcuio_range_ro_ops,
-	},
-	/* dwords 0x10 .. 0x10f, gpio labels */
-	{
-		.start = 0x10,
-		.length = &__gpio_labels_size,
-		.rd_target = gpio_labels_start,
-		.ops = &default_mcuio_range_ro_ops,
-	},
-	/* dwords 0x110 .. 0x30f, gpio capabilities */
-	{
-		.start = 0x110,
-		.length = &__gpio_caps_size,
-		.rd_target = gpio_caps_start,
-		.ops = &default_mcuio_range_ro_ops,
-	},
-	/* dwords 0x310 .. 0x40f, gpio events capabilities */
-	{
-		.start = 0x310,
-		.length = &__gpio_evts_caps_size,
-		.rd_target = gpio_evts_caps_start,
-		.ops = &default_mcuio_range_ro_ops,
-	},
-	/* dwords 0x510 .. 0x70f, actual gpio modes */
-	{
-		.start = 0x510,
-		.length = &gpio_modes_size,
-		.rd_target = NULL,
-		.wr_target = NULL,
-		.ops = &gpio_modes_ops,
-	},
-	/*
-	  dwords 0x710 .. 0x90f, actual gpio events masks,
-	  currently not implemented
-	*/
-	{
-		.start = 0x710,
-		.length = &gpio_evts_masks_size,
-		.rd_target = NULL,
-		.wr_target = NULL,
-		.ops = &gpio_evts_ops,
-	},
-	/* dwords 0x910 0x914, gpio data */
-	{
-		.start = 0x910,
-		.length = &gpio_data_length,
-		.rd_target = NULL,
-		.wr_target = NULL,
-		.ops = &gpio_data_ops,
-	},
-	/* dwords 0x918 0x91c, gpio set */
-	{
-		.start = 0x918,
-		.length = &gpio_data_length,
-		.rd_target = NULL,
-		.wr_target = NULL,
-		.ops = &gpio_set_ops,
-	},
-	/* dwords 0x920 0x924, gpio clear */
-	{
-		.start = 0x920,
-		.length = &gpio_data_length,
-		.rd_target = NULL,
-		.wr_target = NULL,
-		.ops = &gpio_clr_ops,
-	},
-	/*
-	  dwords 0x928 0x92c gpio events status, currently
-	  not implemented
-	*/
-	{
-		.start = 0x928,
-		.length = &gpio_evts_status_length,
-		.rd_target = gpio_events_status,
-		.ops = &gpio_evts_status_ops,
-	},
-};
-
-
-declare_mcuio_function(gpio, gpio_ranges, NULL, NULL,
-		       &mcuio_func_common_runtime);
-
 declare_event(mcuio_irq);
 
-static void gpio_evt_handle(struct event_handler_data *ed)
+/* We assume edata->evt_status is 64 bits long, same size as an mcuio port */
+void gpio_evt_handle(struct event_handler_data *ed,
+		     const struct mcuio_gpio_port_data * PROGMEM _pd)
 {
-	uint32_t *evt_status = ed->data;
+	struct gpio_event_data *edata = ed->data;
+	uint32_t *evt_status = edata->evt_status;
+	int gpio_offset = edata->gpio_offset;
+	struct mcuio_gpio_port_data __pd;
+	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
+	struct mcuio_gpio_port_status *s = pd->status;
 	static struct mcuio_function_irq_data idata;
 	int i;
 
+	if (gpio_offset != pd->gpio_start)
+		/* Not mine. */
+		return;
+
 	for (i = 0; i < 2; i++) {
-		gpio_events_status[i] |= (evt_status[i] &
-			~gpio_events_high[i] & ~gpio_events_low[i]);
+		s->gpio_events_status[i] |= (evt_status[i] &
+			~s->gpio_events_high[i] & ~s->gpio_events_low[i]);
 		evt_status[i] = 0;
 	}
 
-	__handle_level_gpio_events(gpio_events_status);
+	__handle_level_gpio_events(pd);
 
-	idata.func = &gpio - mcuio_functions_start;
-	idata.active = gpio_events_status[0] || gpio_events_status[1] ? 1 : 0;
+	idata.func = pd->function - mcuio_functions_start;
+	idata.active = s->gpio_events_status[0] ||
+		s->gpio_events_status[1] ? 1 : 0;
 	trigger_event(&event_name(mcuio_irq), &idata);
 }
-
-declare_event_handler(gpio_evt, NULL, gpio_evt_handle, NULL);
