@@ -83,6 +83,12 @@ static inline int __gpio_get_portw(int gpio, void *out, int w)
 #define GPIO_EVT_LOW     0x08
 #define GPIO_EVT_ENABLE  0x80
 
+/* Event data for gpio event */
+struct gpio_event_data {
+	uint32_t *evt_status;
+	int gpio_offset;
+};
+
 #ifndef HAVE_GPIO_EVENTS
 static inline int gpio_request_events(int gpio, int flags)
 {
