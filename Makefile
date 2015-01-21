@@ -161,6 +161,11 @@ bathos: bathos.o
 tasks/$(MCUIO_GPIO_CONFIG_FILE):
 	scripts/gen_default_gpio_config_file $(ARCH) $(BOARD) $@
 
+$(MCUIO_TABLES_OBJS): tasks/mcuio_gpio_table_%.o : tasks/mcuio_gpio_table.c
+	$(CC) $(CFLAGS) -DMCUIO_GPIO_PORT=$* \
+	-DMCUIO_NGPIO=$$(scripts/get_port_ngpios $* 64 $(MCUIO_TOT_NGPIO)) \
+	-c -o $@ $<
+
 obj-y =  main.o sys_timer.o periodic_scheduler.o pipe.o version_data.o \
 $(INT_EVENTS_OBJ) $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 
