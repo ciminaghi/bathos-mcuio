@@ -27,6 +27,24 @@ static uint8_t portd_irqc[16];
 
 declare_event(gpio_evt);
 
+/*
+ * evt_status is a pointer to an array of 2 uint32_t entries
+ */
+static struct gpio_event_data event_data[3] = {
+	[0] = {
+		.evt_status = &events[0],
+		.gpio_offset = 0,
+	},
+	[1] = {
+		.evt_status = &events[2],
+		.gpio_offset = 64,
+	},
+	[2] = {
+		.evt_status = &events[4],
+		.gpio_offset = 128,
+	},
+};
+
 static void _gpio_irq_handler(int port)
 {
 	int i, j;
@@ -43,7 +61,8 @@ static void _gpio_irq_handler(int port)
 		regs[REG_PORT_ISFR(port)] |= (1 << j);
 	}
 	if (do_trigger)
-		trigger_event(&event_name(gpio_evt), events);
+		trigger_event(&event_name(gpio_evt),
+			      &event_data[port/2]);
 }
 
 void bathos_int_handler_name(NVIC_IRQ_PORTA)(struct event_handler_data *d)
