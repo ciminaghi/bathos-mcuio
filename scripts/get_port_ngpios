@@ -1,0 +1,20 @@
+#!/bin/bash
+# Finds out number of gpios given port index, port width and total number of
+# gpios. Port index starts from 0
+# set -x
+
+[ $# -lt 3 ] && { echo "Use $0 <port_index> <port_width> <total_gpios>" ; \
+    exit 1 ; }
+
+pi=$1
+pw=$2
+gpios=$3
+
+nports=$($(dirname $0)/get_ngpio_ports $gpios $pw)
+
+start=$((pi * pw))
+end=$(($start + $pw - 1))
+[ $end -ge $gpios ] && end=$(($gpios - 1))
+
+echo $(($end - $start + 1))
+
