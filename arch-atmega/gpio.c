@@ -21,6 +21,11 @@ static uint8_t enable[5];
 
 static uint32_t events[2];
 
+static struct gpio_event_data gpio_evdata = {
+	.evt_status = events,
+	.gpio_offset = 0,
+};
+
 declare_event(gpio_evt);
 
 static void gpio_sample(struct event_handler_data *__d)
@@ -56,7 +61,7 @@ static void gpio_sample(struct event_handler_data *__d)
 		ports[i] = s;
 	}
 	if (do_trigger)
-		trigger_event(&event_name(gpio_evt), events);
+		trigger_event(&event_name(gpio_evt), &gpio_evdata);
 }
 
 declare_event_handler(hw_timer_tick, NULL, gpio_sample, NULL);
