@@ -2,19 +2,26 @@
 # gen_gpios_names: generate object file with gpio labels
 # set -x
 
-[ $# -lt 3 ] && \
-    { echo "Use $0 <obj-format> <gpio_cfg_file> <output_obj_file>" ; exit 1 ; }
+[ $# -lt 6 ] && \
+    { echo "Use $0 <obj-format> <gpio_cfg_file> <port_index> <gpio_offset> <ngpios> <output_obj_file>" ; exit 1 ; }
 
 f=$(tempfile)
 r=$(tempfile)
 fmt=$1
-out=$3
+cfg=$2
+port=$3
+offs=$4
+ngpios=$5
+out=$6
 
-cat $2 | sed -e 's/^[ \t]*#.*//' | cut -d ',' -f 1 | tr -d '\n' | tr -d '"' \
-| tr ' ' \\\000 > $f
+cat $cfg | sed -e 's/^[ \t]*#.*//' \
+    | cut -d ',' -f 1 | tr -d '"' \
+    | tr ' ' \\\000 | tr -d '\n' | \
+    tail -c +$((offs * 4)) | head -c +$((ngpios*4))> $f
 
 for s in start end size ; do
-    echo "_binary_$(echo $f | sed -e 's/\//_/g')_$s gpio_labels_$s" >> $r
+    echo "_binary_$(echo $f | sed -e 's/\//_/g')_${s} \
+       gpio_labels_${s}_${port}" >> $r
 done
 
 ret=0
