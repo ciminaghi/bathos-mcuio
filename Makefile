@@ -79,7 +79,7 @@ STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
-export CC OBJDUMP
+export CC OBJDUMP OBJCOPY LD
 
 # host gcc
 HOSTCC ?= gcc
@@ -137,8 +137,12 @@ ifeq ($(CONFIG_MCUIO_GPIO),y)
 	$(MCUIO_GPIO_CONFIG_FILE))
   GPIOS_CAPS_FILE = $(patsubst %.cfg, tasks/%-caps.o, $(MCUIO_GPIO_CONFIG_FILE))
   TOBJ += $(GPIOS_NAMES_FILE) $(GPIOS_CAPS_FILE)
-  MCUIO_NGPIO := $(shell scripts/get_ngpios tasks/$(MCUIO_GPIO_CONFIG_FILE))
-  CFLAGS += -DMCUIO_NGPIO=$(MCUIO_NGPIO)
+  MCUIO_TOT_NGPIO = $(shell scripts/get_ngpios tasks/$(MCUIO_GPIO_CONFIG_FILE))
+  MCUIO_GPIO_NPORTS = $(shell scripts/get_ngpio_ports $(MCUIO_TOT_NGPIO) 64)
+  MCUIO_TABLES_OBJS = $(foreach i, \
+			 $(shell seq 0 $$(($(MCUIO_GPIO_NPORTS) - 1))),\
+			 tasks/mcuio_gpio_table_$i.o)
+  TOBJ += $(MCUIO_TABLES_OBJS)
 endif
 
 # Generic flags
@@ -161,7 +165,7 @@ bathos: bathos.o
 tasks/$(MCUIO_GPIO_CONFIG_FILE):
 	scripts/gen_default_gpio_config_file $(ARCH) $(BOARD) $@
 
-$(MCUIO_TABLES_OBJS): tasks/mcuio_gpio_table_%.o : tasks/mcuio_gpio_table.c
+$(MCUIO_TABLES_OBJS): tasks/mcuio_gpio_table_%.o : tasks/mcuio_gpio_table.c tasks/$(MCUIO_GPIO_CONFIG_FILE)
 	$(CC) $(CFLAGS) -DMCUIO_GPIO_PORT=$* \
 	-DMCUIO_NGPIO=$$(scripts/get_port_ngpios $* 64 $(MCUIO_TOT_NGPIO)) \
 	-c -o $@ $<
@@ -184,13 +188,25 @@ version_data.o:
 	$@
 
 $(GPIOS_NAMES_FILE): tasks/%-names.o: tasks/%.cfg main.o
-	export CC=$(CC) LD=${LD} OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
-	scripts/gen_gpios_names $$(scripts/get_bin_format) $< $@ ; \
+	for p in $$(seq 0 $$(($(MCUIO_GPIO_NPORTS) - 1))) ; do \
+		offs=$$(($$p * 64)) \
+		ngpios=$$(scripts/get_port_ngpios $$p 64 $(MCUIO_TOT_NGPIO)); \
+		scripts/gen_gpios_names $$(scripts/get_bin_format) $< \
+		$$p $$offs $$ngpios $(basename $@)_$$p.o ; \
+	done
+	$(LD) -r $(foreach p,$(shell seq 0 $$(($(MCUIO_GPIO_NPORTS)-1))), \
+		$(basename $@)_$(p).o) -o $@
 	if [ "$(ARCH)" = "arm" ] ; then scripts/arm_fix_elf $@ main.o ; fi
 
-$(GPIOS_CAPS_FILE): tasks/%-caps.o: tasks/%.cfg
-	export CC=$(CC) LD=${LD} OBJDUMP=$(OBJDUMP) OBJCOPY=$(OBJCOPY) ; \
-	scripts/gen_gpios_capabilities $$(scripts/get_bin_format) $< $@ ; \
+$(GPIOS_CAPS_FILE): tasks/%-caps.o: tasks/%.cfg main.o
+	for p in $$(seq 0 $$(($(MCUIO_GPIO_NPORTS) - 1))) ; do \
+		offs=$$(($$p * 64)) \
+		ngpios=$$(scripts/get_port_ngpios $$p 64 $(MCUIO_TOT_NGPIO)); \
+		scripts/gen_gpios_capabilities $$(scripts/get_bin_format) $< \
+		$$p $$offs $$ngpios $(basename $@)_$$p.o ; \
+	done
+	$(LD) -r $(foreach p,$(shell seq 0 $$(($(MCUIO_GPIO_NPORTS)-1))), \
+		$(basename $@)_$(p).o) -o $@
 	if [ "$(ARCH)" = "arm" ] ; then scripts/arm_fix_elf $@ main.o ; fi
 
 clean:
