@@ -238,7 +238,14 @@ int bathos_dev_ioctl(struct bathos_pipe *pipe,
 			return -EINVAL;
 		return __switch_to_cbuf(data, *(int *)iocdata->data);
 	default:
+	{
+		struct bathos_ll_dev_ops *ops, __ops;
+
+		ops = __get_ops(data, &__ops);
+		if (ops->ioctl)
+			return ops->ioctl(data->ll_priv, iocdata);
 		return -EINVAL;
+	}
 	}
 	/* NEVER REACHED */
 	return -EINVAL;
