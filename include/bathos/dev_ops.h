@@ -70,6 +70,9 @@ struct dev_ioc_set_rx_sync_seq_data {
 /* set sync silence time for packet mode (1 arg: silence time in jiffies) */
 #define DEV_IOC_SET_RX_SYNC_SIL_TIME	9
 
+/* Start of reserved device-specific LL ioctls */
+#define DEV_IOC_PRIVATE                 0x1000
+
 /*
  * Low level device operations
  *
@@ -80,6 +83,7 @@ struct dev_ioc_set_rx_sync_seq_data {
  * @rx_enable: low level rx enable
  * @tx_disable: low level tx disable
  * @tx_enable: low level tx enable
+ * @ioctl: low level ioctl
  *
  */
 struct bathos_ll_dev_ops {
@@ -90,6 +94,7 @@ struct bathos_ll_dev_ops {
 	int (*rx_enable)(void *priv);
 	int (*tx_disable)(void *priv);
 	int (*tx_enable)(void *priv);
+	int (*ioctl)(void *priv, struct bathos_ioctl_data *data);
 };
 
 struct bathos_dev_data;
