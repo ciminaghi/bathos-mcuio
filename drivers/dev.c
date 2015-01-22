@@ -187,7 +187,7 @@ int bathos_dev_close(struct bathos_pipe *pipe)
 			return stat;
 	}
 	if (pipe->mode & BATHOS_MODE_OUTPUT) {
-		stat = ops->tx_enable(data->ll_priv);
+		stat = ops->tx_disable(data->ll_priv);
 		if (stat)
 			return stat;
 	}
