@@ -114,6 +114,9 @@ SECTIONS
 		evt_loopback_handlers_start = .;
 		*(.evt_loopback_handlers);
 		evt_loopback_handlers_end = .;
+		evt_radio_empty_packet_received_handlers_start = .;
+		*(.evt_radio_empty_packet_received);
+		evt_radio_empty_packet_received_handlers_end = .;
 		mcuio_functions_start = .;
 		*(.mcuio_functions);
 		mcuio_functions_end = .;
