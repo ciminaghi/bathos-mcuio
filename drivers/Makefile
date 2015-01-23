@@ -26,6 +26,7 @@ endif
 ifeq ($(CONFIG_NRF51_DRIVERS),y)
   DRV_OBJS += drivers/nrf51-rtc.o
   DRV_OBJS += drivers/nrf51-uart.o
+  DRV_OBJS += drivers/nrf51-radio.o
 endif
 
 $(LIBDRIVERS): $(DRV_OBJS)
