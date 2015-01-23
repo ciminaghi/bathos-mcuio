@@ -9,7 +9,9 @@
 #include <bathos/event.h>
 #include <bathos/nrf51-rtc.h>
 #include <bathos/nrf51-uart.h>
+#include <bathos/nrf51-radio.h>
 #include <bathos/dev_ops.h>
+#include <bathos/pipe.h>
 #include <mach/hw.h>
 
 
@@ -49,4 +51,51 @@ static struct bathos_dev __udev0
 void bathos_ll_int_handler_name(UART0_IRQ)(struct event_handler_data *data)
 {
 	nrf51_uart_irq_handler(&__udev0);
+}
+
+#ifndef CONFIG_NRF51822_MY_RADIO_ADDR
+#define CONFIG_NRF51822_MY_RADIO_ADDR 1
+#endif
+#ifndef CONFIG_NRF51822_DST_RADIO_ADDR
+#define CONFIG_NRF51822_DST_RADIO_ADDR 2
+#endif
+
+static union {
+	struct nrf51_radio_packet radio_packet;
+	/* Get space for 16bytes payload */
+	uint8_t dummy[sizeof(struct nrf51_radio_packet) + 16];
+} radio_packet_area;
+
+static const uint8_t my_radio_addr[] = {
+	0,
+	CONFIG_NRF51822_MY_RADIO_ADDR,
+};
+
+static const uint8_t dst_radio_addr[] = {
+	0,
+	CONFIG_NRF51822_DST_RADIO_ADDR,
+};
+
+static const struct nrf51_radio_platform_data radio_plat = {
+	.irq = RADIO_IRQ,
+	.base = RADIO_BASE,
+	.addr_length = ARRAY_SIZE(my_radio_addr),
+	.my_addr = my_radio_addr,
+	.dst_addr = dst_radio_addr,
+	.packet_area = &radio_packet_area.radio_packet,
+	.packet_size = 16,
+};
+
+static struct bathos_dev __rdev0;
+
+static struct bathos_dev __rdev0
+	__attribute__((section(".bathos_devices"), aligned(4))) = {
+	.name = "radio",
+	.ops = &nrf51_radio_dev_ops,
+	.platform_data = &radio_plat,
+};
+
+void bathos_ll_int_handler_name(IRQ_RADIO)(struct event_handler_data *data)
+{
+	nrf51_radio_irq_handler(&__rdev0);
 }
