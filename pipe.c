@@ -58,11 +58,20 @@ struct bathos_dev * __attribute__((weak)) bathos_find_dev(struct bathos_pipe *p)
 void pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt)
 {
 	struct bathos_pipe *p;
+	const struct event *e;
+
 	if (!dev->pipes.next)
 		/* List not even initialized */
 		return;
+
 	list_for_each_entry(p, &dev->pipes, list) {
-		if (trigger_event(evt, p) < 0) {
+		/* Maybe remap event */
+		e = evt;
+		if (evt == &evt_pipe_input_ready)
+			e = p->input_ready_event;
+		if (evt == &evt_pipe_output_ready)
+			e = p->output_ready_event;
+		if (trigger_event(e, p) < 0) {
 			printf("WARN: missing pipe evt\n");
 		}
 	}
@@ -88,6 +97,8 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 	out->n = n;
 	out->data = data;
 	out->mode = mode;
+	out->input_ready_event = &evt_pipe_input_ready;
+	out->output_ready_event = &evt_pipe_output_ready;
 	dev  = bathos_find_dev(out);
 	if (!dev) {
 		__do_free_pipe(out);
