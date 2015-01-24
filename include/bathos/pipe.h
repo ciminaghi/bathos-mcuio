@@ -43,6 +43,8 @@ struct bathos_pipe {
 	const char *n;
 	int mode;
 	void *data;
+	const struct event *input_ready_event;
+	const struct event *output_ready_event;
 	struct bathos_dev *dev;
 	/* list of pipes related to the same device */
 	struct list_head list;
@@ -59,6 +61,18 @@ int pipe_read(struct bathos_pipe *, char *buf, int len);
 int pipe_write(struct bathos_pipe *, const char *buf, int len);
 int pipe_ioctl(struct bathos_pipe *, struct bathos_ioctl_data *data);
 void pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt);
+
+static inline void pipe_remap_input_ready_event(struct bathos_pipe *pipe,
+						const struct event * PROGMEM e)
+{
+	pipe->input_ready_event = e;
+}
+
+static inline void pipe_remap_output_ready_event(struct bathos_pipe *pipe,
+						 const struct event * PROGMEM e)
+{
+	pipe->output_ready_event = e;
+}
 
 declare_extern_event(input_pipe_opened);
 declare_extern_event(output_pipe_opened);
