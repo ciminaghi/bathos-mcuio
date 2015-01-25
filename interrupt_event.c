@@ -34,7 +34,8 @@ event_handler_ops_struct(ISR_NAME) = {
 	.exit = NULL,
 };
 
-static struct event_handler_data PROGMEM event_handler_struct(ISR_NAME) = {
+static const struct event_handler_data
+PROGMEM event_handler_struct(ISR_NAME) = {
 	.ops = &event_handler_ops_struct(ISR_NAME),
 	.priv = &ISR_PRIV,
 };
