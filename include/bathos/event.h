@@ -58,8 +58,8 @@ struct event_handler_data {
  * @handlers_end: pointer to the last handler for this event
  */
 struct event {
-	struct event_handler_data *handlers_start;
-	struct event_handler_data *handlers_end;
+	const struct event_handler_data * PROGMEM handlers_start;
+	const struct event_handler_data * PROGMEM handlers_end;
 };
 
 /*
