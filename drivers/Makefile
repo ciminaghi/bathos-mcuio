@@ -36,6 +36,7 @@ ifeq ($(CONFIG_NRF5X_DRIVERS),y)
 endif
 
 DRV_OBJS += drivers/radio-bridge-master.o
+DRV_OBJS += drivers/radio-bridge-slave.o
 
 $(LIBDRIVERS): $(DRV_OBJS)
 	$(AR) r $@ $(DRV_OBJS)
