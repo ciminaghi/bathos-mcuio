@@ -6,3 +6,23 @@ config  LFCLK
 	int "nrf5x low frequency clock"
 	default 32768 if MACH_NRF51822
 
+choice
+       prompt "NRF5X RADIO MODE"
+       default NRF5X_RADIO_NONE
+
+config NRF5X_RADIO_MASTER
+       bool "Enable nrf5x radio bridge master"
+       help
+         This adds a radio bridge master driver using the nrf5x low level radio driver
+
+config NRF5X_RADIO_SLAVE
+       bool "Enable nrf5x radio bridge slave"
+       help
+         This adds a radio bridge slave driver using the nrf5x low level
+
+config NRF5X_RADIO_NONE
+       bool "No radio bridge driver"
+       help
+         This disables high level radio drivers
+
+endchoice

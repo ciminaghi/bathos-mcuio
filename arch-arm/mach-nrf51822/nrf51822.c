@@ -10,6 +10,8 @@
 #include <bathos/nrf5x-rtc.h>
 #include <bathos/nrf5x-uart.h>
 #include <bathos/nrf5x-radio.h>
+#include <bathos/radio-bridge-master.h>
+#include <bathos/radio-bridge-slave.h>
 #include <bathos/dev_ops.h>
 #include <bathos/pipe.h>
 #include <mach/hw.h>
@@ -53,12 +55,7 @@ void bathos_ll_int_handler_name(UART0_IRQ)(struct event_handler_data *data)
 	nrf5x_uart_irq_handler(&__udev0);
 }
 
-#ifndef CONFIG_NRF51822_MY_RADIO_ADDR
-#define CONFIG_NRF51822_MY_RADIO_ADDR 1
-#endif
-#ifndef CONFIG_NRF51822_DST_RADIO_ADDR
-#define CONFIG_NRF51822_DST_RADIO_ADDR 2
-#endif
+#if defined CONFIG_NRF5X_RADIO_MASTER || defined CONFIG_NRF5X_RADIO_SLAVE
 
 static union {
 	struct nrf5x_radio_packet radio_packet;
@@ -67,13 +64,17 @@ static union {
 } radio_packet_area;
 
 static const uint8_t my_radio_addr[] = {
-	0,
-	CONFIG_NRF51822_MY_RADIO_ADDR,
+	0x33,
+	0x29,
+	0x38,
+	0x22,
 };
 
 static const uint8_t dst_radio_addr[] = {
-	0,
-	CONFIG_NRF51822_DST_RADIO_ADDR,
+	0x33,
+	0x29,
+	0x38,
+	0x22,
 };
 
 static const struct nrf5x_radio_platform_data radio_plat = {
@@ -99,3 +100,48 @@ void bathos_ll_int_handler_name(RADIO_IRQ)(struct event_handler_data *data)
 {
 	nrf5x_radio_irq_handler(&__rdev0);
 }
+
+#ifdef CONFIG_NRF5X_RADIO_MASTER
+
+static const struct rb_master_platform_data rbm_data = {
+	.input_dev = "uart0",
+	.output_dev = "radio",
+	.filter = NULL,
+	.filter_data = NULL,
+	.packet_size = 16,
+};
+
+static struct bathos_dev __rbm0
+__attribute__((section(".bathos_devices"), aligned(4))) = {
+	.name = "radio-bridge-master",
+	.ops = &master_radio_dev_ops,
+	.platform_data = &rbm_data,
+};
+
+static void do_beacon(struct event_handler_data *ed)
+{
+	rb_master_do_beacon(&__rbm0);
+}
+
+declare_event_handler(hw_timer_tick, NULL, do_beacon, NULL);
+
+#else /* ! CONFIG_NRF5X_RADIO_MASTER */
+
+static const struct rb_slave_platform_data rbs_data = {
+	.input_dev = "radio",
+	.packet_size = 16,
+};
+
+/* Can't be static, otherwise the symbol is unused and it is not generated */
+struct bathos_dev __rbs0
+__attribute__((section(".bathos_devices"), aligned(4))) = {
+	.name = "radio-bridge-slave",
+	.ops = &slave_radio_dev_ops,
+	.platform_data = &rbs_data,
+};
+
+
+#endif /* CONFIG_NRF5X_RADIO_MASTER */
+
+
+#endif /* CONFIG_NRF5X_RADIO_MASTER || CONFIG_NRF5X_RADIO_SLAVE */

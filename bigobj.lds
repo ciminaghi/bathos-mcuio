@@ -117,6 +117,12 @@ SECTIONS
 		evt_radio_empty_packet_received_handlers_start = .;
 		*(.evt_radio_empty_packet_received);
 		evt_radio_empty_packet_received_handlers_end = .;
+		evt_rb_ipipe_input_ready_handlers_start = .;
+		*(.evt_rb_ipipe_input_ready_handlers);
+		evt_rb_ipipe_input_ready_handlers_end = .;
+		evt_rb_opipe_input_ready_handlers_start = .;
+		*(.evt_rb_opipe_input_ready_handlers);
+		evt_rb_opipe_input_ready_handlers_end = .;
 		mcuio_functions_start = .;
 		*(.mcuio_functions);
 		mcuio_functions_end = .;
