@@ -86,6 +86,15 @@ SECTIONS
 		evt_shell_termination_handlers_start = .;
 		*(.evt_shell_termination_handlers);
 		evt_shell_termination_handlers_end = .;
+		evt_rb_ipipe_input_ready_handlers_start = .;
+		*(.evt_rb_ipipe_input_ready_handlers);
+		evt_rb_ipipe_input_ready_handlers_end = .;
+		evt_rb_opipe_input_ready_handlers_start = .;
+		*(.evt_rb_opipe_input_ready_handlers);
+		evt_rb_opipe_input_ready_handlers_end = .;
+		evt_radio_empty_packet_received_handlers_start = .;
+		*(.evt_radio_empty_packet_received_handlers);
+		evt_radio_empty_packet_received_handlers_end = .;
 	}
 }
 
