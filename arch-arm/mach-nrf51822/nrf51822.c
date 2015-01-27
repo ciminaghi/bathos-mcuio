@@ -32,6 +32,8 @@ void bathos_ll_int_handler_name(RTC0_IRQ)(struct event_handler_data *data)
 	nrf51_irq_handler(&rtc0_plat);
 }
 
+#ifdef CONFIG_NRF51822_UART
+
 static const struct nrf51_uart_platform_data uart0_plat = {
 	.tx_pin = 9,
 	.rx_pin = 11,
@@ -52,6 +54,8 @@ void bathos_ll_int_handler_name(UART0_IRQ)(struct event_handler_data *data)
 {
 	nrf51_uart_irq_handler(&__udev0);
 }
+
+#endif /* CONFIG_NRF51822_UART */
 
 #ifndef CONFIG_NRF51822_MY_RADIO_ADDR
 #define CONFIG_NRF51822_MY_RADIO_ADDR 1
