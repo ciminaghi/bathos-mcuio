@@ -19,3 +19,30 @@ config OPENSDA_DEBUG
        help
          This adds an infinite loop just after _romboot_start to let the
 	 user connect to the target before actually booting bathos
+
+config NRF51822_UART
+	bool "NRF51822 UART driver"
+	select HAVE_UART
+	help
+	  Add an UART driver for the NRF51822
+
+config CONSOLE
+	string
+	default "uart0" if CONSOLE_UART
+
+config STDIN
+	string
+	default CONSOLE if STDIN_CONSOLE
+	default "uart0" if STDIN_UART
+
+config STDOUT
+	string
+	default CONSOLE if STDOUT_CONSOLE
+	default "uart0" if STDOUT_UART
+
+config COPY_STDOUT_TO_CONSOLE
+	bool "Copy stdout to console"
+	depends on !STDOUT_CONSOLE
+	help
+         Copy standard output to console
+
