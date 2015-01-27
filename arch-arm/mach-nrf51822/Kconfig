@@ -46,3 +46,49 @@ config COPY_STDOUT_TO_CONSOLE
 	help
          Copy standard output to console
 
+config NRF51822_RADIO_MASTER
+       bool "Enable nrf51822 radio bridge master"
+       help
+         This adds a radio bridge master driver using the nrf51 low level
+	 radio driver
+
+choice
+	prompt "NRF51822 RADIO MODE"
+	default NRF51822_RADIO_NONE
+
+config NRF51822_RADIO_MASTER
+       bool "Enable nrf51822 radio bridge master"
+       help
+         This adds a radio bridge master driver using the nrf51 low level
+	 radio driver
+
+config NRF51822_RADIO_SLAVE
+       bool "Enable nrf51822 radio bridge slave"
+       help
+         This adds a radio bridge slave driver using the nrf51 low level
+	 radio driver
+
+config NRF51822_RADIO_NONE
+       bool "No radio bridge driver"
+       help
+         This disables high level radio drivers
+
+endchoice
+
+if NRF51822_RADIO_MASTER || NRF51822_RADIO_SLAVE
+
+config NRF51822_MY_RADIO_ADDR
+       hex "Local radio address for nrf51822 (0-255)"
+       default 0 if NRF51822_RADIO_MASTER
+       default 1 if NRF51822_RADIO_SLAVE
+       help
+          This sets the local radio address.
+
+config NRF51822_DST_RADIO_ADDR
+       hex "Destination radio address for nrf51822 (0-255)"
+       default 1 if NRF51822_RADIO_MASTER
+       default 0 if NRF51822_RADIO_SLAVE
+       help
+         This sets the destination radio address.
+
+endif
