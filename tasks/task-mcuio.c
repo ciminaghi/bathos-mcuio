@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) dog hunter AG - Zug - CH
  * General Public License version 2 (GPLv2)
@@ -21,6 +22,8 @@
 #include "mcuio-function.h"
 
 struct mcuio_function_runtime mcuio_func_common_runtime;
+
+declare_event(mcuio_data_ready);
 
 #ifdef CONFIG_MCUIO_DEBUG
 static void dump_packet(const struct mcuio_base_packet *packet)
@@ -266,6 +269,8 @@ static struct bathos_pipe *__open_input_pipe(struct mcuio_data *data)
 	out = pipe_open(CONFIG_MCUIO_PIPE_INPUT_PATH, BATHOS_MODE_INPUT, data);
 	if (!out)
 		out = bathos_stdin;
+	if (out)
+		pipe_remap_input_ready_event(out, &evt_mcuio_data_ready);
 	return out;
 }
 
