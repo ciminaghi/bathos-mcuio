@@ -13,7 +13,7 @@ THOS_QUARTZ ?= $(patsubst "%",%,$(CONFIG_THOS_QUARTZ))
 # if no .config is there, ARCH is still empty, this would prevent a simple
 # "make config"
 ifeq ($(ARCH),)
-  ARCH = lpc1343
+  ARCH = atmega
 endif
 
 # Any tasks coming from configuration ?
@@ -224,9 +224,9 @@ scripts_basic config %config:
 	$(MAKE) -f Makefile.kconfig $@
 
 defconfig:
-	@echo "Using lpc1343_defconfig"
+	@echo "Using yun_defconfig"
 	@test -f .config || touch .config
-	@$(MAKE) -f Makefile.kconfig lpc1343_defconfig
+	@$(MAKE) -f Makefile.kconfig yun_defconfig
 
 .config: silentoldconfig
 
