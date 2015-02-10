@@ -13,6 +13,8 @@
 
 static struct mcuio_function_runtime irq_ctrl_msg_runtime;
 
+declare_event(mcuio_irq);
+
 static const struct mcuio_func_descriptor PROGMEM irq_controller_msg_descr = {
 	.device = 0x5556,
 	.vendor = 0x0001,

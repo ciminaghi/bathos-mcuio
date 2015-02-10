@@ -597,8 +597,6 @@ static const struct mcuio_range PROGMEM gpio_ranges[] = {
 declare_mcuio_function(gpio, gpio_ranges, NULL, NULL,
 		       &mcuio_func_common_runtime);
 
-declare_event(mcuio_irq);
-
 static void gpio_evt_handle(struct event_handler_data *ed)
 {
 	uint32_t *evt_status = ed->data;
