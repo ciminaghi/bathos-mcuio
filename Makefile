@@ -152,6 +152,9 @@ bathos.bin: bathos
 bathos: bathos.o
 	$(CC) bathos.o $(LDFLAGS) -o $@
 
+%.hex: %
+	$(OBJCOPY) -O ihex $^ $@
+
 # This target is needed to generate a default version of the gpio config file
 # Will be removed when all boards have their gpio config file.
 tasks/$(MCUIO_GPIO_CONFIG_FILE):

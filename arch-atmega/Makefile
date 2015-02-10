@@ -70,9 +70,6 @@ load: bathos.hex
 	avrdude -p $(word 2, $(BATHOS_MCU)) \
 		-c stk500v2 -P $(TTY) -e -U flash:w:bathos.hex
 
-%.hex: %
-	$(OBJCOPY) -O ihex $^ $@
-
 ifneq ($(BOOTLOADER_HEX),)
 
 $(ADIR)/bootloader.bin: $(BOOTLOADER_HEX)
