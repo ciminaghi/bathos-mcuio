@@ -17,9 +17,6 @@ SECTIONS
 		/* For data that needs to reside in the lower 64k of progmem. */
 		*(.progmem.gcc*)
     		*(.progmem*)
-		mcuio_functions_start = .;
-		*(.mcuio_functions);
-		mcuio_functions_end = .;
 	}
 	__end_text = .;
 	INCLUDE arch-atmega/bootloader.lds
@@ -33,14 +30,6 @@ SECTIONS
 		romcall_end = .;
 		*(.data);
 		__data = .;
-		. = ALIGN(8);
-		bathos_devices_start = .;
-		*(.bathos_devices);
-		bathos_devices_end = .;
-		. = ALIGN(4);
-		__task_begin = .;
-		*(.task);
-		__task_end = .;
 	}
 	__end_data = .;
 
