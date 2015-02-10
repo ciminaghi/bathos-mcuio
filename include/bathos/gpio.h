@@ -7,6 +7,8 @@
 #ifndef __BATHOS_GPIO_H__
 #define __BATHOS_GPIO_H__
 
+#include <bathos/types.h>
+#include <bathos/errno.h>
 #include <arch/gpio.h>
 
 #ifndef HAVE_GPIO_PORT_8
