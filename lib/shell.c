@@ -10,6 +10,7 @@
 #include <bathos/init.h>
 #include <bathos/shell.h>
 #include <bathos/allocator.h>
+#include <bathos/string.h>
 
 #define MAX_ARGV 5
 
