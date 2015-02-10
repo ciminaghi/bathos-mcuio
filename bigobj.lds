@@ -20,6 +20,14 @@ SECTIONS
 	}
 	.data : {
 		*(.data);      
+		. = ALIGN(8);
+		bathos_devices_start = .;
+		*(.bathos_devices);
+		bathos_devices_end = .;
+		. = ALIGN(4);
+		__task_begin = .;
+		*(.task);
+		__task_end = .;
 	}
 	.text : {
 		. = ALIGN(2);
@@ -85,6 +93,9 @@ SECTIONS
 		evt_shell_termination_handlers_start = .;
 		*(.evt_shell_termination_handlers);
 		evt_shell_termination_handlers_end = .;
+		mcuio_functions_start = .;
+		*(.mcuio_functions);
+		mcuio_functions_end = .;
 	}
 }
 
