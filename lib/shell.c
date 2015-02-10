@@ -32,8 +32,8 @@ struct shell_data *shell_data;
 
 #ifdef ARCH_IS_HARVARD
 
-static struct shell_cmd *__get_cmd(const struct shell_cmd * PROGMEM _cmd,
-				   struct shell_cmd *__cmd)
+static const struct shell_cmd *__get_cmd(const struct shell_cmd * PROGMEM _cmd,
+					 struct shell_cmd *__cmd)
 {
 	memcpy_p(__cmd, _cmd, sizeof(*_cmd));
 	return __cmd;
@@ -41,8 +41,8 @@ static struct shell_cmd *__get_cmd(const struct shell_cmd * PROGMEM _cmd,
 
 #else
 
-static struct shell_cmd *__get_cmd(const struct shell_cmd * PROGMEM _cmd,
-				   struct shell_cmd *__cmd)
+static const struct shell_cmd *__get_cmd(const struct shell_cmd * PROGMEM _cmd,
+					 struct shell_cmd *__cmd)
 {
 	return _cmd;
 }
