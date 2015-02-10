@@ -85,6 +85,21 @@ endif
 
    source "drivers/Kconfig"
 
+config HAVE_GPIOS
+       bool
+       default y if ARCH_ATMEGA
+       default n
+
+config HAVE_ADCS
+       bool
+       default y if ARCH_ATMEGA
+       default n
+
+config HAVE_PWMS
+       bool
+       default y if ARCH_ATMEGA
+       default n
+
 config HAVE_UART
        bool
 

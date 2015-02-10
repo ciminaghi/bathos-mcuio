@@ -47,6 +47,7 @@ config MCUIO_GPIO
        prompt "Mcuio gpio function"
        bool
        depends on TASK_MCUIO
+       depends on HAVE_GPIOS
        default n
 
 config MCUIO_GPIO_DEVICE
@@ -65,12 +66,14 @@ config MCUIO_ADC
        prompt "Mcuio ADC function"
        bool
        depends on TASK_MCUIO
+       depends on HAVE_ADCS
        default n
 
 config MCUIO_PWM
        prompt "Mcuio PWM function"
        bool
        depends on TASK_MCUIO
+       depends on HAVE_PWMS
        default n
 
 choice
@@ -189,6 +192,7 @@ endchoice
 config MCUIO_BITBANG_I2C
        bool "mcuio bitbang i2c function"
        depends on TASK_MCUIO
+       depends on HAVE_GPIOS
        help
 	 This adds an I2C bitbang controller MCUIO function
 
