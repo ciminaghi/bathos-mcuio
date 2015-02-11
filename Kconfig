@@ -95,6 +95,7 @@ endif
 
 config HAVE_IRQ_CONTROLLER
        bool
+       default y if ARCH_ARM
        default n
 
 config HAVE_GPIOS
