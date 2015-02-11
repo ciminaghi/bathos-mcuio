@@ -4,7 +4,7 @@ ifeq ($(CONFIG_CPU),"cortex-m0")
 CFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 endif
 ASFLAGS = $(CFLAGS)
-LDFLAGS = -nostdlib -nostartfiles
+LDFLAGS = -nostdlib -nostartfiles -Wl,--defsym -Wl,regs=0
 
 ifeq ($(CONFIG_OPENSDA_DEBUG),y)
 ASFLAGS += -DOPENSDA_DEBUG
