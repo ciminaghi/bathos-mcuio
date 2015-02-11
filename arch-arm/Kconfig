@@ -66,3 +66,12 @@ config BOARD
        default "none" if BOARD_NONE
 
 endmenu
+
+config ENDLESS_LOOP_AT_START
+       bool
+       prompt "Add an endless loop at machine startup"
+       default n
+       help
+        This can be useful in case you want the machine to delay
+        boot until a jtag/cmsis-dap emulator has been connected
+	Say N if unsure.
