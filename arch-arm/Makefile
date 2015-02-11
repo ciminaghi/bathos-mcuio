@@ -16,10 +16,9 @@ MACH_DIR = $(ADIR)/mach-$(shell echo $(CONFIG_MACH))
 CFLAGS += -I$(ADIR)/$(MACH_DIR) -DHZ=100
 
 ifneq ($(CONFIG_MACH),"none")
-BOOT_OBJ = $(MACH_DIR)/boot.o $(MACH_DIR)/init.o
-else
-BOOT_OBJ =
+BOOT_OBJ = $(MACH_DIR)/init.o
 endif
+BOOT_OBJ += $(ADIR)/boot.o
 
 # No io.o for this arch
 IO_OBJ =
