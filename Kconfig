@@ -93,6 +93,10 @@ endif
 
    source "drivers/Kconfig"
 
+config HAVE_IRQ_CONTROLLER
+       bool
+       default n
+
 config HAVE_GPIOS
        bool
        default y if ARCH_ATMEGA
