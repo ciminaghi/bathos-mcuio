@@ -28,7 +28,7 @@ IO_OBJ =
 LIBARCH = $(ADIR)/libarch.a
 LIBARCH_OBJS = $(ADIR)/init.o
 
-AOBJ += $(ADIR)/vectable.o
+AOBJ += $(ADIR)/vectable.o $(ADIR)/nvic.o
 
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
