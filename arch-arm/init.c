@@ -15,6 +15,8 @@
 #include <stdint.h>
 
 volatile unsigned long __attribute__((weak)) jiffies;
+volatile unsigned long __attribute__((weak)) _sdata;
+volatile unsigned long __attribute__((weak)) _erom;
 
 /* Dummy start function (replaced by machine's romboot_start in boot.S */
 void __attribute__((weak)) _romboot_start(void)
