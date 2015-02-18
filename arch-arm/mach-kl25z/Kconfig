@@ -1,0 +1,53 @@
+
+
+choice
+	prompt "KL25Z clock configuration"
+	default KL25Z_MCG_PEE
+
+config	KL25Z_MCG_FEI
+	bool "KL25Z MCG in FLL Engaged Internal mode"
+	help
+	  External resonator
+
+config  KL25Z_MCG_PEE
+	bool "KL25Z MCG in PLL Engaged External mode"
+	help
+	  External xtal, 8-32MHz
+
+config  KL25Z_MCG_BLPE
+	bool "KL25Z MCG in Bypassed Low Power External mode"
+	help
+	  External oscillator
+
+endchoice
+
+choice
+	prompt "KL25Z based boards"
+	default BOARD_FREEDOG
+
+config	KL25Z_BOARD_FREEDOG
+	bool "Doghunter Freedog board"
+	select KL25Z_MCG_PEE
+	help
+	  This build bathos for a Freedog board
+
+endchoice
+
+config  KL25Z_RESONATOR_FREQ
+	depends on KL25Z_MCG_FEI
+	int "KL25Z external resonator frequency"
+	default 32768
+
+config  KL25Z_XTAL_FREQ
+       	int "KL25Z external crystal frequency"
+	depends on KL25Z_MCG_PEE
+	default 8000000 if KL25Z_BOARD_FREEDOG
+
+config  KL25Z_OSC_FREQ
+	int "KL25Z external oscillator frequency"
+	depends on KL25Z_MCG_BLPE
+	default 8000000
+
+config  KL25Z_BUS_FREQ
+       	int "KL25 bus frequency"
+	default 24000000
