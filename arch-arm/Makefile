@@ -33,5 +33,10 @@ ifeq ($(CONFIG_HAS_CORTEXM_SYSTICKTMR),y)
 AOBJ += $(ADIR)/systicktmr.o
 endif
 
+ifeq ($(CONFIG_MACH),"kl25z")
+AOBJ += $(MACH_DIR)/clock.o
+endif
+
+
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)

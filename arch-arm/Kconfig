@@ -39,11 +39,21 @@ config MACH_NONE
        help
 	 build for no particular machine
 
+config MACH_KL25Z
+       bool "Freescale KL25Z"
+       select CPU_CORTEX_M0_PLUS
+       select HAVE_RELOCATE_INTERRUPT_TABLE
+       select HAS_CORTEXM_SYSTICKTMR
+
 endchoice
 
 config THOS_QUARTZ
        int "CPU clock frequency"
        default 12000000 if MACH_KL25Z
+
+if MACH_KL25Z
+	source arch-arm/mach-kl25z/Kconfig
+endif
 
 choice
 	prompt "Target board for bathos"
@@ -61,6 +71,7 @@ config CPU
 
 config MACH
        default "none" if MACH_NONE
+       default "kl25z" if MACH_KL25Z
 
 config BOARD
        default "none" if BOARD_NONE
