@@ -35,5 +35,11 @@ CFLAGS += -DARCH_NEEDS_INTERRUPT_FOR_JIFFIES=1
 AOBJ += $(ADIR)/systicktmr.o
 endif
 
+ifeq ($(CONFIG_MACH),"kl25z")
+AOBJ += $(MACH_DIR)/clock.o
+LDS = $(MACH_DIR)/bathos.lds
+endif
+
+
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)

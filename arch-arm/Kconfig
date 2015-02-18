@@ -39,20 +39,17 @@ config MACH_NONE
        help
 	 build for no particular machine
 
+config MACH_KL25Z
+       bool "Freescale KL25Z"
+       select CPU_CORTEX_M0_PLUS
+       select HAVE_RELOCATE_INTERRUPT_TABLE
+       select HAS_CORTEXM_SYSTICKTMR
+
 endchoice
 
 config THOS_QUARTZ
        int "CPU clock frequency"
        default 12000000 if MACH_KL25Z
-
-choice
-	prompt "Target board for bathos"
-
-config BOARD_NONE
-       bool
-	prompt "Build for no particular board"
-
-endchoice
 
 config CPU
        string
@@ -61,11 +58,29 @@ config CPU
 
 config MACH
        default "none" if MACH_NONE
+       default "kl25z" if MACH_KL25Z
+
+if MACH_KL25Z
+	source arch-arm/mach-kl25z/Kconfig
+endif
+
+choice
+	prompt "Target board for bathos"
+
+config BOARD_NONE
+       bool
+	prompt "Build for no particular board"
+
+config BOARD_FREEDOG
+       bool
+        prompt "Build for a KL25Z based freedog board"
+
+endchoice
 
 config BOARD
        default "none" if BOARD_NONE
+       default "freedog" if BOARD_FREEDOG
 
-endmenu
 
 config ENDLESS_LOOP_AT_START
        bool
@@ -75,3 +90,5 @@ config ENDLESS_LOOP_AT_START
         This can be useful in case you want the machine to delay
         boot until a jtag/cmsis-dap emulator has been connected
 	Say N if unsure.
+
+endmenu
