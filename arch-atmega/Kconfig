@@ -33,6 +33,10 @@ config BOARD
        default "yun" if BOARD_YUN
        default "any" if BOARD_ANY_ATMEGA32U4
 
+config THOS_QUARTZ
+       int "Oscillator frequency"
+       default 16000000
+
 config ATMEGA_USB_UART
        bool "Atmega Usb-uart driver"
        select HAVE_USB_UART
