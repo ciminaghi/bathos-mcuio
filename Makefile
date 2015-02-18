@@ -7,6 +7,8 @@ PACKAGE = $(patsubst "%",%,$(CONFIG_MACH_PACKAGE))
 CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
 MODE ?= $(patsubst "%",%,$(CONFIG_MEMORY_MODE))
 BATHOS_GIT=$(shell ./scripts/get_version)
+HZ ?= $(patsubst "%",%,$(CONFIG_HZ))
+THOS_QUARTZ ?= $(patsubst "%",%,$(CONFIG_THOS_QUARTZ))
 
 # if no .config is there, ARCH is still empty, this would prevent a simple
 # "make config"
@@ -91,7 +93,7 @@ IO_OBJ ?= $(ADIR)/io.o
 AOBJ  += $(BOOT_OBJ) $(IO_OBJ)
 
 # The user can pass USER_CFLAGS if needed
-CFLAGS += $(USER_CFLAGS) -DBATHOS_GIT=\"$(BATHOS_GIT)\" -DMODULE_NAME=$(subst -,_,$(subst /,_,$(subst .o,,$@)))
+CFLAGS += $(USER_CFLAGS) -DBATHOS_GIT=\"$(BATHOS_GIT)\" -DMODULE_NAME=$(subst -,_,$(subst /,_,$(subst .o,,$@))) -DHZ=$(HZ) -DTHOS_QUARTZ=$(THOS_QUARTZ)
 
 # There may or may not be a linker script (arch-unix doesn't)
 LDS   ?= $(wildcard $(ADIR)/bathos$(MODE).lds)
