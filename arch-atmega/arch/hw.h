@@ -2,12 +2,16 @@
 
 #include <avr/pgmspace.h>
 
+#ifndef THOS_QUARTZ
 #define THOS_QUARTZ		(16UL * 1000 * 1000)
+#endif /* THOS_QUARTZ */
+#ifndef HZ
 #if (MCU_atmega32u4==1)
 #define HZ			(THOS_QUARTZ / 256 / 250) /* 250 */
 #else
 #define HZ			(THOS_QUARTZ / 256 / 256) /* 244 (+.140625) */
 #endif
+#endif /* HZ */
 
 /* Make avr-libc happy */
 #define F_CPU THOS_QUARTZ
