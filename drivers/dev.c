@@ -12,7 +12,7 @@
 #include <bathos/allocator.h>
 #include <bathos/circ_buf.h>
 
-#define UART_DEFAULT_BUF_SIZE 16
+#define UART_DEFAULT_BUF_SIZE 64
 
 struct bathos_dev_data {
 	enum bathos_dev_mode mode;
