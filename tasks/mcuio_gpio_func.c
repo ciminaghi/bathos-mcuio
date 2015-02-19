@@ -335,7 +335,7 @@ static int gpio_modes_wrq(const struct mcuio_range *r, unsigned offset,
 static int __gpio_modes_rd(const struct mcuio_range *r, unsigned offset,
 			   void *__out, int fill, int width)
 {
-	int n = width, i;
+	int n = width/8, i;
 	const struct mcuio_gpio_port_data * PROGMEM _pd = r->priv;
 	struct mcuio_gpio_port_data __pd;
 	const struct mcuio_gpio_port_data *pd = __get_port_data(_pd, &__pd);
