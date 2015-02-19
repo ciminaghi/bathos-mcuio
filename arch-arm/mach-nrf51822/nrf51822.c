@@ -68,13 +68,17 @@ static union {
 } radio_packet_area;
 
 static const uint8_t my_radio_addr[] = {
-	0,
-	CONFIG_NRF51822_MY_RADIO_ADDR,
+	0x33,
+	0x29,
+	0x38,
+	0x22,
 };
 
 static const uint8_t dst_radio_addr[] = {
-	0,
-	CONFIG_NRF51822_DST_RADIO_ADDR,
+	0x33,
+	0x29,
+	0x38,
+	0x22,
 };
 
 static const struct nrf51_radio_platform_data radio_plat = {
