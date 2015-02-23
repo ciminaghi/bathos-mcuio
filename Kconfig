@@ -90,6 +90,11 @@ config HAVE_GPIOS
        default y if ARCH_ATMEGA
        default n
 
+config HAVE_GPIO_EVENTS
+       bool
+       default y if ARCH_ATMEGA
+       default n
+
 config HAVE_ADCS
        bool
        default y if ARCH_ATMEGA
