@@ -76,23 +76,9 @@ config MCUIO_PWM
        depends on HAVE_PWMS
        default n
 
-choice
-       prompt "Irq controller"
-
 config MCUIO_IRQ_CONTROLLER_MSG
-       prompt "Message irq controller"
        bool
-       help
-         This adds an mcuio function which sends interrupts to the MPU via
-	 an MCU message over the bus
-
-config MCUIO_IRQ_CONTROLLER_NONE
-       prompt "No irq controller"
-       bool
-       help
-         This avoids building any interrupt controller
-
-endchoice
+       default y if MCUIO_GPIO || MCUIO_BITBANG_I2C
 
 config MCUIO_IRQ_CONTROLLER_WIRE_DEVICE
        prompt "Device id for irq controller"
@@ -126,7 +112,7 @@ config MCUIO_IRQ_WIRE_ACTIVE_LEVEL
 config MCUIO_IRQ_TEST
        prompt "Irq test function"
        bool
-       depends on TASK_MCUIO && !MCUIO_IRQ_CONTROLLER_NONE
+       depends on TASK_MCUIO && MCUIO_IRQ_CONTROLLER_MSG
        default y
        help
          This adds an mcuio irq test function: such function such triggers
