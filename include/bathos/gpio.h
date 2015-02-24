@@ -85,13 +85,13 @@ static inline int __gpio_get_portw(int gpio, void *out, int w)
 #define GPIO_EVT_LOW     0x08
 #define GPIO_EVT_ENABLE  0x80
 
-#ifndef HAVE_GPIO_EVENTS
+#ifndef CONFIG_HAVE_GPIO_EVENTS
 static inline int gpio_request_events(int gpio, int flags)
 {
 	return -ENOSYS;
 }
 #else
 extern int gpio_request_events(int gpio, int flags);
-#endif /* __HAVE_GPIO_EVENTS__ */
+#endif /* CONFIG_HAVE_GPIO_EVENTS */
 
 #endif /* __BATHOS_GPIO_H__ */
