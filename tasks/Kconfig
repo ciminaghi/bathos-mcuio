@@ -80,35 +80,6 @@ config MCUIO_IRQ_CONTROLLER_MSG
        bool
        default y if MCUIO_GPIO || MCUIO_BITBANG_I2C
 
-config MCUIO_IRQ_CONTROLLER_WIRE_DEVICE
-       prompt "Device id for irq controller"
-       hex
-       depends on MCUIO_IRQ_CONTROLLER_WIRE
-       default 0x1111
-
-config MCUIO_IRQ_CONTROLLER_WIRE_VENDOR
-       prompt "Vendor id for wire irq controller"
-       hex
-       depends on MCUIO_IRQ_CONTROLLER_WIRE
-       default 0xaaaa
-
-config MCUIO_IRQ_WIRE_GPIO_NUMBER
-       prompt "Gpio for irq wire"
-       int
-       depends on MCUIO_IRQ_CONTROLLER_WIRE
-       default 30
-       help
-         This selects the gpio through which interrupts shall be sent to the
-	 MPU
-
-config MCUIO_IRQ_WIRE_ACTIVE_LEVEL
-       prompt "Active level for irq wire"
-       int
-       depends on MCUIO_IRQ_CONTROLLER_WIRE
-       default 0
-       help
-         This select the active level for irqs sent to the MPU
-
 config MCUIO_IRQ_TEST
        prompt "Irq test function"
        bool
