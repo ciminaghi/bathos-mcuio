@@ -44,6 +44,8 @@ config MACH_KL25Z
        select CPU_CORTEX_M0_PLUS
        select HAVE_RELOCATE_INTERRUPT_TABLE
        select HAS_CORTEXM_SYSTICKTMR
+       select HAVE_GPIOS
+       select HAVE_GPIO_EVENTS
 
 endchoice
 
