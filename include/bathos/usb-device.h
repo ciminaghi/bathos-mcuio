@@ -58,5 +58,14 @@ struct usb_descriptor_list {
  */
 extern const struct usb_descriptor_list usb_descr_list[];
 
+/*
+ * EP ioctls
+ */
+#define EP_IOC_GET_RX_BUF 0
+
+struct usb_device_ep_buf {
+	const char *buf;
+	int len;
+};
 
 #endif
