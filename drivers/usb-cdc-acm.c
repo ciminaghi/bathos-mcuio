@@ -177,6 +177,20 @@ declare_event_handler(control_event, NULL, control_handle, NULL);
 static void data_handle(struct event_handler_data *ed)
 {
 	/* Data received */
+	struct bathos_pipe *p = ed->data;
+	struct usb_device_ep_buf ep_buf;
+	struct bathos_ioctl_data iocd = {
+		.code = EP_IOC_GET_RX_BUF,
+		.data = &ep_buf,
+	};
+	struct usb_cdc_data *data = p->data;
+	struct bathos_dev *dev = data->dev;
+	int stat;
+
+	stat = pipe_ioctl(p, &iocd);
+	if (stat < 0)
+		return;
+	(void)bathos_dev_push_chars(dev, ep_buf.buf, ep_buf.len);
 }
 
 declare_event_handler(data_event, NULL, data_handle, NULL);
