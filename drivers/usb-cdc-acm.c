@@ -21,6 +21,8 @@
 #define CDC_GET_LINE_CODING		0x21
 #define CDC_SET_CONTROL_LINE_STATE	0x22
 
+static char __line_coding[] = {0x00, 0xE1, 0x00, 0x00, 0x00, 0x00, 0x08};
+
 declare_event(control_event);
 declare_event(data_event);
 
@@ -142,6 +144,31 @@ static int usb_uart_close(struct bathos_pipe *pipe)
 static void control_handle(struct event_handler_data *ed)
 {
 	/* Control message received */
+	struct bathos_pipe *p = ed->data;
+	struct usb_device_ep_buf ep_buf;
+	struct bathos_ioctl_data iocd = {
+		.code = EP_IOC_GET_RX_BUF,
+		.data = &ep_buf,
+	};
+	struct usb_setup_token *t;
+	int stat, len;
+
+	stat = pipe_ioctl(p, &iocd);
+	if (stat < 0)
+		return;
+	t = (struct usb_setup_token *)ep_buf.buf;
+	len = ep_buf.len;
+	if (len != sizeof(*t))
+		return;
+	if (!(t->bmRequestType & 0x1f))
+		return;
+	switch (t->bRequest) {
+	case CDC_GET_LINE_CODING:
+		(void)pipe_write(p, __line_coding, sizeof(__line_coding));
+		break;
+	default:
+		pipe_write(p, NULL, 0);
+	}
 }
 
 
