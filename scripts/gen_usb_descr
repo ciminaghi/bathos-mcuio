@@ -1,0 +1,266 @@
+#!/bin/bash
+#set -x
+
+# Reads usb config file and sets up descriptor for device, with relevant
+# data structures
+# Config file format example
+#
+# NUMBER = ((0x)[0-9a..fA..F]+)|([0-9]+)
+# STRING = "[a..zA..Z_\. ]"
+#
+# device {
+#   vendor    NUMBER
+#   device    NUMBER
+#   class     NUMBER
+#   subclass  NUMBER
+#   protocol  NUMBER
+#   manufacturer STRING
+#   configs   NUMBER
+# }
+#
+# starts scripts/gen_usb_descr.fun with args arg0=val0, arg1=val1, ....
+#
+# function fun {
+#    arg0 val0
+#    arg1 val1
+#    .....
+#    argn valn
+# }
+#set -x
+
+. $(dirname $0)/usb-functions
+
+help() {
+    echo "use $0 <usb_config_file> <output_file>"
+}
+
+# $1 -> index
+# $2 -> length
+# $3 -> descr symbol
+# $4 -> output file
+add_string_descriptor() {
+    echo -e "static const struct usb_descriptor PROGMEM string_descr_$1 = {" >> $4
+    echo -e "\t.addr = str_${1}_descr," >> $4
+    echo -e "\t.len = sizeof(str_${1}_descr)," >> $4
+    echo -e "};" >> $4
+}
+
+# $1 -> index
+# $2 -> length
+# $3 -> descr symbol
+# $4 -> output file
+add_dev_descriptor() {
+    echo -e "static const struct usb_descriptor PROGMEM device_descr_$1 = {" >> $4
+    echo -e "\t.addr = device_descriptor," >> $4
+    echo -e "\t.len = sizeof(device_descriptor)," >> $4
+    echo -e "};" >> $4
+}
+
+# $1 -> index
+# $2 -> length
+# $3 -> descr symbol
+# $4 -> output file
+add_config_descriptor() {
+    echo -e "static const struct usb_descriptor PROGMEM config_descr_$1 = {" >> $4
+    echo -e "\t.addr = config_descriptor," >> $4
+    echo -e "\t.len = sizeof(config_descriptor)," >> $4
+    echo -e "};" >> $4
+}
+
+# $1 type
+# $2 id
+# $3 length
+# $4 descr symbol
+# $5 output file
+add_descriptor() {
+    [ "$1" = "string" ] && add_string_descriptor $2 $3 $4 $5
+    [ "$1" = "device" ] && add_dev_descriptor    $2 $3 $4 $5
+    [ "$1" = "config" ] && add_config_descriptor $2 $3 $4 $5
+}
+
+add_zero_string() {
+    local id=0
+    local len=4
+    nstrings=$((nstrings + 1))
+    var_name=$3
+    echo "/* Zero string */" >> $2
+    initializer=$(echo $len, 0x03, $1)
+    echo  \
+	"static const uint8_t PROGMEM str_${id}_descr[] = { $initializer };" \
+	>> $2
+    eval $var_name=$id
+    add_descriptor string 0 $len str_0 $tmp_descr_array_file
+}
+
+# Add a string with value $1 to file $2, set var $3 to string index
+# Echo back string id
+add_string() {
+    local id=$nstrings
+    local len
+    nstrings=$((nstrings + 1))
+    var_name=$3
+    echo "/* String: \"$1\" */" >> $2
+    len=$(printf 0x%02x $(($(($(echo -e -n $1 | wc -c) * 2)) + 2)))
+    initializer=$(echo $len, 0x03, $(echo -e -n $1 | iconv -t UTF-16LE | \
+	od -A n -t x1 --width=255 | \
+	head -n 1  | sed -e 's/\([0-9a-f][0-9a-f]\)/0x\1,/g'))
+    echo  \
+	"static const uint8_t PROGMEM str_${id}_descr[] = { $initializer };" \
+	>> $2
+    eval $var_name=$id
+    add_descriptor string $id $len str_$id $tmp_descr_array_file
+}
+
+# $1 -> output file
+device_descriptor_end() {
+    for v in $device_vars ; do
+	if eval [ -z \"\$usb_device_${v}\" ] ; then
+	    echo "Missing declaration of $v"
+	    return 1
+	fi
+    done
+    add_string "$usb_device_manufacturer" $tmp_strfile manuf_str
+    add_string "$usb_device_product" $tmp_strfile prod_str
+    add_string "$usb_device_serial" $tmp_strfile serial_str
+    echo "static const uint8_t PROGMEM device_descriptor[] = {" >> $1
+    # Length is always 18 bytes
+    echo -e "\t18," >> $1
+    # Descriptor type is always 1
+    echo -e "\t1," >> $1
+    # bcdUSB is always 0 2
+    echo -e "\t0x00, 0x02," >> $1
+    # device class is $usb_device_class
+    printf "\t0x%02x,\n" $usb_device_class >> $1
+    # device class is $usb_device_subclass
+    printf "\t0x%02x,\n" $usb_device_subclass >> $1
+    # device protocol is $usb_device_protocol
+    printf "\t0x%02x,\n" $usb_device_protocol >> $1
+    # bMaxPacketSize is $usb_device_maxpacket0
+    printf "\t0x%02x,\n" $usb_device_maxpacket0 >> $1
+    # vendor id is $usb_device_vendor
+    printf "\t0x%02x,\n" $(($usb_device_vendor & 0xff)) >> $1
+    printf "\t0x%02x,\n" $(($usb_device_vendor >> 8)) >> $1
+    # product id is $usb_device_device
+    printf "\t0x%02x,\n"  $(($usb_device_device & 0xff)) >> $1
+    printf "\t0x%02x,\n" $(($usb_device_device >> 8)) >> $1
+    # device release is always 0 1 (FIXME ?)
+    echo -e "\t0x00, 0x01," >> $1
+    # iManufacturer is the index of manufacturer string
+    printf "\t%d,\n" $manuf_str >> $1
+    # iProduct is the index of product string
+    printf "\t%d,\n" $prod_str >> $1
+    # iSerialNumber is the index of serial number string
+    printf "\t%d,\n" $serial_str >> $1
+    # Only one configuration is supported at the moment
+    printf "\t1,\n" >> $1
+    echo "};" >> $1
+
+    add_descriptor device 0 18 device_descriptor $tmp_descr_array_file
+    return 0
+}
+
+
+[ $# -ge 2 ] || { help ; exit 1 ; }
+
+config_file=$1
+out=$2
+# Makes process_line include the right function 
+genmode=descr
+
+read_config_file $1
+
+# add string 0
+add_zero_string 0x04,0x09 $tmp_strfile zero_str
+
+cat > $out <<EOF
+/*
+ * This file was automatically generated by $0 on $(date)
+ * Config file: $config_file
+ */
+#include <bathos/usb-device.h>
+
+EOF
+
+echo -n "Adding strings ... "
+echo '/* USB strings */' >> $out
+echo >> $out
+
+cat $tmp_strfile >> $out
+rm $tmp_strfile
+
+echo OK
+
+echo -n "Adding device descriptor ... "
+echo '/* Device descriptor */' >> $out
+echo >> $out
+
+cat $tmp_dev_descr_file >> $out
+rm $tmp_dev_descr_file
+
+echo OK
+
+echo "Adding configuration descriptor ... "
+
+
+
+cat >> $out <<EOF
+
+/* Configuration */
+static uint8_t config_descriptor[] = {
+	/* configuration descriptor, USB spec 9.6.3, page 264-266, Table 9-10 */
+	9,		/* bLength */
+	2,		/* bDescriptorType */
+	$((config_descr_len & 0xff)),
+	$((config_descr_len >> 8)),/* wTotalLength */
+	$interfaces,		/* bNumInterfaces */
+	1,		/* bConfigurationValue */
+	0,		/* iConfiguration */
+	0xC0,		/* bmAttributes */
+	50,		/* bMaxPower */
+EOF
+
+for f in $funcheaders ; do
+    echo -e -n "Adding function from header $f ... "
+    echo "" >> $out
+    echo "/* This comes from file $f */" >> $out
+    echo "" >> $out
+    cat $f >> $out
+    echo "OK"
+done
+
+# Close configuration descriptor
+echo "};" >> $out
+
+add_descriptor config 0 9 config_descriptor $tmp_descr_array_file
+
+echo -n "Adding descriptors arrays ... "
+
+echo '/* Descriptors arrays */' >> $out
+echo >> $out
+
+cat $tmp_descr_array_file >> $out
+
+echo "const struct usb_descriptor PROGMEM *string_descriptors_start[] = {" >> $out
+for i in $(seq 0 $(($nstrings - 2))) ; do
+    echo -e "\t[$i] = &string_descr_$i," >> $out
+done
+
+echo "};" >> $out
+
+echo -e "const struct usb_descriptor * const PROGMEM *string_descriptors_end = &string_descriptors_start[$(($nstrings - 1))];" >> $out
+
+echo "const struct usb_descriptor PROGMEM *device_descriptors_start[] = {" >> $out
+echo -e "\t[0] = &device_descr_0," >> $out
+echo "};" >> $out
+
+echo -e "const struct usb_descriptor * const PROGMEM *device_descriptors_end = &device_descriptors_start[1];" >> $out
+
+echo "const struct usb_descriptor PROGMEM *config_descriptors_start[] = {" >> $out
+echo -e "\t[0] = &config_descr_0," >> $out
+echo "};" >> $out
+
+echo -e "const struct usb_descriptor * const PROGMEM *config_descriptors_end = &config_descriptors_start[1];" >> $out
+
+echo OK
+
+
