@@ -48,6 +48,7 @@ config MACH_KL25Z
        select HAVE_GPIO_EVENTS
        select FREESCALE_DRIVERS
        select HAVE_UART
+       select HAVE_USB_GENERIC_STACK
 
 endchoice
 

@@ -40,7 +40,7 @@ AOBJ += $(MACH_DIR)/kl25.o
 #endif
 
 ifeq ($(CONFIG_MACH),"kl25z")
-AOBJ += $(MACH_DIR)/clock.o $(MACH_DIR)/gpio.o
+AOBJ += $(MACH_DIR)/clock.o $(MACH_DIR)/gpio.o $(MACH_DIR)/usb-device.o
 LDS = $(MACH_DIR)/bathos.lds
 endif
 
