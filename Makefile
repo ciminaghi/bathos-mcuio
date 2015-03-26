@@ -2,6 +2,7 @@
 # But we must remove the quotes from these Kconfig values
 -include $(CURDIR)/.config
 ARCH ?= $(patsubst "%",%,$(CONFIG_ARCH))
+MACH ?= $(patsubst "%",%,$(CONFIG_MACH))
 BOARD ?= $(patsubst "%",%,$(CONFIG_BOARD))
 PACKAGE = $(patsubst "%",%,$(CONFIG_MACH_PACKAGE))
 CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
@@ -93,7 +94,7 @@ IO_OBJ ?= $(ADIR)/io.o
 AOBJ  += $(BOOT_OBJ) $(IO_OBJ)
 
 # The user can pass USER_CFLAGS if needed
-CFLAGS += $(USER_CFLAGS) -DBATHOS_GIT=\"$(BATHOS_GIT)\" -DMODULE_NAME=$(subst -,_,$(subst /,_,$(subst .o,,$@))) -DHZ=$(HZ) -DTHOS_QUARTZ=$(THOS_QUARTZ)
+CFLAGS += $(USER_CFLAGS) -DMACH=$(MACH) -DBATHOS_GIT=\"$(BATHOS_GIT)\" -DMODULE_NAME=$(subst -,_,$(subst /,_,$(subst .o,,$@))) -DHZ=$(HZ) -DTHOS_QUARTZ=$(THOS_QUARTZ)
 
 # There may or may not be a linker script (arch-unix doesn't)
 LDS   ?= $(wildcard $(ADIR)/bathos$(MODE).lds)
