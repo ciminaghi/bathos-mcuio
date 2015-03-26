@@ -123,6 +123,9 @@ config GPIO_PORTS_WIDTH
        int
        default 8 if ARCH_ATMEGA
 
+config HAVE_USB_GENERIC_STACK
+       bool
+
 config HAVE_UART
        bool
 
