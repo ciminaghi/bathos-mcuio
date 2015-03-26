@@ -1,0 +1,77 @@
+# This file is sourced by scripts/gen_usb_descr when a cdc-acm is asked for
+
+
+cdc-acm_end() {
+    # Update global variables
+    # We use 2 interfaces
+    start_interface=$interface_index
+    interface_index=$((interface_index + 2))
+    control_devs="$control_devs $interface_index"
+    config_descr_len=$((config_descr_len + 9 + 5 + 5 + 4 + 5 + 7 + 9 + 7 + 7))
+    eps="$eps $cdc_acm_tx_ep,$cdc_acm_tx_ep_size,bulk"
+    eps="$eps $cdc_acm_acm_ep,$cdc_acm_acm_ep_size,interrupt"
+    eps="$eps $cdc_acm_rx_ep,$cdc_acm_rx_ep_size,bulk"
+    eval export ep_${cdc_acm_acm_ep}_size=$cdc_acm_acm_ep_size
+    eval export ep_${cdc_acm_acm_ep}_dir=in
+    eval export ep_${cdc_acm_rx_ep}_size=$cdc_acm_rx_ep_size
+    eval export ep_${cdc_acm_rx_ep}_dir=out
+    eval export ep_${cdc_acm_tx_ep}_size=$cdc_acm_tx_ep_size
+    eval export ep_${cdc_acm_tx_ep}_dir=in
+    [ -z "$cdc_acm_index" ] && cdc_acm_index=0 || \
+	cdc_acm_index=$(($cdc_acm_index + 1))
+    finish_funcs="$finish_funcs cdc_acm_create_dev,$cdc_acm_index,$cdc_acm_acm_ep,$cdc_acm_rx_ep,$cdc_acm_tx_ep,$start_interface"
+}
+
+cdc_acm_vars=acm_ep\ acm_ep_size\ acm_ep_interval\ rx_ep\ rx_ep_size\ \
+tx_ep\ tx_ep_size
+
+process_line_cdc-acm() {
+    local v
+
+    for s in $cdc_acm_vars ; do
+	if echo $1 | egrep -q "^[[:space:]]*$s[[:space:]]+.*" ; then
+	    v=$(echo $1 | awk '{print $2;}')
+	    eval export cdc_acm_$s=$v
+	    return 0
+	fi
+    done
+    status_end $1 && { cdc-acm_end && return 0 ||  return 1 ; }
+}
+
+# Automatically invoked at the end of data generation, adds bathos devices
+# $1 -> dev index
+# $2 -> acm ep
+# $3 -> rx ep
+# $4 -> tx ep
+# $5 -> index of first interface associated to this usb-serial
+cdc_acm_create_dev() {
+    echo "/* cdc-acm device usb-serial-$1 */" >> $out
+    echo "" >> $out
+    echo "#include <bathos/usb-cdc-acm.h>" >> $out
+    echo "" >> $out
+    echo "declare_event(usb_cdc_acm_control_event${1});" >> $out
+    echo "declare_event(usb_cdc_acm_data_event${1});" >> $out
+    echo "" >> $out
+    echo "static struct usb_cdc_data usb_cdc_data_$1 = {" >> $out
+    echo -e "\t.control_evt = &evt_usb_cdc_acm_control_event${1}," >> $out
+    echo -e "\t.data_evt = &evt_usb_cdc_acm_data_event${1}," >> $out
+    echo "};" >> $out
+    echo "" >> $out
+    echo "static const char * PROGMEM usb_serial_${1}_eps[] = {" >> $out
+    echo -e "\t\"usb-ep0-if${5}\", \"usb-ep${2}\", \"usb-ep${3}\", \"usb-ep${4}\"" >> $out
+    echo "};" >> $out
+    echo "" >> $out
+    echo "static struct usb_device_proto_platform_data usb_serial_${1}_plat = {" >> $out
+    echo -e "\t.eps=usb_serial_${1}_eps," >> $out
+    echo -e "\t.neps=ARRAY_SIZE(usb_serial_${1}_eps)," >> $out
+    echo -e "\t.proto_specific=&usb_cdc_data_$1," >> $out
+    echo "};" >> $out
+    echo "" >> $out
+    echo "struct bathos_dev  \
+ __attribute__((section(\".bathos_devices\"))) usb_serial_dev_${1} = {" >> $out
+    echo -e "\t.name=\"usb-serial-$1\"," >> $out
+    echo -e "\t.ops=&usb_cdc_acm_dev_ops," >> $out
+    echo -e "\t.platform_data = &usb_serial_${1}_plat," >> $out
+    echo "};" >> $out
+    echo "" >> $out
+}
