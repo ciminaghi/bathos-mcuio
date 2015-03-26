@@ -1,0 +1,96 @@
+# Common functions for usb related scripts
+
+process_line_idle() {
+    if echo $1 | egrep -q "^[[:space:]]*device[[:space:]]*{" ; then
+	[ $device_done -eq 1 ] && \
+	    { echo "Error, more than one device specification" ; return 1 ; }
+	status="device"
+	device_done=1
+	return 0;
+    fi
+    if echo $1 | \
+      egrep -q "^[[:space:]]*function[[:space:]]+[a-zA-Z_-]+[[:space:]]*{"; \
+	then
+	status="func"
+	fname=$(echo $1 | awk '{ print $2; }')
+	ffile=$(dirname $0)/gen_${fname}_usb_${genmode}
+	funcheader=$(dirname $out)/${fname}-${interface_index}.h
+	functions="$functions ${fname}-${interface_index}"
+	funcheaders="$funcheaders $funcheader"
+	rm -f $funcheader
+	[ -f $ffile ] || { echo "Could not find func file $ffile" ; return 1 ; }
+	. $ffile
+	return 0
+    fi
+    echo "Syntax error at line $lnum"
+    return 1
+}
+
+# Returns true if line terminates a status (})
+status_end() {
+    echo $1 | egrep -q "^[[:space:]]*}[[:space:]]*" && status=idle
+}
+
+device_vars=vendor\ device\ class\ subclass\ protocol\ maxpacket0\ manufacturer\ product\ serial
+
+process_line_device() {
+    local v
+
+    for s in $device_vars ; do
+	if echo $* | egrep -q "^[[:space:]]*$s[[:space:]]+.*" ; then
+	    v=$(echo $* | awk '{for (i=2; i<=NF; i++) printf $i " "}' | \
+		sed -e 's/^\(.*\) $/\1/' | tr -d '"')
+	    eval export usb_device_$s=\"$v\"
+	    return 0
+	fi
+    done
+    status_end $1 && \
+	{ device_descriptor_end $tmp_dev_descr_file && return 0 || return 1 ; }
+    echo "Syntax error at line $lnum"
+    return 1
+}
+
+process_line_func() {
+    eval process_line_$fname \"$1\"
+}
+
+read_config_file() {
+    tmp_dev_descr_file=$(tempfile)
+    strfile=$(dirname $out)/strings.h
+    tmp_strfile=$(tempfile)
+    tmp_descr_array_file=$(tempfile)
+    nstrings=1
+    device_done=0
+    fname=
+    lnum=0
+    in_eps=
+    out_eps=
+    interface_index=0
+    # This shall be updated by single functions
+    config_descr_len=0
+    funcheaders=
+    functions=
+
+    [ -f $config_file ] || \
+	{ echo "Could not find config file $config_file" ; exit 2 ; }
+    
+    echo "Reading config file $config_file"
+
+    exec 9<$config_file
+
+    status="idle"
+
+    while read -u 9 line ; do
+        # Skip comments and empty lines
+	lnum=$((lnum + 1))
+        echo $line | grep -q ^#.* && continue
+        echo $line | grep -q ^[[:space:]]*$ && continue
+        eval process_line_${status} \"$line\" || exit 3
+    done
+
+    interfaces=$interface_index
+    # Configuration descriptor is 9 bytes length
+    config_descr_len=$((config_descr_len + 9))
+
+    echo Config file read OK, starting code generation
+}
