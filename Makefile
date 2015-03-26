@@ -216,6 +216,7 @@ $(GPIOS_CAPS_FILE): tasks/%-caps.o: tasks/%.cfg main.o
 
 clean:
 	rm -f bathos.bin bathos *.o *~
+	rm -f drivers/usb-data.* drivers/usb-descriptors.*
 	find . -name '*.o' -o -name '*~' -o -name '*.a' | \
 		grep -v scripts/kconfig | xargs rm -f
 
