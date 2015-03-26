@@ -1,0 +1,25 @@
+# Test config file
+
+device {
+       vendor 0x1234
+       device 0x5678
+       class  2
+       subclass 0
+       protocol 0
+       maxpacket0 8
+       manufacturer Dog\ Hunter
+       product freedog
+       serial 123456
+}
+
+# A cdc-acm function
+function cdc-acm {
+       acm_ep 1
+       acm_ep_size 16
+       acm_ep_interval 64
+       rx_ep 2
+       rx_ep_size 16
+       tx_ep 3
+       tx_ep_size 16
+}
+
