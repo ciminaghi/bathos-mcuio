@@ -24,3 +24,7 @@ endif
 
 config FREESCALE_DRIVERS
        bool
+
+config USB_CONFIG_FILE
+       string "Usb configuration file"
+       default "configs/freedog_usb_config" if KL25Z_BOARD_FREEDOG
