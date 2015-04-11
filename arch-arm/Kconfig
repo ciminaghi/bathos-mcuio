@@ -47,6 +47,7 @@ config MACH_KL25Z
        select HAVE_GPIOS
        select HAVE_GPIO_EVENTS
        select FREESCALE_DRIVERS
+       select HAVE_UART
 
 endchoice
 
