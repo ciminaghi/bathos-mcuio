@@ -1,4 +1,20 @@
 
+config TASK_LOOPBACK_PIPE
+       prompt "Loopback test for configurable pipe"
+       bool
+       help
+         This enables a loopback for a pipe selected via
+	 CONFIG_LOOPBACK_PIPE_NAME
+
+config LOOPBACK_PIPE_NAME
+       prompt "Pipe name for loopback test"
+       depends on TASK_LOOPBACK_PIPE
+       string
+       help
+         This defines a pipe's path for the loopback test.
+	 The pipe is opened rw, and whatever is read from
+	 it is immediately written back.
+
 config TASK_MCUIO
        prompt "Mcuio protocol implementation"
        bool

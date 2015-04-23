@@ -111,6 +111,9 @@ SECTIONS
 		evt_usb_cdc_acm_data_event2_handlers_start = .;
 		*(.evt_usb_cdc_acm_data_event2_handlers);
 		evt_usb_cdc_acm_data_event2_handlers_end = .;
+		evt_loopback_handlers_start = .;
+		*(.evt_loopback_handlers);
+		evt_loopback_handlers_end = .;
 		mcuio_functions_start = .;
 		*(.mcuio_functions);
 		mcuio_functions_end = .;

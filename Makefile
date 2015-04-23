@@ -46,6 +46,9 @@ ifndef TASK-y
   ifeq ($(CONFIG_MCUIO_IRQ_TEST), y)
     TASK-y+=mcuio_irq_test_func.o
   endif
+  ifeq ($(CONFIG_TASK_LOOPBACK_PIPE), y)
+    TASK-y+=task-loopback-pipe.o
+  endif
 endif
 
 ifeq ($(CONFIG_NR_INTERRUPTS),)
