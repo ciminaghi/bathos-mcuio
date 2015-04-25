@@ -4,6 +4,7 @@
 #include <bathos/pipe.h>
 #include <bathos/errno.h>
 #include <bathos/gpio.h>
+#include <bathos/string.h>
 #include <generated/autoconf.h>
 #include <tasks/mcuio.h>
 
