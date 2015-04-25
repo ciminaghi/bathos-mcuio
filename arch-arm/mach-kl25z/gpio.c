@@ -30,7 +30,7 @@ declare_event(gpio_evt);
 
 static void _gpio_irq_handler(int port)
 {
-	int i, j;
+	int j;
 	uint32_t s;
 	uint32_t m;
 	int do_trigger = 0;
