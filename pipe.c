@@ -55,10 +55,12 @@ struct bathos_dev * __attribute__((weak)) bathos_find_dev(struct bathos_pipe *p)
 	return NULL;
 }
 
-void pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt)
+void __pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt,
+			      int immediate)
 {
 	struct bathos_pipe *p;
 	const struct event *e;
+	int stat;
 
 	if (!dev->pipes.next)
 		/* List not even initialized */
@@ -71,9 +73,10 @@ void pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt)
 			e = p->input_ready_event;
 		if (evt == &evt_pipe_output_ready)
 			e = p->output_ready_event;
-		if (trigger_event(e, p) < 0) {
+		stat = immediate ? trigger_event_immediate(e, p):
+			trigger_event(e, p);
+		if (stat < 0)
 			printf("WARN: missing pipe evt\n");
-		}
 	}
 }
 
