@@ -8,6 +8,7 @@
 #define __PWM_H__
 
 #include <bathos/stdio.h>
+#include <bathos/string.h>
 #include <arch/bathos-arch.h>
 
 extern const uint32_t num_pwm;   /* number of supported pwm's */
