@@ -8,13 +8,13 @@
 #ifndef __BATHOS_ARCH_H__
 #define __BATHOS_ARCH_H__
 
+#define ARCH_NEEDS_INTERRUPTS_FOR_JIFFIES 1
+#define ARCH_IS_HARVARD 1
+
 #include <stddef.h>
 #include <bathos/string.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
-
-#define ARCH_NEEDS_INTERRUPTS_FOR_JIFFIES 1
-#define ARCH_IS_HARVARD 1
 
 #define interrupt_disable(flags) \
     do {			 \

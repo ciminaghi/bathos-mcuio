@@ -124,12 +124,6 @@ static inline int __copy_dword(uint32_t *dst, const uint32_t *src)
 	return 0;
 }
 
-static inline void *memcpy_p(void *dst, const void *src, int size)
-{
-	return memcpy(dst, src, size);
-}
-
-
 static inline const struct mcuio_range_ops *
 __get_range_ops(const struct mcuio_range *r,
 		struct mcuio_range_ops *out)
