@@ -85,6 +85,7 @@ int bathos_dev_push_chars(struct bathos_dev *dev, const char *buf, int len)
 	memcpy(&data->d.cb.buf[data->d.cb.head], buf, l);
 	data->d.cb.head = (data->d.cb.head + l) & (data->d.cb.size - 1);
 	len -= l;
+	buf += l;
 	if (!l)
 		goto end;
 	out = l;
