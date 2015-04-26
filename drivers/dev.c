@@ -11,6 +11,7 @@
 #include <bathos/pipe.h>
 #include <bathos/allocator.h>
 #include <bathos/circ_buf.h>
+#include <bathos/string.h>
 
 #define UART_DEFAULT_BUF_SIZE 16
 
@@ -44,8 +45,8 @@ static inline struct bathos_ll_dev_ops *__get_ops(struct bathos_dev_data *data,
 }
 
 #else
-static inline struct bathos_ll_dev_ops *__get_ops(struct bathos_dev_data *data,
-						  struct bathos_ll_dev_ops *ops)
+static inline const struct bathos_ll_dev_ops *
+__get_ops(struct bathos_dev_data *data, struct bathos_ll_dev_ops *ops)
 {
 	return data->ops;
 }
@@ -109,7 +110,8 @@ static int __allocate_internal_buf(struct bathos_dev_data *data)
 int bathos_dev_open(struct bathos_pipe *pipe)
 {
 	struct bathos_dev_data *data = pipe->dev->priv;
-	struct bathos_ll_dev_ops *ops, __ops;
+	const struct bathos_ll_dev_ops *ops;
+	struct bathos_ll_dev_ops __ops;
 	int stat;
 
 	/* Mode is circ buf by default on open */
@@ -161,7 +163,8 @@ int bathos_dev_read(struct bathos_pipe *pipe, char *buf, int len)
 int bathos_dev_write(struct bathos_pipe *pipe, const char *buf, int len)
 {
 	struct bathos_dev_data *data = pipe->dev->priv;
-	struct bathos_ll_dev_ops *ops, __ops;
+	const struct bathos_ll_dev_ops *ops;
+	struct bathos_ll_dev_ops __ops;
 	int i, stat = 0;
 
 	ops = __get_ops(data, &__ops);
@@ -179,7 +182,8 @@ int bathos_dev_close(struct bathos_pipe *pipe)
 	int stat;
 	struct bathos_dev_data *data = pipe->dev->priv;
 
-	struct bathos_ll_dev_ops *ops, __ops;
+	const struct bathos_ll_dev_ops *ops;
+	struct bathos_ll_dev_ops __ops;
 	ops = __get_ops(data, &__ops);
 	if (pipe->mode & BATHOS_MODE_INPUT) {
 		stat = ops->rx_disable(data->ll_priv);
@@ -196,7 +200,8 @@ int bathos_dev_close(struct bathos_pipe *pipe)
 
 static int __switch_to_cbuf(struct bathos_dev_data *data, int bufsize)
 {
-	struct bathos_ll_dev_ops *ops, __ops;
+	const struct bathos_ll_dev_ops *ops;
+	struct bathos_ll_dev_ops __ops;
 	int stat;
 
 	ops = __get_ops(data, &__ops);
@@ -239,7 +244,8 @@ int bathos_dev_ioctl(struct bathos_pipe *pipe,
 		return __switch_to_cbuf(data, *(int *)iocdata->data);
 	default:
 	{
-		struct bathos_ll_dev_ops *ops, __ops;
+		const struct bathos_ll_dev_ops *ops;
+		struct bathos_ll_dev_ops __ops;
 
 		ops = __get_ops(data, &__ops);
 		if (ops->ioctl)
