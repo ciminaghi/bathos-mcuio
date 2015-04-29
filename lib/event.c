@@ -15,6 +15,11 @@
 #include <bathos/bitops.h>
 #include <bathos/ffs.h>
 
+#ifdef CONFIG_INTERRUPT_EVENTS
+#include <bathos/irq.h>
+#include <bathos/irq-controller.h>
+#endif
+
 #define PENDING_EVENTS_POOL_SIZE 64
 
 /*
@@ -201,9 +206,15 @@ int trigger_interrupt_event(int evno)
 	if (evno >= CONFIG_NR_INTERRUPTS)
 		return -EINVAL;
 
-	/* Start low level handler */
+	/* Start low level handler if one is available */
 	e = &interrupt_events_start[evno];
 	__handle_event(e, NULL, 1);
+
+	/*
+	 * Acknowledge and mask interrupt until the high level handler is
+	 * done with it
+	 */
+	bathos_mask_ack_irq(evno);
 
 	/* And get ready for executing high level handler */
 	set_bit(evno, ie_pending_flags);
@@ -213,26 +224,38 @@ int trigger_interrupt_event(int evno)
 static void handle_interrupt_events(void)
 {
 	int w;
-	static unsigned long tmp[PENDING_FLAGS_SZ];
-	unsigned long flags;
-
-	interrupt_disable(flags);
-	memcpy(tmp, ie_pending_flags, sizeof(tmp));
-	memset(&ie_pending_flags, 0, sizeof(ie_pending_flags));
-	interrupt_restore(flags);
 
 	for (w = 0; w < CONFIG_NR_INTERRUPTS; w+=BITS_PER_LONG) {
 		int k = BITS_TO_LONGS(w);
-		unsigned long *l = &tmp[k];
+		unsigned long *l = &ie_pending_flags[k];
 		const struct event *e = &interrupt_events_start[k];
 
 		do {
-			int i = ffs(*l);
+			int i = ffs(*l), irq;
+
 			if (!i)
 				break;
+
+			/* i is 1 + the index of the first bit set in l */
 			i--;
-			__handle_event(e + i, NULL, 0);
-			*l &= ~BIT_MASK(i);
+			irq = i + w;
+
+			/*
+			 * Run the high level handler (if available) in
+			 * thread context
+			 */
+			__handle_event(e + irq, NULL, 0);
+
+			/*
+			 * Clear event flag: this __must__ be atomic:
+			 * we must avoid races in case another interrupt whose
+			 * pending bit belongs to *l occurs after reading *l,
+			 * but before writing the new *l.
+			 */
+			clear_bit(i, l);
+
+			/* We're finally ready for unmasking the irq line */
+			bathos_unmask_irq(irq);
 		} while(1);
 	}
 }
