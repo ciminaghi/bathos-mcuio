@@ -30,7 +30,10 @@ struct usb_device_controller USB_DEVICE_CONTROLLER_NAME(0) = {
 	.plat = &controller_platdata,
 };
 
-void bathos_ll_int_handler_name(IRQ_USBOTG)(struct event_handler_data *data)
+/*
+ * Seems to work with handler in non-interrupt context
+ */
+void bathos_int_handler_name(IRQ_USBOTG)(struct event_handler_data *data)
 {
 	usb_device_freescale_irq_handler(&USB_DEVICE_CONTROLLER_NAME(0));
 }
