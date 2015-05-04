@@ -108,6 +108,9 @@ LDFLAGS += $(patsubst %.lds, -T %.lds, $(LDS))
 # Each architecture can have specific drivers
 LDFLAGS += $(LIBARCH)
 
+# Add $(LIBDRIVERS) because console_init() console_putc() could be stored there
+LDFLAGS += $(LIBDRIVERS)
+
 # This is currently needed by the bathos allocator
 # Default value of BITS_PER_LONG is 32, can be overridden in arch makefile
 BITS_PER_LONG ?= 32

@@ -1,4 +1,5 @@
 #include <bathos/stdio.h>
+#include <bathos/init.h>
 #include <bathos/pipe.h>
 
 struct bathos_pipe *bathos_stdout;
@@ -12,8 +13,35 @@ struct bathos_pipe *bathos_stdin;
 void console_putc(int c)
 {
 }
+
+#ifdef CONFIG_EARLY_CONSOLE
+int console_early_init(void)
+{
+	return 0;
+}
+#endif /* CONFIG_EARLY_CONSOLE */
+
+#else /* !CONFIG_CONSOLE_NULL */
+
+#ifdef CONFIG_EARLY_CONSOLE
+int console_early_init(void)
+{
+	return console_init();
+}
+#else
+rom_initcall(console_init);
 #endif
 
+#endif
+
+#ifdef CONFIG_STDOUT_CONSOLE
+void __attribute__((weak)) putc(int c)
+{
+	if (c == '\n')
+		console_putc('\r');
+	console_putc(c);
+}
+#else
 void __attribute__((weak)) putc(int c)
 {
 	if (c == '\n')
@@ -25,6 +53,37 @@ void __attribute__((weak)) putc(int c)
 		return;
 	pipe_write(bathos_stdout, (char *)&c, 1);
 }
+#endif
+
+#ifndef CONFIG_STDOUT_CONSOLE
+static inline void __stdout_open(void)
+{
+	bathos_stdout = pipe_open(CONFIG_STDOUT, BATHOS_MODE_OUTPUT, NULL);
+}
+#else
+static inline void __stdout_open(void)
+{
+}
+#endif
+
+#ifndef CONFIG_STDIN_CONSOLE
+static inline void __stdin_open(void)
+{
+	bathos_stdin = pipe_open(CONFIG_STDIN, BATHOS_MODE_INPUT, NULL);
+}
+#else
+static inline void __stdin_open(void)
+{
+}
+#endif
+
+static int stdio_init(void)
+{
+	__stdout_open();
+	__stdin_open();
+	return 0;
+}
+core_initcall(stdio_init);
 
 int puts(const char *s)
 {

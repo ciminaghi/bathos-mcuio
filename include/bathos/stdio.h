@@ -55,6 +55,7 @@ extern struct bathos_pipe *bathos_stdout;
 extern struct bathos_pipe *bathos_stdin;
 
 extern void console_putc(int c);
+extern int console_init(void);
 
 #if defined CONFIG_EARLY_CONSOLE
 extern int console_early_init(void);

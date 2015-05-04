@@ -76,14 +76,10 @@ void bitbang_puts(char *buf)
 
 #if defined CONFIG_CONSOLE_DEBUG_BITBANG
 
-#if defined CONFIG_EARLY_CONSOLE
-int console_early_init(void)
+int console_init(void)
 {
 	return __init_io();
 }
-#else /* !CONFIG_EARLY_CONSOLE */
-core_initcall(__init_io);
-#endif
 
 void console_putc(int c)
 {
