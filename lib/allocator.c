@@ -236,7 +236,8 @@ static inline void *__find_free_buf(int order, int *out_index)
 		if (v[i] & mask[i]) {
 			int mask_ffs = __order_to_bitmap_mask_ffs(order);
 
-			bit = (ffs(v[i] & mask[i]) - 1) - mask_ffs;
+			bit = (ffs(v[i] & mask[i]) - 1) - mask_ffs +
+			    i * BITS_PER_LONG;
 			pr_debug("__find_free_buf: bit %d is set\n", bit);
 			pr_debug("ffs(mask[%d]) = %d\n", order, mask_ffs);
 			index = __bit_to_index(bit, order);
