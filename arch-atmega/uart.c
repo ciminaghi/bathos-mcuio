@@ -155,7 +155,7 @@ static int baudrate_handler(int argc, char *argv[])
 		}
 		else {
 			baud_idx = i;
-			uart_set_baudrate(baud[i].val);
+			atmega_uart_set_baudrate(baud[i].val);
 		}
 	}
 
