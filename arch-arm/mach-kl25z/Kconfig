@@ -89,6 +89,7 @@ config STDOUT
        default "uart0" if STDOUT_UART0
        default "uart1" if STDOUT_UART1
        default "uart2" if STDOUT_UART2
+       default "usb-serial-0" if STDOUT_USB_UART
 
 choice
 	prompt "Index of stdin UART"
@@ -114,4 +115,5 @@ config STDIN
        default "uart0" if STDIN_UART0
        default "uart1" if STDIN_UART1
        default "uart2" if STDIN_UART2
+       default "usb-serial-0" if STDIN_USB_UART
 
