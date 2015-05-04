@@ -5,7 +5,7 @@
 #include <bathos/bathos.h>
 #include <bathos/pipe.h>
 
-extern struct bathos_dev_ops PROGMEM bitbang_dev_ops;
+extern const struct bathos_dev_ops PROGMEM bitbang_dev_ops;
 
 
 #endif
