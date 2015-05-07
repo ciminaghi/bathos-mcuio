@@ -8,6 +8,7 @@
 #include <mach/hw.h>
 #include <bathos/freescale-uart.h>
 #include <bathos/gpio.h>
+#include <bathos/init.h>
 
 #define UART0_BASE 0x4006a000
 #define UART1_BASE 0x4006b000
@@ -144,3 +145,16 @@ void console_putc(int c)
 	freescale_uart_console_putc(UART2_BASE, c);
 }
 #endif
+
+#ifdef CONFIG_MCUIO_BITBANG_I2C
+
+static int kl25z_mcuio_bitbang_i2c_init(void)
+{
+	/* init sda and scl lines, set them to 1 level */
+	gpio_dir_af(CONFIG_MCUIO_BITBANG_I2C_SDA, 1, 1, 1);
+	gpio_dir_af(CONFIG_MCUIO_BITBANG_I2C_SCL, 1, 1, 1);
+}
+
+device_initcall(kl25z_mcuio_bitbang_i2c_init);
+
+#endif /* CONFIG_MCUIO_BITBANG_I2C */
