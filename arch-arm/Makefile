@@ -18,7 +18,7 @@ CFLAGS += -I$(MACH_DIR)
 ifneq ($(CONFIG_MACH),"none")
 BOOT_OBJ = $(MACH_DIR)/init.o
 endif
-BOOT_OBJ += $(ADIR)/boot.o
+BOOT_OBJ += $(ADIR)/boot.o $(ADIR)/idle.o
 
 # No io.o for this arch
 IO_OBJ =
