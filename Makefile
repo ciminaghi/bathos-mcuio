@@ -84,7 +84,7 @@ STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
-export CC OBJDUMP OBJCOPY LD
+export CC OBJDUMP OBJCOPY LD ARCH
 
 # host gcc
 HOSTCC ?= gcc
