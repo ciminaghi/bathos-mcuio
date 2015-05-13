@@ -33,7 +33,7 @@ static void errorexit(char **argv, char *reason)
 
 int main(int argc, char **argv)
 {
-	char *port, *reply;
+	char *port;
 	int fd, i, nline, clk, verbose, binary;
 	struct lpc_dev *dev;
 	char s[128]; /* string */
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 
 	/* Read data to stdout */
 	sprintf(s, "R %li %li\r\n", start, len);
-	reply = lpc_write_c(fd, s, 2); /* echo and error code */
+	(void)lpc_write_c(fd, s, 2); /* echo and error code */
 	if (!binary) printf("begin 644 LPC%i.data\n", dev->name);
 	nline = 0;
 	while (lpc_fd_gets(fd, s, 80) > 0) {
