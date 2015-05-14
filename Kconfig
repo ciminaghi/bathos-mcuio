@@ -23,6 +23,7 @@ config ARCH_VERSATILE
 
 config ARCH_UNIX
 	bool "Unix -- run in a process"
+	select HAVE_UART
 	help
 	  Build
 
