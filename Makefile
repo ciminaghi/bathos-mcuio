@@ -222,6 +222,8 @@ clean:
 	rm -f drivers/usb-data.* drivers/usb-descriptors.*
 	find . -name '*.o' -o -name '*~' -o -name '*.a' | \
 		grep -v scripts/kconfig | xargs rm -f
+	rm -f scripts/allocator_aux_gen
+	rm -f lib/allocator-tables.o lib/allocator-tables.c
 
 # following targets from Makefile.kconfig
 silentoldconfig:
