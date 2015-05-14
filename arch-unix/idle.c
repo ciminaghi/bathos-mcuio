@@ -32,17 +32,8 @@ void idle(void)
 	struct timeval next_timeout;
 	fd_set __rdfds = rd_fdset;
 
-	unsigned long now, next;
-	void *data;
-
-	now = jiffies;
-	if (sys_timer_get_next_tick(&next, &data) < 0)
-		/* No next tick */
-		return;
-	if (time_before(next, now))
-		goto end;
-	next_timeout.tv_usec = ((1000000 * (next - now)) / HZ) % 1000000;
-	next_timeout.tv_sec = ((1000000 * (next - now)) / HZ) / 1000000;
+	next_timeout.tv_usec = ((1000000) / HZ*2) % 1000000;
+	next_timeout.tv_sec = ((1000000) / HZ*2) / 1000000;
 	stat = select(nfds, &__rdfds, NULL, NULL, &next_timeout);
 	if (stat < 0 && bathos_errno == EINTR)
 		return ;
@@ -61,7 +52,6 @@ void idle(void)
 		}
 		return;
 	}
-end:
 	trigger_event(&event_name(hw_timer_tick), NULL);
 }
 
