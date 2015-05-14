@@ -28,3 +28,11 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+void console_putc(int c)
+{
+	write(1, &c, 1);
+}
+
+int console_init(void)
+{
+}
