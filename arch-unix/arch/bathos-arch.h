@@ -6,4 +6,6 @@ extern unsigned long get_jiffies(void);
 
 #define __get_jiffies  get_jiffies
 
+#define PROGMEM
+
 #endif /* __POSIX_ARCH_H__ */
