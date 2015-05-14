@@ -8,6 +8,7 @@ fmt=$2
 out=$3
 
 [ "$ARCH" = arm ] && BARG="-B $ARCH"
+[ "$ARCH" = unix ] && BARG="-B i386"
 
 f=$(tempfile)
 
