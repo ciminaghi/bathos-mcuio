@@ -6,6 +6,7 @@
 #include <bathos/bathos.h>
 #include <bathos/stdio.h>
 #include <bathos/init.h>
+#include <bathos/pipe.h>
 #include <arch/hw.h>
 
 int stdio_init(void)
