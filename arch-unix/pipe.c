@@ -11,6 +11,10 @@
 #define BATHOS_UNIX_FREE_FD -1
 #define BATHOS_UNIX_RESERVED_FD -2
 
+#ifndef MAX_BATHOS_PIPES
+#define MAX_BATHOS_PIPES 32
+#endif
+
 static struct arch_unix_pipe_data priv[MAX_BATHOS_PIPES] = {
 	[0 ... MAX_BATHOS_PIPES - 1] = {
 		.fd = BATHOS_UNIX_FREE_FD,
