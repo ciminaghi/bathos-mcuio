@@ -87,8 +87,20 @@ extern int trigger_event_immediate(const struct event *, void *data);
 #ifdef CONFIG_INTERRUPT_EVENTS
 /* Trigger an interrupt event */
 extern int trigger_interrupt_event(int n);
+/*
+ * Trigger n interrupt events at the same time
+ * (n must be a multiple of BITS_PER_LONG)
+ */
+extern int trigger_multiple_interrupt_events(int start, unsigned long *e,
+					     int numlongs);
 #else
 static inline int trigger_interrupt_event(int n)
+{
+	return -ENOSYS;
+}
+
+static inline int trigger_multiple_interrupt_events(int start, unsigned long *e,
+						    int numlongs)
 {
 	return -ENOSYS;
 }
