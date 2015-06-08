@@ -25,6 +25,10 @@ ifeq ($(CONFIG_FREESCALE_DRIVERS),y)
   DRV_OBJS += drivers/usb-device-freescale.o
 endif
 
+ifeq ($(CONFIG_AMBA_DRIVERS),y)
+  DRV_OBJS += drivers/pl011-uart.o
+endif
+
 $(LIBDRIVERS): $(DRV_OBJS)
 	$(AR) r $@ $(DRV_OBJS)
 
