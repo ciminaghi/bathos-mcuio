@@ -16,7 +16,7 @@ static int pts_init(void)
 		if (p->init) p->init(p->arg);
 	}
 	for (p = __task_begin; p < __task_end; p++) {
-		p->release += now + 100;
+		p->release += now + HZ;
 		if (sys_timer_enqueue_tick(p->release - now, p) < 0)
 			return -1;
 	}
