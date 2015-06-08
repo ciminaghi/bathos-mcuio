@@ -1,3 +1,0 @@
-
-# The default task list is very limited...
-TASK-y ?= task-uart.o
