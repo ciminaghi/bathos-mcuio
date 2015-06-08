@@ -4,6 +4,11 @@ ifeq ($(CONFIG_CPU),"cortex-m0")
 CFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 CPU_DIR = $(ADIR)/cpu-cortex-m/
 endif
+
+ifeq ($(CONFIG_CPU),"arm926ej-s")
+CPU_DIR = $(ADIR)/cpu-arm926ej-s
+endif
+
 ASFLAGS = $(CFLAGS)
 LDFLAGS = -nostdlib -nostartfiles -Wl,--defsym -Wl,regs=0
 
@@ -27,7 +32,11 @@ IO_OBJ =
 LIBARCH = $(ADIR)/libarch.a
 LIBARCH_OBJS = $(ADIR)/init.o
 
-AOBJ += $(CPU_DIR)/vectable.o $(CPU_DIR)/nvic.o
+AOBJ += $(CPU_DIR)/vectable.o
+
+ifeq ($(CONFIG_CPU),"cortex-m0")
+AOBJ += $(CPU_DIR)/nvic.o
+endif
 
 ifeq ($(CONFIG_HAS_CORTEXM_SYSTICKTMR),y)
 CFLAGS += -DARCH_NEEDS_INTERRUPT_FOR_JIFFIES=1

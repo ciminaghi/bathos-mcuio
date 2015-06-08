@@ -9,6 +9,9 @@ config CPU_CORTEX_M0_PLUS
 config CPU_CORTEX_M3
        bool
 
+config CPU_ARM926EJS
+       bool
+
 config HAS_MEMORY_MODE
 	bool
 
@@ -60,6 +63,7 @@ config CPU
        string
        default "cortex-m0" if CPU_CORTEX_M0 || CPU_CORTEX_M0_PLUS
        default "cortex-m3" if CPU_CORTEX_M3
+       default "arm926ej-s" if CPU_ARM926EJS
 
 config MACH
        default "none" if MACH_NONE
