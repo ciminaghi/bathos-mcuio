@@ -44,15 +44,21 @@ CFLAGS += -DARCH_NEEDS_INTERRUPT_FOR_JIFFIES=1
 AOBJ += $(CPU_DIR)/systicktmr.o
 endif
 
-#ifeq ($(CONFIG_KL25Z_UART),y)
-AOBJ += $(MACH_DIR)/kl25.o
-#endif
-
 ifeq ($(CONFIG_MACH),"kl25z")
-AOBJ += $(MACH_DIR)/clock.o $(MACH_DIR)/gpio.o $(MACH_DIR)/usb-device.o
+AOBJ += $(MACH_DIR)/kl25.o $(MACH_DIR)/clock.o $(MACH_DIR)/gpio.o \
+	$(MACH_DIR)/usb-device.o
+LDS = $(MACH_DIR)/bathos.lds
+endif
+
+ifeq ($(CONFIG_MACH),"versatile")
+AOBJ += $(MACH_DIR)/irq.o $(MACH_DIR)/timer.o $(MACH_DIR)/versatile-pb.o
 LDS = $(MACH_DIR)/bathos.lds
 endif
 
 
+
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
+
+run_versatile: bathos.bin
+	qemu-system-arm -M versatilepb -m 128M -kernel bathos.bin -nographic

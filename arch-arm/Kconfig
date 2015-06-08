@@ -23,6 +23,7 @@ config CORTEXM_SYSTICKTMR_USE_EXT_CLOCK
 
 config NR_INTERRUPTS
        int
+       default 64 if MACH_VERSATILE
        default 32
 
 config STACK_ADDR
@@ -53,11 +54,20 @@ config MACH_KL25Z
        select HAVE_UART
        select HAVE_USB_GENERIC_STACK
 
+config MACH_VERSATILE
+       bool "ARM Versatile machine (qemu)"
+       select CPU_ARM926EJS
+       select AMBA_DRIVERS
+       select HAVE_UART
+       help
+         build for qemu versatile machine
+
 endchoice
 
 config THOS_QUARTZ
        int "CPU clock frequency"
        default 12000000 if MACH_KL25Z
+       default 16000000 if MACH_VERSATILE
 
 config CPU
        string
@@ -67,10 +77,15 @@ config CPU
 
 config MACH
        default "none" if MACH_NONE
+       default "versatile" if MACH_VERSATILE
        default "kl25z" if MACH_KL25Z
 
 if MACH_KL25Z
 	source arch-arm/mach-kl25z/Kconfig
+endif
+
+if MACH_VERSATILE
+	source arch-arm/mach-versatile/Kconfig
 endif
 
 choice

@@ -10,3 +10,7 @@
 #if defined CONFIG_CPU_ARM926EJS
 #include <arch/bathos-arch-arm926ej-s.h>
 #endif
+
+#if defined CONFIG_MACH_VERSATILE
+#include <mach/jiffies.h>
+#endif

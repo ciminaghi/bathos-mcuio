@@ -230,6 +230,7 @@ config HZ
        int "Number of timer ticks in a second"
        default 250 if ARCH_ATMEGA
        default 100 if ARCH_ARM
+       default 62500 if MACH_VERSATILE
 
 
    source "tasks/Kconfig"
