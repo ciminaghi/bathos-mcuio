@@ -93,6 +93,10 @@ if MACH_VERSATILE
 	source arch-arm/mach-versatile/Kconfig
 endif
 
+if MACH_NRF51822
+	source arch-arm/mach-nrf51822/Kconfig
+endif
+
 choice
 	prompt "Target board for bathos"
 

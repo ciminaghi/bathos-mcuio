@@ -1,0 +1,8 @@
+config  HFCLK
+	int "nrf5x high frequency clock"
+	default 16000000 if MACH_NRF51822
+
+config  LFCLK
+	int "nrf5x low frequency clock"
+	default 32768 if MACH_NRF51822
+

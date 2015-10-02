@@ -55,6 +55,10 @@ AOBJ += $(MACH_DIR)/irq.o $(MACH_DIR)/timer.o $(MACH_DIR)/versatile-pb.o
 LDS = $(MACH_DIR)/bathos.lds
 endif
 
+ifeq ($(CONFIG_MACH),"nrf51822")
+LDS = $(MACH_DIR)/bathos.lds
+endif
+
 
 
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
