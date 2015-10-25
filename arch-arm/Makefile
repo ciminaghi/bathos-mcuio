@@ -20,6 +20,11 @@ MACH_DIR = $(ADIR)/mach-$(shell echo $(CONFIG_MACH))
 
 CFLAGS += -I$(MACH_DIR)
 
+ifneq ($(FAMILY),)
+FAMILY_DIR = $(ADIR)/family-$(FAMILY)
+CFLAGS += -I$(FAMILY_DIR)/
+endif
+
 ifneq ($(CONFIG_MACH),"none")
 BOOT_OBJ = $(MACH_DIR)/init.o
 endif
@@ -57,6 +62,7 @@ endif
 
 ifeq ($(CONFIG_MACH),"nrf51822")
 LDS = $(MACH_DIR)/bathos.lds
+CFLAGS += -I$(FAMILY_SUBDIR)/family
 endif
 
 
