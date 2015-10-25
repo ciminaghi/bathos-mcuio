@@ -4,6 +4,7 @@
 ARCH ?= $(patsubst "%",%,$(CONFIG_ARCH))
 MACH ?= $(patsubst "%",%,$(CONFIG_MACH))
 BOARD ?= $(patsubst "%",%,$(CONFIG_BOARD))
+FAMILY ?= $(patsubst "%",%,$(CONFIG_FAMILY))
 PACKAGE = $(patsubst "%",%,$(CONFIG_MACH_PACKAGE))
 CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
 MODE ?= $(patsubst "%",%,$(CONFIG_MEMORY_MODE))
