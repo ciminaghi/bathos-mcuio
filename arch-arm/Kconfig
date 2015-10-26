@@ -73,6 +73,7 @@ config MACH_NRF51822
        bool "Nordic nrf51822"
        select CPU_CORTEX_M0
        select FAMILY_NRF5X
+       select NRF5X_DRIVERS
 
 endchoice
 
