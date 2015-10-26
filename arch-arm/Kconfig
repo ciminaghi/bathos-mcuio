@@ -102,8 +102,8 @@ if MACH_VERSATILE
 	source arch-arm/mach-versatile/Kconfig
 endif
 
-if MACH_NRF51822
-	source arch-arm/mach-nrf51822/Kconfig
+if FAMILY_NRF5X
+	source arch-arm/family-nrf5x/Kconfig
 endif
 
 choice
