@@ -34,6 +34,13 @@ config VECTABLE_ALIGNMENT
        int
        default 64
 
+config FAMILY_NRF5X
+       bool
+
+config FAMILY
+       string
+       default "nrf5x" if FAMILY_NRF5X
+
 choice
 	prompt "SOC to build for"
 
@@ -65,6 +72,7 @@ config MACH_VERSATILE
 config MACH_NRF51822
        bool "Nordic nrf51822"
        select CPU_CORTEX_M0
+       select FAMILY_NRF5X
 
 endchoice
 
