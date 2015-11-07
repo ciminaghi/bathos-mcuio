@@ -119,11 +119,17 @@ config BOARD_FREEDOG
        depends on MACH_KL25Z
         prompt "Build for a KL25Z based freedog board"
 
+config BOARD_RB_51822
+        bool
+	depends on MACH_NRF51822
+	 prompt "Builld for a Redbear NRF51822 board"
+
 endchoice
 
 config BOARD
        default "none" if BOARD_NONE
        default "freedog" if BOARD_FREEDOG
+       default "rb-nrf51822" if BOARD_RB_51822
 
 
 config ENDLESS_LOOP_AT_START
