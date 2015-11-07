@@ -116,6 +116,7 @@ config BOARD_NONE
 
 config BOARD_FREEDOG
        bool
+       depends on MACH_KL25Z
         prompt "Build for a KL25Z based freedog board"
 
 endchoice
