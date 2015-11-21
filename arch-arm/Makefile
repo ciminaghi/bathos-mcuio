@@ -66,7 +66,7 @@ endif
 ifeq ($(CONFIG_MACH),"nrf51822")
 LDS = $(MACH_DIR)/bathos.lds
 CFLAGS += -I$(FAMILY_SUBDIR)/family
-AOBJ += $(MACH_DIR)/nrf51822.o
+AOBJ += $(MACH_DIR)/nrf51822.o $(MACH_DIR)/quirks.o
 endif
 
 

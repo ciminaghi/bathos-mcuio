@@ -11,6 +11,7 @@ SECTIONS
 		rom_vectors = .;
 		*(.vectors);
 		*(.text.romboot)
+		*(.text.romboot_quirks)
 		*(.text.romboot_common)
 		*(.text)
 		mcuio_functions_start = .;
