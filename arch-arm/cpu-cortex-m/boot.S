@@ -21,7 +21,7 @@
 .thumb_func
 /* We start here */
 _romboot_start:
-#if 1 /* defined CONFIG_OPENSDA_DEBUG */
+#if defined CONFIG_ENDLESS_LOOP_AT_START
 	b       _romboot_start
 #endif
 
