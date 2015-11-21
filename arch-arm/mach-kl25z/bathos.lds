@@ -13,6 +13,7 @@ SECTIONS
 		*(.flash_config)
 		. = 0x410;
 		*(.text.romboot)
+		*(.text.romboot_common)
 		*(.text)
 		mcuio_functions_start = .;
 		*(.mcuio_functions);
