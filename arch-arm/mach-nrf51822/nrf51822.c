@@ -55,6 +55,18 @@ void bathos_ll_int_handler_name(UART0_IRQ)(struct event_handler_data *data)
 	nrf5x_uart_irq_handler(&__udev0);
 }
 
+#ifdef CONFIG_CONSOLE_UART
+void console_putc(int c)
+{
+	return nrf5x_console_putc(&uart0_plat, c);
+}
+
+int console_init(void)
+{
+	return nrf5x_uart_console_init(&uart0_plat);
+}
+#endif
+
 #if defined CONFIG_NRF5X_RADIO_MASTER || defined CONFIG_NRF5X_RADIO_SLAVE
 
 static union {
