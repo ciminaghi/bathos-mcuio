@@ -37,9 +37,6 @@ SECTIONS
 	.data 0x20000000: AT(_erom) {
 		_sdata = .;
 		*(.data);
-		bathos_devices_start =  .;
-		*(.bathos_devices);
-		bathos_devices_end = .;
 		_edata = .;
 	}
 

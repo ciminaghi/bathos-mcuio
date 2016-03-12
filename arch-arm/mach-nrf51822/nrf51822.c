@@ -35,8 +35,13 @@ void bathos_ll_int_handler_name(RTC0_IRQ)(struct event_handler_data *data)
 }
 
 static const struct nrf5x_uart_platform_data uart0_plat = {
+#if 0
 	.tx_pin = 9,
 	.rx_pin = 11,
+#else
+	.tx_pin = 6,
+	.rx_pin = 8,
+#endif
 	.irq = UART0_IRQ,
 	.base = UART0_BASE,
 };
