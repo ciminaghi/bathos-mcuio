@@ -5,6 +5,11 @@ CFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 CPU_DIR = $(ADIR)/cpu-cortex-m/
 endif
 
+ifeq ($(CONFIG_CPU),"cortex-m4")
+CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft
+CPU_DIR = $(ADIR)/cpu-cortex-m/
+endif
+
 ifeq ($(CONFIG_CPU),"arm926ej-s")
 CPU_DIR = $(ADIR)/cpu-arm926ej-s
 endif
@@ -40,6 +45,10 @@ LIBARCH_OBJS = $(ADIR)/init.o
 AOBJ += $(CPU_DIR)/vectable.o
 
 ifeq ($(CONFIG_CPU),"cortex-m0")
+AOBJ += $(CPU_DIR)/nvic.o
+endif
+
+ifeq ($(CONFIG_CPU),"cortex-m4")
 AOBJ += $(CPU_DIR)/nvic.o
 endif
 
