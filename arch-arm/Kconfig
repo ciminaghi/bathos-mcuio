@@ -82,6 +82,12 @@ config MACH_NRF51822
        select NRF5X_DRIVERS
        select HAVE_UART
 
+config MACH_STM32F469X
+       bool "ST microelectronics STM32F469X"
+       select CPU_CORTEX_M4F
+       help
+         build for an STM32F469X machine
+
 endchoice
 
 config THOS_QUARTZ
@@ -102,6 +108,7 @@ config MACH
        default "versatile" if MACH_VERSATILE
        default "kl25z" if MACH_KL25Z
        default "nrf51822" if MACH_NRF51822
+       default "stm32f469x" if MACH_STM32F469X
 
 if MACH_KL25Z
 	source arch-arm/mach-kl25z/Kconfig
