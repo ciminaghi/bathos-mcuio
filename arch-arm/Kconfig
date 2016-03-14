@@ -139,12 +139,18 @@ config BOARD_RB_51822
 	depends on MACH_NRF51822
 	 prompt "Builld for a Redbear NRF51822 board"
 
+config BOARD_STAR
+       bool
+       depends on MACH_STM32F469X
+        prompt "Build for a START board"
+
 endchoice
 
 config BOARD
        default "none" if BOARD_NONE
        default "freedog" if BOARD_FREEDOG
        default "rb-nrf51822" if BOARD_RB_51822
+       default "star" if BOARD_STAR
 
 
 config ENDLESS_LOOP_AT_START
