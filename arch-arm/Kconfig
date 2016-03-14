@@ -12,6 +12,9 @@ config CPU_CORTEX_M3
 config CPU_CORTEX_M4
        bool
 
+config CPU_CORTEX_M4F
+       bool
+
 config CPU_ARM926EJS
        bool
 
@@ -91,6 +94,7 @@ config CPU
        default "cortex-m0" if CPU_CORTEX_M0 || CPU_CORTEX_M0_PLUS
        default "cortex-m3" if CPU_CORTEX_M3
        default "cortex-m4" if CPU_CORTEX_M4
+       default "cortex-m4f" if CPU_CORTEX_M4F
        default "arm926ej-s" if CPU_ARM926EJS
 
 config MACH
