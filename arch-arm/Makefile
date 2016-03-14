@@ -10,6 +10,11 @@ CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft
 CPU_DIR = $(ADIR)/cpu-cortex-m/
 endif
 
+ifeq ($(CONFIG_CPU),"cortex-m4f")
+CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard
+CPU_DIR = $(ADIR)/cpu-cortex-m/
+endif
+
 ifeq ($(CONFIG_CPU),"arm926ej-s")
 CPU_DIR = $(ADIR)/cpu-arm926ej-s
 endif
