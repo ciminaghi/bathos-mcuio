@@ -57,6 +57,10 @@ ifeq ($(CONFIG_CPU),"cortex-m4")
 AOBJ += $(CPU_DIR)/nvic.o
 endif
 
+ifeq ($(CONFIG_CPU),"cortex-m4f")
+AOBJ += $(CPU_DIR)/nvic.o
+endif
+
 ifeq ($(CONFIG_HAS_CORTEXM_SYSTICKTMR),y)
 CFLAGS += -DARCH_NEEDS_INTERRUPT_FOR_JIFFIES=1
 AOBJ += $(CPU_DIR)/systicktmr.o
