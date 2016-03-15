@@ -49,15 +49,7 @@ LIBARCH_OBJS = $(ADIR)/init.o
 
 AOBJ += $(CPU_DIR)/vectable.o
 
-ifeq ($(CONFIG_CPU),"cortex-m0")
-AOBJ += $(CPU_DIR)/nvic.o
-endif
-
-ifeq ($(CONFIG_CPU),"cortex-m4")
-AOBJ += $(CPU_DIR)/nvic.o
-endif
-
-ifeq ($(CONFIG_CPU),"cortex-m4f")
+ifeq ($(CONFIG_HAS_CORTEXM_NVIC),y)
 AOBJ += $(CPU_DIR)/nvic.o
 endif
 
