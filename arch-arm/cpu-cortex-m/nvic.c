@@ -13,30 +13,44 @@
 
 static void nvic_enable(struct bathos_irq_controller *ctrl, int irqn)
 {
-	regs[REG_NVIC_ISER] = 1 << irqn;
+	int offs = irqn >> 5;
+	int bit = irqn & (32 - 1);
+
+	regs[REG_NVIC_ISER + offs] = 1 << bit;
 }
 
 static void nvic_disable(struct bathos_irq_controller *ctrl, int irqn)
 {
-	regs[REG_NVIC_ICER] = 1 << irqn;
+	int offs = irqn >> 5;
+	int bit = irqn & (32 - 1);
+
+	regs[REG_NVIC_ICER + offs] = 1 << bit;
 }
 
 static void nvic_clear_pending(struct bathos_irq_controller *ctrl, int irqn)
 {
-	regs[REG_NVIC_ICPR] = 1 << irqn;
+	int offs = irqn >> 5;
+	int bit = irqn & (32 - 1);
+
+	regs[REG_NVIC_ICPR + offs] = 1 << bit;
 }
 
 static void nvic_set_pending(struct bathos_irq_controller *ctrl, int irqn)
 {
-	regs[REG_NVIC_ISPR] = 1 << irqn;
+	int offs = irqn >> 5;
+	int bit = irqn & (32 - 1);
+
+	regs[REG_NVIC_ISPR + offs] = 1 << bit;
 }
 
 static void nvic_mask_ack(struct bathos_irq_controller *ctrl, int irqn)
 {
-	uint32_t mask = 1 << irqn;
+	int offs = irqn >> 5;
+	int bit = irqn & (32 - 1);
+	uint32_t mask = 1 << bit;
 
-	regs[REG_NVIC_ICER] = mask;
-	regs[REG_NVIC_ICPR] = mask;
+	regs[REG_NVIC_ICER + offs] = mask;
+	regs[REG_NVIC_ICPR + offs] = mask;
 }
 
 static struct bathos_irq_controller nvic = {
