@@ -61,12 +61,10 @@ endif
 ifeq ($(CONFIG_MACH),"kl25z")
 AOBJ += $(MACH_DIR)/kl25.o $(MACH_DIR)/clock.o $(MACH_DIR)/gpio.o \
 	$(MACH_DIR)/usb-device.o
-LDS = $(MACH_DIR)/bathos.lds
 endif
 
 ifeq ($(CONFIG_MACH),"versatile")
 AOBJ += $(MACH_DIR)/irq.o $(MACH_DIR)/timer.o $(MACH_DIR)/versatile-pb.o
-LDS = $(MACH_DIR)/bathos.lds
 endif
 
 ifeq ($(CONFIG_FAMILY),"nrf5x")
@@ -74,12 +72,11 @@ AOBJ += $(FAMILY_DIR)/clock.o
 endif
 
 ifeq ($(CONFIG_MACH),"nrf51822")
-LDS = $(MACH_DIR)/bathos.lds
 CFLAGS += -I$(FAMILY_SUBDIR)/family
 AOBJ += $(MACH_DIR)/nrf51822.o $(MACH_DIR)/quirks.o
 endif
 
-
+LDS = $(wildcard $(MACH_DIR)/bathos$(MODE).lds)
 
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
