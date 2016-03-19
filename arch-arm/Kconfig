@@ -51,9 +51,13 @@ config VECTABLE_ALIGNMENT
 config FAMILY_NRF5X
        bool
 
+config FAMILY_STM32F4X
+       bool
+
 config FAMILY
        string
        default "nrf5x" if FAMILY_NRF5X
+       default "stm32f4x" if FAMILY_STM32F4X
 
 choice
 	prompt "SOC to build for"
