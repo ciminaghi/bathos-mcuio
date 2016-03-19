@@ -3,7 +3,8 @@
 #define PROGMEM
 
 #if defined CONFIG_CPU_CORTEX_M0 || defined CONFIG_CPU_CORTEX_M0_PLUS || \
-    defined CONFIG_CPU_CORTEX_M3
+    defined CONFIG_CPU_CORTEX_M3 || defined CONFIG_CPU_CORTEX_M4 || \
+    defined CONFIG_CPU_CORTEX_M4F
 #include <arch/bathos-arch-cortex-m.h>
 #endif
 
