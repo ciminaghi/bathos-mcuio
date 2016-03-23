@@ -135,6 +135,10 @@ if FAMILY_NRF5X
 	source arch-arm/family-nrf5x/Kconfig
 endif
 
+if FAMILY_STM32F4X
+	source arch-arm/family-stm32f4x/Kconfig
+endif
+
 choice
 	prompt "Target board for bathos"
 
