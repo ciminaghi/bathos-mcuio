@@ -76,6 +76,11 @@ CFLAGS += -I$(FAMILY_SUBDIR)/family
 AOBJ += $(MACH_DIR)/nrf51822.o $(MACH_DIR)/quirks.o
 endif
 
+ifeq ($(CONFIG_FAMILY),"stm32f4x")
+CFLAGS += -I$(FAMILY_SUBDIR)/family
+AOBJ += $(FAMILY_DIR)/clocks.o
+endif
+
 LDS = $(wildcard $(MACH_DIR)/bathos$(MODE).lds)
 
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
