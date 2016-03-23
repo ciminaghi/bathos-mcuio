@@ -1,0 +1,34 @@
+
+
+config STM32F4X_PLL_M
+int
+default 4 if BOARD_STAR
+
+config STM32F4X_PLL_N
+int
+default 180 if BOARD_STAR
+
+config STM32F4X_PLL_P
+int
+default 8 if BOARD_STAR
+
+config STM32F4X_PLL_Q
+int
+default 15 if BOARD_STAR
+
+config STM32F4X_PLL_R
+int
+default 7 if BOARD_STAR
+
+config STM32F4X_APB1_PRESC
+int
+default 4 if BOARD_STAR
+
+config STM32F4X_APB2_PRESC
+int
+default 2 if BOARD_STAR
+
+config STM32F4X_AHB_PRESC
+int
+default 1 if BOARD_STAR
+
