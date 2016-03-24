@@ -2,22 +2,27 @@ menu "ARM architecture configuration"
 
 config CPU_CORTEX_M0
        select HAS_CORTEXM_NVIC
+       select HAS_CORTEXM_SYSTICKTMR
        bool
 
 config CPU_CORTEX_M0_PLUS
        select HAS_CORTEXM_NVIC
+       select HAS_CORTEXM_SYSTICKTMR
        bool
 
 config CPU_CORTEX_M3
        select HAS_CORTEXM_NVIC
+       select HAS_CORTEXM_SYSTICKTMR
        bool
 
 config CPU_CORTEX_M4
        select HAS_CORTEXM_NVIC
+       select HAS_CORTEXM_SYSTICKTMR
        bool
 
 config CPU_CORTEX_M4F
        select HAS_CORTEXM_NVIC
+       select HAS_CORTEXM_SYSTICKTMR
        bool
 
 config CPU_ARM926EJS
