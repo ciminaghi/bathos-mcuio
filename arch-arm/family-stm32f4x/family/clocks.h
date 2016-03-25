@@ -114,4 +114,7 @@ static inline void stm32f4x_setup_prescalers(enum apb_divider apb1,
 	writel(tmp, RCC_BASE + RCC_CFGR);
 }
 
+extern int stm32f4x_enable_peripheral_clock(enum stm32f4x_bus_id,
+					    int periph_id);
+
 #endif /* __STM32F4X_CLOCKS_H__ */

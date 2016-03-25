@@ -115,3 +115,23 @@ int stm32f4x_sysclock_init(void)
 	writel(tmp, RCC_BASE + RCC_CFGR);
 	return 0;
 }
+
+int stm32f4x_enable_peripheral_clock(enum stm32f4x_bus_id bus, int periph_id)
+{
+	uint32_t tmp;
+	static const int offsets[] = {
+		[AHB1] = 0x30,
+		[AHB2] = 0x34,
+		[AHB3] = 0x38,
+		[APB1] = 0x40,
+		[APB2] = 0x44,
+	};
+	int offset = offsets[bus];
+
+	if (bus < AHB1 || bus > APB2)
+		return -1;
+	tmp = readl(RCC_BASE + offset);
+	tmp |= 1 << periph_id;
+	writel(tmp, RCC_BASE + offset);
+	return 0;
+}
