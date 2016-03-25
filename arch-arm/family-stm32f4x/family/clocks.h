@@ -56,6 +56,14 @@ enum ahb_divider {
 	AHB_512 = 15,
 };
 
+enum stm32f4x_bus_id {
+	AHB1 = 1,
+	AHB2,
+	AHB3,
+	APB1,
+	APB2,
+};
+
 static inline int stm32f4x_setup_pll(uint8_t _m, uint16_t _n, uint8_t _p,
 				     enum pllsrc _src, uint8_t _q, uint8_t _r)
 {
