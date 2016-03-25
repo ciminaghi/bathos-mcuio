@@ -10,7 +10,7 @@
 #include <bathos/errno.h>
 #include <generated/autoconf.h>
 
-#define GPIO_PORT_WIDTH 32
+#define GPIO_PORT_WIDTH CONFIG_GPIO_PORT_WIDTH
 #define GPIO_NR(port, bit) ((port) * GPIO_PORT_WIDTH + (bit))
 #define GPIO_PORT(nr)      ((nr) / GPIO_PORT_WIDTH)
 #define GPIO_BIT(nr)       ((nr) % GPIO_PORT_WIDTH)

@@ -54,6 +54,11 @@ config VECTABLE_ALIGNMENT
        int
        default 64
 
+config GPIO_PORT_WIDTH
+       int
+       default 16 if FAMILY_STM32F4X
+       default 32
+
 config FAMILY_NRF5X
        bool
 
