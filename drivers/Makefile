@@ -35,6 +35,10 @@ ifeq ($(CONFIG_NRF5X_DRIVERS),y)
   DRV_OBJS += drivers/nrf5x-radio.o
 endif
 
+ifeq ($(CONFIG_STM32F4X_DRIVERS),y)
+  DRV_OBJS += drivers/stm32f4x-uart.o
+endif
+
 DRV_OBJS += drivers/radio-bridge-master.o
 DRV_OBJS += drivers/radio-bridge-slave.o
 
