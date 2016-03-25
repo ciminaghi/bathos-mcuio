@@ -25,6 +25,9 @@ endif
 config FREESCALE_DRIVERS
        bool
 
+config STM32F4X_DRIVERS
+       bool
+
 config AMBA_DRIVERS
        bool
 
