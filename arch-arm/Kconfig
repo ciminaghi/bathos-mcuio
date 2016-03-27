@@ -215,6 +215,22 @@ config  CONSOLE_UART3
 	bool "Console on UART3"
 	default n
 
+config  CONSOLE_UART4
+	bool "Console on UART4"
+	default n
+
+config CONSOLE_UART5
+        bool "Console on UART5"
+	default n
+
+config CONSOLE_UART6
+        bool "Console on UART6"
+	default n
+
+config CONSOLE_UART7
+        bool "Console on UART7"
+	default n
+
 endchoice
 
 
@@ -224,6 +240,10 @@ config  CONSOLE_DEV_NAME
 	default "uart1" if CONSOLE_UART1
 	default "uart2" if CONSOLE_UART2
 	default "uart3" if CONSOLE_UART3
+	default "uart4" if CONSOLE_UART4
+	default "uart5" if CONSOLE_UART5
+	default "uart6" if CONSOLE_UART6
+	default "uart7" if CONSOLE_UART7
 
 choice
 	prompt "Index of stdout UART"
