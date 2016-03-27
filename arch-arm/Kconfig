@@ -265,6 +265,21 @@ config  STDOUT_UART3
 	bool "Stdout to UART3"
 	default n
 
+config  STDOUT_UART4
+	bool "Stdout to UART4"
+	default n
+
+config  STDOUT_UART5
+	bool "Stdout to UART5"
+	default n
+
+config  STDOUT_UART6
+	bool "Stdout to UART6"
+	default n
+
+config  STDOUT_UART7
+	bool "Stdout to UART7"
+	default n
 endchoice
 
 config STDOUT
@@ -274,6 +289,10 @@ config STDOUT
        default "uart1" if STDOUT_UART1
        default "uart2" if STDOUT_UART2
        default "uart3" if STDOUT_UART3
+       default "uart4" if STDOUT_UART4
+       default "uart5" if STDOUT_UART5
+       default "uart6" if STDOUT_UART6
+       default "uart7" if STDOUT_UART7
 
 choice
 	prompt "Index of stdin UART"
@@ -295,6 +314,22 @@ config  STDIN_UART3
 	bool "Stdin from UART3"
 	default n
 
+config  STDIN_UART4
+        bool "Stdin from UART4"
+	default n
+
+config  STDIN_UART5
+	bool "Stdin from UART5"
+	default n
+
+config  STDIN_UART6
+	bool "Stdin from UART6"
+	default n
+
+config  STDIN_UART7
+	bool "Stdin from UART7"
+	default n
+
 endchoice
 
 config STDIN
@@ -304,3 +339,7 @@ config STDIN
        default "uart1" if STDIN_UART1
        default "uart2" if STDIN_UART2
        default "uart3" if STDIN_UART3
+       default "uart4" if STDIN_UART4
+       default "uart5" if STDIN_UART5
+       default "uart6" if STDIN_UART6
+       default "uart7" if STDIN_UART7
