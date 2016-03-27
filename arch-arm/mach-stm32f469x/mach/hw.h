@@ -8,7 +8,7 @@
 #ifndef __STM32F469X_H__
 #define __STM32F469X_H__
 
-#include <family/clocks.h>
+#include <family/bus.h>
 
 #define GPIO_BASE 0x40020000
 #define RCC_BASE 0x40023800
