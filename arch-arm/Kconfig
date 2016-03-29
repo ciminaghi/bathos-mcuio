@@ -111,6 +111,7 @@ config MACH_STM32F469X
        select FAMILY_STM32F4X
        select STM32F4X_DRIVERS
        select HAVE_GPIOS
+       select HAVE_UART
        help
          build for an STM32F469X machine
 
