@@ -81,6 +81,10 @@ CFLAGS += -I$(FAMILY_SUBDIR)/family
 AOBJ += $(FAMILY_DIR)/clocks.o
 endif
 
+ifeq ($(CONFIG_BOARD_STAR),y)
+AOBJ += $(MACH_DIR)/board-star.o
+endif
+
 LDS = $(wildcard $(MACH_DIR)/bathos$(MODE).lds)
 
 $(ADIR)/libarch.a: $(LIBARCH_OBJS)
