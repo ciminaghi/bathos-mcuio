@@ -37,7 +37,8 @@ extern void _romboot_start(void);
 extern void _hard_fault_handler(void);
 
 #if defined CONFIG_CPU_CORTEX_M0 || defined CONFIG_CPU_CORTEX_M0_PLUS || \
-defined CONFIG_CPU_CORTEX_M3
+defined CONFIG_CPU_CORTEX_M3 || defined CONFIG_CPU_CORTEX_M4 || \
+defined CONFIG_CPU_CORTEX_M4F
 static inline int __get_vector(void)
 {
 	int vector;
