@@ -16,11 +16,13 @@
 #define EVT_NAME xcat(int_evt_,INTNO)
 
 /* Dummy interrupt event handlers and relevant data, can be overridden */
-void  __attribute__((weak)) ISR_NAME(struct event_handler_data *d)
+void  __attribute__((weak, section(".default_hl_handlers")))
+ISR_NAME(struct event_handler_data *d)
 {
 }
 
-void __attribute__((weak)) LL_ISR_NAME(struct event_handler_data *d)
+void __attribute__((weak, section(".default_ll_handlers")))
+LL_ISR_NAME(struct event_handler_data *d)
 {
 }
 

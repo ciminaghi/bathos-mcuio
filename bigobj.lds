@@ -34,6 +34,12 @@ SECTIONS
 		events_start = .;
 		*(.events);
 		events_end = .;
+		default_hl_handlers_start = .;
+		*(.default_hl_handlers);
+		default_hl_handlers_end = .;
+		default_ll_handlers_start = .;
+		*(.default_ll_handlers);
+		default_ll_handlers_end = .;
 		interrupt_events_start = .;
 		*(.interrupt_events);
 		interrupt_events_end = .;
