@@ -163,14 +163,31 @@ static inline int __handle_ll_evt(struct event_handler_data *d)
 	d->ops->handle_ll(d);
 	return 1;
 }
+
+typedef void (eh)(struct event_handler_data *);
+
+extern eh default_hl_handlers_start, default_hl_handlers_end;
+
+int has_default_hl_handler(struct event_handler_data *d)
+{
+	return d->ops->handle >= &default_hl_handlers_start &&
+		d->ops->handle < &default_hl_handlers_end;
+}
+
 #else
 static inline int __handle_ll_evt(struct event_handler_data *d)
 {
 	return 0;
 }
+
+static inline int has_default_hl_handler(struct event_handler_data *d)
+{
+	return 0;
+}
 #endif /* CONFIG_INTERRUPT_EVENTS */
 
-static void __handle_event(const struct event *__e, void *data, int ll)
+static void __handle_event(const struct event *__e, void *data, int ll,
+			   int *has_hl_handler)
 {
 	struct event_handler_data *__d, *d;
 	struct event_handler_data ehd;
@@ -178,6 +195,8 @@ static void __handle_event(const struct event *__e, void *data, int ll)
 	struct event evt;
 	struct event *e;
 
+	if (has_hl_handler)
+		*has_hl_handler = 0;
 	e = __get_evt(&evt, __e);
 	for (__d = e->handlers_start;
 	     __d != e->handlers_end; __d++) {
@@ -185,6 +204,8 @@ static void __handle_event(const struct event *__e, void *data, int ll)
 		d->ops = __get_evt_handler_ops(&eho,
 					       d);
 		d->data = data;
+		if (has_hl_handler && !(*has_hl_handler))
+			*has_hl_handler = !has_default_hl_handler(d);
 		if (ll && __handle_ll_evt(d))
 			continue;
 		if (d->ops->handle)
@@ -194,7 +215,7 @@ static void __handle_event(const struct event *__e, void *data, int ll)
 
 int trigger_event_immediate(const struct event *e, void *data)
 {
-	__handle_event(e, data, 0);
+	__handle_event(e, data, 0, NULL);
 	return 0;
 }
 
@@ -202,13 +223,21 @@ int trigger_event_immediate(const struct event *e, void *data)
 int trigger_interrupt_event(int evno)
 {
 	const struct event *e;
+	int has_hl_handler = 0;
 
 	if (evno >= CONFIG_NR_INTERRUPTS)
 		return -EINVAL;
 
 	/* Start low level handler if one is available */
 	e = &interrupt_events_start[evno];
-	__handle_event(e, NULL, 1);
+	__handle_event(e, NULL, 1, &has_hl_handler);
+
+	/*
+	 * Avoid masking the irq and servicing the event in main context
+	 * if it has no high level handler
+	 */
+	if (!has_hl_handler)
+		return 0;
 
 	/*
 	 * Acknowledge and mask interrupt until the high level handler is
@@ -256,7 +285,7 @@ static void handle_interrupt_events(void)
 			 * Run the high level handler (if available) in
 			 * thread context
 			 */
-			__handle_event(e + irq, NULL, 0);
+			__handle_event(e + irq, NULL, 0, NULL);
 
 			/*
 			 * Clear event flag: this __must__ be atomic:
