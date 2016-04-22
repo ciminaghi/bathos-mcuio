@@ -28,7 +28,7 @@ endif
 
 MACH_DIR = $(ADIR)/mach-$(shell echo $(CONFIG_MACH))
 
-CFLAGS += -I$(MACH_DIR)
+CFLAGS += -I$(MACH_DIR) -DARCH_HAS_BUILTIN_FFS
 
 ifneq ($(FAMILY),)
 FAMILY_DIR = $(ADIR)/family-$(FAMILY)

@@ -12,6 +12,7 @@
  * the libc and compiler builtin ffs routines, therefore
  * differs in spirit from the above ffz (man ffs).
  */
+#ifndef ARCH_HAS_BUILTIN_FFS
 static inline int ffs(unsigned long x)
 {
 	int r = 1;
@@ -46,5 +47,8 @@ static inline int ffs(unsigned long x)
 	}
 	return r;
 }
+#else
+#define ffs(a) __builtin_ffs(a)
+#endif
 
 #endif /* _ASM_GENERIC_BITOPS_FFS_H_ */
