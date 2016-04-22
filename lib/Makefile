@@ -18,10 +18,10 @@ LIB_OBJS += lib/irq.o
 $(LIBBATHOS): $(LIB_OBJS)
 	$(AR) r $@ $(LIB_OBJS)
 
-lib/allocator-tables.c : scripts/allocator_aux_gen
+lib/allocator-tables.c : $(SCRIPTS)/allocator_aux_gen
 	$< > $@
 
-scripts/allocator_aux_gen: scripts/allocator_aux_gen.c
+$(SCRIPTS)/allocator_aux_gen: $(SCRIPTS)/allocator_aux_gen.c
 	$(HOSTCC) $(HOST_CFLAGS) -DBITS_PER_LONG=$(BITS_PER_LONG) \
 	-o $@ $<
 

@@ -1,7 +1,7 @@
 
 # Drivers Makefile: just add the objects and names
 
-LIBDRIVERS = drivers/libdrivers.a
+LIBDRIVERS = $(BUILD_DIR)/drivers/libdrivers.a
 DRV_OBJS += drivers/enc28j60.o
 
 DRV_OBJS += drivers/w1.o

@@ -1,18 +1,18 @@
 
 ifeq ($(CONFIG_CPU),"cortex-m0")
 # Using thumb for version 7 ARM core:
-CFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
+ARCH_CFLAGS = -mcpu=cortex-m0 -mthumb -mfloat-abi=soft
 CPU_DIR = $(ADIR)/cpu-cortex-m/
 endif
 
 ifeq ($(CONFIG_CPU),"cortex-m4")
-CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft
+ARCH_CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=soft
 CPU_DIR = $(ADIR)/cpu-cortex-m/
 endif
 
 ifeq ($(CONFIG_CPU),"cortex-m4f")
-CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard
-CPU_DIR = $(ADIR)/cpu-cortex-m/
+ARCH_CFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard
+CPU_DIR = $(ADIR)/cpu-cortex-m
 endif
 
 ifeq ($(CONFIG_CPU),"arm926ej-s")
@@ -20,7 +20,7 @@ CPU_DIR = $(ADIR)/cpu-arm926ej-s
 endif
 
 ASFLAGS = $(CFLAGS)
-LDFLAGS = -nostdlib -nostartfiles -Wl,--defsym -Wl,regs=0
+ARCH_LDFLAGS = -nostdlib -nostartfiles -Wl,--defsym -Wl,regs=0
 
 ifeq ($(CONFIG_OPENSDA_DEBUG),y)
 ASFLAGS += -DOPENSDA_DEBUG
@@ -28,11 +28,11 @@ endif
 
 MACH_DIR = $(ADIR)/mach-$(shell echo $(CONFIG_MACH))
 
-CFLAGS += -I$(MACH_DIR) -DARCH_HAS_BUILTIN_FFS
+ARCH_CFLAGS += -I$(SRC_DIR)/$(MACH_DIR) -DARCH_HAS_BUILTIN_FFS
 
 ifneq ($(FAMILY),)
 FAMILY_DIR = $(ADIR)/family-$(FAMILY)
-CFLAGS += -I$(FAMILY_DIR)/
+ARCH_CFLAGS += -I$(SRC_DIR)/$(FAMILY_DIR)/
 endif
 
 ifneq ($(CONFIG_MACH),"none")
@@ -44,7 +44,7 @@ BOOT_OBJ += $(CPU_DIR)/boot.o $(CPU_DIR)/idle.o
 IO_OBJ =
 
 # Library
-LIBARCH = $(ADIR)/libarch.a
+LIBARCH = $(BUILD_DIR)/$(ADIR)/libarch.a
 LIBARCH_OBJS = $(ADIR)/init.o
 
 AOBJ += $(CPU_DIR)/vectable.o
@@ -85,9 +85,12 @@ ifeq ($(CONFIG_BOARD_STAR),y)
 AOBJ += $(MACH_DIR)/board-star.o $(MACH_DIR)/esp8266-bridge.o
 endif
 
-LDS = $(wildcard $(MACH_DIR)/bathos$(MODE).lds)
+LDS = $(wildcard $(SRC_DIR)/$(MACH_DIR)/bathos$(MODE).lds)
 
-$(ADIR)/libarch.a: $(LIBARCH_OBJS)
+CFLAGS = $(ARCH_CFLAGS)
+LDFLAGS = $(ARCH_LDFLAGS)
+
+$(LIBARCH): $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
 
 run_versatile: bathos.bin
