@@ -11,6 +11,7 @@ MODE ?= $(patsubst "%",%,$(CONFIG_MEMORY_MODE))
 BATHOS_GIT=$(shell ./scripts/get_version)
 HZ ?= $(patsubst "%",%,$(CONFIG_HZ))
 THOS_QUARTZ ?= $(patsubst "%",%,$(CONFIG_THOS_QUARTZ))
+BUILD_DIR ?= $(shell pwd)
 
 # if no .config is there, ARCH is still empty, this would prevent a simple
 # "make config"
@@ -85,7 +86,7 @@ STRIP           = $(CROSS_COMPILE)strip
 OBJCOPY         = $(CROSS_COMPILE)objcopy
 OBJDUMP         = $(CROSS_COMPILE)objdump
 
-export CC OBJDUMP OBJCOPY LD ARCH
+export CC OBJDUMP OBJCOPY LD ARCH BUILD_DIR
 
 # host gcc
 HOSTCC ?= gcc
