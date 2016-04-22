@@ -129,6 +129,12 @@ SECTIONS
 		evt_rb_opipe_input_ready_handlers_start = .;
 		*(.evt_rb_opipe_input_ready_handlers);
 		evt_rb_opipe_input_ready_handlers_end = .;
+		evt_upstream_input_ready_handlers_start = .;
+		*(.evt_upstream_input_ready_handlers);
+		evt_upstream_input_ready_handlers_end = .;
+		evt_downstream_input_ready_handlers_start = .;
+		*(.evt_downstream_input_ready_handlers);
+		evt_downstream_input_ready_handlers_end = .;
 		mcuio_functions_start = .;
 		*(.mcuio_functions);
 		mcuio_functions_end = .;

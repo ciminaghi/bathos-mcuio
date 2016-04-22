@@ -82,7 +82,7 @@ AOBJ += $(FAMILY_DIR)/clocks.o
 endif
 
 ifeq ($(CONFIG_BOARD_STAR),y)
-AOBJ += $(MACH_DIR)/board-star.o
+AOBJ += $(MACH_DIR)/board-star.o $(MACH_DIR)/esp8266-bridge.o
 endif
 
 LDS = $(wildcard $(MACH_DIR)/bathos$(MODE).lds)
