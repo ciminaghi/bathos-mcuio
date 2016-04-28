@@ -71,7 +71,11 @@ endif
 
 # First: the target. After that, we can include the arch Makefile
 ifeq ($(EXTERNAL),n)
+ifeq ($(CONFIG_RELOCATABLE_ONLY),y)
+all: bathos.o
+else # CONFIG_RELOCATABLE_ONLY
 all: bathos.bin bathos.hex
+endif
 else
 all: do_all
 

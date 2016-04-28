@@ -38,6 +38,10 @@ config CROSS_COMPILE
        default "avr-" if ARCH_ATMEGA
        default ""
 
+config RELOCATABLE_ONLY
+       bool
+       default n
+
 config INTERRUPT_EVENTS
        bool
        default y if ARCH_ARM
