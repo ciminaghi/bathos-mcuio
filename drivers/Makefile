@@ -2,10 +2,15 @@
 # Drivers Makefile: just add the objects and names
 
 LIBDRIVERS = $(BUILD_DIR)/drivers/libdrivers.a
+
+ifeq ($(CONFIG_HAVE_SPI),y)
 DRV_OBJS += drivers/enc28j60.o
+endif
 
 DRV_OBJS += drivers/w1.o
+ifeq ($(CONFIG_HAVE_GPIOS),y)
 DRV_OBJS += drivers/w1-gpio.o
+endif
 DRV_OBJS += drivers/w1-temp.o
 DRV_OBJS += drivers/w1-eeprom.o
 DRV_OBJS += drivers/dev.o
