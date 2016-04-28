@@ -34,7 +34,7 @@ config ARCH
 
 config CROSS_COMPILE
        string "Cross compiler prefix"
-       default "/opt/arm-2011.03/bin/arm-none-eabi-" if ARCH_VERSATILE
+       default "arm-none-eabi-" if ARCH_ARM
        default "avr-" if ARCH_ATMEGA
        default ""
 
