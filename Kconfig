@@ -16,11 +16,6 @@ config ARCH_ARM
 	help
 	  Build for ARM based machines
 
-config ARCH_VERSATILE
-	bool "VERSATILE -- for Qemu"
-	help
-	  Build
-
 config ARCH_UNIX
 	bool "Unix -- run in a process"
 	select HAVE_UART
