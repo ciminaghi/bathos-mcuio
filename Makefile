@@ -231,7 +231,10 @@ silentoldconfig:
 	@mkdir -p include/config
 	$(MAKE) -f Makefile.kconfig $@
 
-scripts_basic config %config:
+scripts_basic config:
+	$(MAKE) -f Makefile.kconfig $@
+
+%config:
 	$(MAKE) -f Makefile.kconfig $@
 
 defconfig:
