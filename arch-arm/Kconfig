@@ -82,6 +82,7 @@ config THOS_QUARTZ
        int "CPU clock frequency"
        default 12000000 if MACH_KL25Z
        default 16000000 if MACH_VERSATILE
+       default 16000000 if MACH_NRF51822
 
 config CPU
        string
