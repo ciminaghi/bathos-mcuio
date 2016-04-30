@@ -261,14 +261,7 @@ int trigger_interrupt_event(int evno)
 
 int trigger_multiple_interrupt_events(int start, unsigned long *e, int numlongs)
 {
-	int nbits = numlongs * BITS_PER_LONG, i;
-
-	if (start % BITS_PER_LONG)
-		return -EINVAL;
-
-	/* FIXME IMPLEMENT THIS */
-
-	return 0;
+	return -ENOSYS;
 }
 
 static void handle_interrupt_events(void)
