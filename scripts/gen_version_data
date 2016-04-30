@@ -10,6 +10,7 @@ out=$3
 [ "$ARCH" = arm ]  && BARG="-B $ARCH"
 [ "$ARCH" = unix ] && BARG="-B i386"
 [ "$ARCH" = versatile ]  && BARG="-B arm"
+[ "$ARCH" = xtensa ] && BARG="-B xtensa"
 
 f=$(tempfile)
 

@@ -16,6 +16,13 @@ config ARCH_ARM
 	help
 	  Build for ARM based machines
 
+# For xtensa, we only build a relocatable bathos.o to be linked to user's code
+# and sdk libraries
+config ARCH_XTENSA
+       bool "XTENSA -- a configurable processor"
+       select RELOCATABLE_ONLY
+       select DISABLE_PRINTF
+
 config ARCH_UNIX
 	bool "Unix -- run in a process"
 	select HAVE_UART
@@ -30,12 +37,14 @@ config ARCH
        default "versatile" if ARCH_VERSATILE
        default "unix" if ARCH_UNIX
        default "arm" if ARCH_ARM
+       default "xtensa" if ARCH_XTENSA
 
 
 config CROSS_COMPILE
        string "Cross compiler prefix"
        default "arm-none-eabi-" if ARCH_ARM
        default "avr-" if ARCH_ATMEGA
+       default "xtensa-lx106-elf-" if ARCH_XTENSA
        default ""
 
 config RELOCATABLE_ONLY
