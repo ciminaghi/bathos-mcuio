@@ -77,7 +77,7 @@ else # CONFIG_RELOCATABLE_ONLY
 all: bathos.bin bathos.hex
 endif
 else
-all: do_all
+all: check_src_dir do_all
 
 external_tree:
 	cp Makefile Makefile.kconfig $(BUILD_DIR)
@@ -101,6 +101,16 @@ external_tree:
 
 do_all: external_tree
 	make -C $(BUILD_DIR) VPATH=$(SRC_DIR) EXTERNAL=n
+
+check_src_dir:
+	if [ -f $(SRC_DIR)/.config ] || \
+	[ -f $(SRC_DIR)/include/generated/autoconf.h ] || \
+	[ -n "$(find $(SRC_DIR) -name \*.o)" ] ; then \
+		{ echo Please clean src dir before building from external dir ;\
+		  exit 1 ; } \
+	else \
+		exit 0 ; \
+	fi
 endif
 
 ADIR = arch-$(ARCH)
