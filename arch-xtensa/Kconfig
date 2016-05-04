@@ -1,0 +1,43 @@
+
+
+
+choice
+	prompt "SOC to build for"
+
+config MACH_EAGLE
+       bool "ESP8266 eagle SOC"
+       select ESP8266_DRIVERS
+       select HAVE_UART
+       help
+	"Build for the esp8266 chip"
+
+endchoice
+
+config MACH
+       string
+       default "eagle" if MACH_EAGLE
+
+
+choice
+	prompt "Target board for bathos"
+
+config BOARD_STAR_8266
+       bool "Arduino STAR board"
+       help
+	"Build for a STAR board"
+
+endchoice
+
+config BOARD
+       default "star" if BOARD_STAR_8266
+
+config ESP8266_SERIAL_RX0_FIFO_INT_THRESHOLD
+       int "Rx fifo full interrupt threshold, UART0"
+       default 16 if MCUIO && MCUIO_PIPE_INPUT_PATH=uart0
+       default 1
+
+config ESP8266_SERIAL_RX1_FIFO_INT_THRESHOLD
+       int "Rx fifo full interrupt threshold, UART1"
+       default 16 if MCUIO && MCUIO_PIPE_INPUT_PATH=uart1
+       default 1
+

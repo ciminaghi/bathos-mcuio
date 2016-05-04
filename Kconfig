@@ -101,6 +101,10 @@ if ARCH_ARM
    source "arch-arm/Kconfig"
 endif
 
+if ARCH_XTENSA
+   source "arch-xtensa/Kconfig"
+endif
+
    source "drivers/Kconfig"
 
 config HAVE_IRQ_CONTROLLER
