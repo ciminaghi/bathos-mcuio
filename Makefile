@@ -297,10 +297,10 @@ defconfig:
 	@test -f $(BUILD_DIR)/.config || touch $(BUILD_DIR)/.config
 	@$(MAKE) -f Makefile.kconfig yun_defconfig
 else
-silentoldconfig scripts_basic config defconfig:
+silentoldconfig scripts_basic config defconfig: check_src_dir external_tree
 	$(MAKE) -C $(BUILD_DIR) EXTERNAL=n $@
 
-%config:
+%config: check_src_dir external_tree
 	$(MAKE) -C $(BUILD_DIR) EXTERNAL=n $@
 endif
 
