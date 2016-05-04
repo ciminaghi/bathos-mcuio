@@ -13,7 +13,7 @@ IO_OBJ =
 
 # Library
 LIBARCH = $(BUILD_DIR)/$(ADIR)/libarch.a
-LIBARCH_OBJS = $(ADIR)/init.o
+LIBARCH_OBJS = $(ADIR)/init.o $(ADIR)/jiffies.o
 
 ifeq ($(CONFIG_BOARD_STAR_8266),y)
 AOBJ += $(MACH_DIR)/board-star.o
