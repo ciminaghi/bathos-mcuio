@@ -1,6 +1,8 @@
 #ifndef __ARM_BATHOS_ARCH_H__
 #define __ARM_BATHOS_ARCH_H__
 
+#include <eagle_soc.h>
+
 #define PROGMEM
 
 /*
