@@ -44,6 +44,10 @@ ifeq ($(CONFIG_STM32F4X_DRIVERS),y)
   DRV_OBJS += drivers/stm32f4x-uart.o
 endif
 
+ifeq ($(CONFIG_ESP8266_DRIVERS), y)
+  DRV_OBJS += drivers/esp8266-uart.o
+endif
+
 DRV_OBJS += drivers/radio-bridge-master.o
 DRV_OBJS += drivers/radio-bridge-slave.o
 

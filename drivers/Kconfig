@@ -28,6 +28,9 @@ config FREESCALE_DRIVERS
 config STM32F4X_DRIVERS
        bool
 
+config ESP8266_DRIVERS
+       bool
+
 config AMBA_DRIVERS
        bool
 
