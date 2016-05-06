@@ -20,16 +20,21 @@ void __attribute__((weak)) idle(void)
 	trigger_event(&event_name(hw_timer_tick), NULL);
 }
 
+void __attribute__((weak)) bathos_loop(void)
+{
+	while(1) {
+		while(pending_events())
+			handle_events();
+		idle();
+	}
+}
+
 int bathos_main(void)
 {
 #if !CONFIG_CONSOLE_NULL
 	printf("Hello, Bathos is speaking (%s built on " __DATE__ ")\n",
 	       BATHOS_GIT);
 #endif
-	while(1) {
-		while(pending_events())
-			handle_events();
-		idle();
-	}
+	bathos_loop();
 	return 0;
 }

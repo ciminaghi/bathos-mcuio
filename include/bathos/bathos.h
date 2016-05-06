@@ -35,6 +35,13 @@
 extern int bathos_main(void);
 extern int bathos_setup(void);
 
+/*
+ * This function is implemented as a weak symbol in main.c.
+ * You're free to override the default implementation in case the default
+ * main loop is not suitable for your particular platform.
+ */
+extern void bathos_loop(void);
+
 /* And finally the task definition */
 struct bathos_task {
 	char *name;
