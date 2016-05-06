@@ -137,6 +137,14 @@ int events_init(void)
 }
 core_initcall(events_init);
 
+/*
+ * This hook can be defined by architectures needing notification of
+ * new events (xtensa only at present)
+ */
+void __attribute__((weak)) events_notify(void)
+{
+}
+
 int trigger_event(const struct event *e, void *data)
 {
 	struct pending_event *pe;
@@ -154,6 +162,7 @@ int trigger_event(const struct event *e, void *data)
 	pe = &pe_buffer[h];
 	pe->data = data;
 	pe->event = e;
+	events_notify();
 	return 0;
 }
 

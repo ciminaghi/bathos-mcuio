@@ -78,6 +78,15 @@ extern int events_init(void);
 extern int pending_events(void);
 
 /*
+ * This function is implemented as a weak symbol in lib/event.c and does
+ * nothing by default.
+ * You're free to override the default implementation in case
+ * something special has to be done to notify the main loop that an event
+ * has to be processed.
+ */
+extern void events_notify(void);
+
+/*
  * Trigger a generic event
  */
 extern int trigger_event(const struct event *, void *data);
