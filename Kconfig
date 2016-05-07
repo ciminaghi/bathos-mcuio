@@ -247,3 +247,5 @@ config HZ
 
 
    source "tasks/Kconfig"
+
+   source "mcuio/Kconfig"
