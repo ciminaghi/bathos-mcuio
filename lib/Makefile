@@ -2,6 +2,7 @@
 # Library Makefile: just add the objects and names
 
 LIBBATHOS = lib/libbathos.a
+LIB_OBJS += lib/pipe.o
 LIB_OBJS += lib/string.o
 LIB_OBJS += lib/stdio.o
 LIB_OBJS += lib/stdlib.o

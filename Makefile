@@ -225,7 +225,7 @@ $(MCUIO_TABLES_OBJS): tasks/mcuio_gpio_table_%.o : tasks/mcuio_gpio_table.c task
 	-DMCUIO_NGPIO=$$($(SCRIPTS)/get_port_ngpios $* 64 $(MCUIO_TOT_NGPIO)) \
 	-c -o $@ $<
 
-obj-y =  main.o sys_timer.o periodic_scheduler.o pipe.o version_data.o \
+obj-y =  main.o sys_timer.o periodic_scheduler.o version_data.o \
 $(INT_EVENTS_OBJ) $(AOBJ) $(TOBJ) $(LOBJ) $(LIBARCH) $(LIBS)
 
 $(INT_EVENTS_OBJ): $(INT_EVENTS_OBJS)
