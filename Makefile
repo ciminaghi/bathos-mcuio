@@ -239,7 +239,7 @@ bathos.o: silentoldconfig $(obj-y) $(ARCH_EXTRA) events.lds
 
 events.lds:
 	$(SCRIPTS)/evt_ldsgen $@ $(SRC_DIR) $(SRC_DIR)/lib/ $(SRC_DIR)/$(ADIR) \
-	$(SRC_DIR)/tasks $(SRC_DIR)/tasks-$(ARCH) $(SRC_DIR)/drivers/
+	$(SRC_DIR)/$(MACH_DIR) $(SRC_DIR)/tasks $(SRC_DIR)/tasks-$(ARCH) $(SRC_DIR)/drivers/
 
 version_data.o:
 	export SCRIPTS=$(SCRIPTS) CC=$(CC) OBJDUMP=$(OBJDUMP) \
