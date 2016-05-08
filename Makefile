@@ -215,6 +215,9 @@ clean:
 	done
 	rm -f events.lds
 
+distclean: clean
+	rm -f .config include/generated/autoconf.h
+
 # following targets from Makefile.kconfig
 ifeq ($(EXTERNAL),n)
 silentoldconfig:
