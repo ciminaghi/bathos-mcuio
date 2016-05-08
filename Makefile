@@ -213,6 +213,7 @@ clean:
 	for f in $(GPIOS_NAMES_FILE) $(GPIOS_CAPS_FILE) ; do \
 		rm -f $(BUILD_DIR)/$$f ; \
 	done
+	rm -f events.lds
 
 # following targets from Makefile.kconfig
 ifeq ($(EXTERNAL),n)
