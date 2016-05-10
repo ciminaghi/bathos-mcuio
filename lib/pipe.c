@@ -121,7 +121,7 @@ struct bathos_pipe *pipe_open(const char *n, int mode, void *data)
 		}
 	}
 	list_add(&out->list, &dev->pipes);
-	e = mode == BATHOS_MODE_INPUT ? &evt_input_pipe_opened :
+	e = mode & BATHOS_MODE_INPUT ? &evt_input_pipe_opened :
 	    &evt_output_pipe_opened;
 	trigger_event(e, out);
 	return out;
@@ -134,7 +134,7 @@ int pipe_close(struct bathos_pipe *pipe)
 		bathos_errno = EBADF;
 		return -1;
 	}
-	e = pipe->mode == BATHOS_MODE_INPUT ? &evt_input_pipe_closed :
+	e = pipe->mode & BATHOS_MODE_INPUT ? &evt_input_pipe_closed :
 		&evt_output_pipe_closed;
 	trigger_event(e, pipe);
 	trigger_event(&event_name(pipe_really_closed), pipe);
