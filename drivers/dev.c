@@ -16,7 +16,6 @@
 #define UART_DEFAULT_BUF_SIZE 16
 
 struct bathos_dev_data {
-	enum bathos_dev_mode mode;
 	union {
 		struct {
 			int head;
@@ -65,7 +64,6 @@ bathos_dev_init(const struct bathos_ll_dev_ops * PROGMEM ops, void *priv)
 		return out;
 
 	memset(out, 0, sizeof(*out));
-	out->mode = CIRC_BUF;
 	out->ops = ops;
 	out->ll_priv = priv;
 	return out;
@@ -115,8 +113,6 @@ int bathos_dev_open(struct bathos_pipe *pipe)
 	struct bathos_ll_dev_ops __ops;
 	int stat;
 
-	/* Mode is circ buf by default on open */
-	data->mode = CIRC_BUF;
 	if (!data->d.cb.buf) {
 		stat = __allocate_internal_buf(data);
 		if (stat < 0)
@@ -142,8 +138,6 @@ int bathos_dev_read(struct bathos_pipe *pipe, char *buf, int len)
 	int l;
 	struct bathos_dev_data *data = pipe->dev->priv;
 
-	if (data->mode != CIRC_BUF)
-		return -EINVAL;
 	if (!data->d.cb.buf || !data->d.cb.size)
 		return -EINVAL;
 
@@ -199,33 +193,6 @@ int bathos_dev_close(struct bathos_pipe *pipe)
 	return 0;
 }
 
-static int __switch_to_cbuf(struct bathos_dev_data *data, int bufsize)
-{
-	const struct bathos_ll_dev_ops *ops;
-	struct bathos_ll_dev_ops __ops;
-	int stat;
-
-	ops = __get_ops(data, &__ops);
-	/* Disable rx first */
-	stat = ops->rx_disable(data->ll_priv);
-	if (stat)
-		return stat;
-	data->mode = CIRC_BUF;
-	/* Forget about any external buffer */
-	data->d.cb.ext_buf = NULL;
-	/* Free current buffer first */
-	if (data->d.cb.buf)
-		bathos_free_buffer(data->d.cb.buf, data->d.cb.size);
-	/* and get another one */
-	data->d.cb.size = bufsize;
-	data->d.cb.buf = bathos_alloc_buffer(data->d.cb.size);
-	if (!data->d.cb.buf)
-		return -ENOMEM;
-	/* reset head and tail */
-	data->d.cb.head = data->d.cb.tail = 0;
-	return stat;
-}
-
 int bathos_dev_ioctl(struct bathos_pipe *pipe,
 		     struct bathos_ioctl_data *iocdata)
 {
@@ -237,12 +204,6 @@ int bathos_dev_ioctl(struct bathos_pipe *pipe,
 			return -EINVAL;
 		data->rx_hwm = *(int *)iocdata->data;
 		return 0;
-	case DEV_IOC_RX_SET_CBUF_MODE:
-		if (data->mode == CIRC_BUF)
-			return 0;
-		if (!iocdata->data)
-			return -EINVAL;
-		return __switch_to_cbuf(data, *(int *)iocdata->data);
 	default:
 	{
 		const struct bathos_ll_dev_ops *ops;
