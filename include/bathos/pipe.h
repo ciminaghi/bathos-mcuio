@@ -9,6 +9,7 @@
 
 #include <bathos/event.h>
 #include <bathos/bathos.h>
+#include <bathos/buffer.h>
 #include <linux/list.h>
 
 
@@ -67,6 +68,24 @@ int pipe_ioctl(struct bathos_pipe *, struct bathos_ioctl_data *data);
 void __pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt,
 			      int immediate);
 
+#ifdef CONFIG_PIPE_ASYNC_INTERFACE
+
+struct bathos_bdescr *pipe_async_get_buf(struct bathos_pipe *);
+int pipe_async_start(struct bathos_pipe *);
+
+#else /* !CONFIG_PIPE_ASYNC_INTERFACE */
+
+static inline struct bathos_bdescr *pipe_async_get_buf(struct bathos_pipe *p)
+{
+	return NULL;
+}
+
+static inline int pipe_async_start(struct bathos_pipe *p)
+{
+	return -ENOSYS;
+}
+#endif /* !CONFIG_PIPE_ASYNC_INTERFACE */
+
 static inline void
 pipe_dev_trigger_event(struct bathos_dev *dev, const struct event *evt)
 {
@@ -104,6 +123,11 @@ pipe_remap_buffer_processed_event(struct bathos_pipe *pipe,
 				  const struct event * PROGMEM e)
 {
 	pipe->buffer_processed_event = e;
+}
+
+static inline int pipe_mode_is_async(struct bathos_pipe *pipe)
+{
+	return pipe->mode & BATHOS_MODE_ASYNC;
 }
 
 declare_extern_event(input_pipe_opened);
