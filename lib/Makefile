@@ -3,6 +3,7 @@
 
 LIBBATHOS = lib/libbathos.a
 LIB_OBJS += lib/pipe.o
+LIB_OBJS += lib/buffer_queue.o
 LIB_OBJS += lib/string.o
 LIB_OBJS += lib/stdio.o
 LIB_OBJS += lib/stdlib.o
