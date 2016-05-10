@@ -10,6 +10,7 @@
 #define __BATHOS_DEV_OPS_H__
 
 #include <bathos/pipe.h>
+#include <bathos/buffer.h>
 #include <arch/bathos-arch.h>
 
 /*
@@ -34,6 +35,7 @@
  * @tx_disable: low level tx disable
  * @tx_enable: low level tx enable
  * @ioctl: low level ioctl
+ * @async_open: invoked on open in async mode
  *
  */
 struct bathos_ll_dev_ops {
@@ -45,6 +47,7 @@ struct bathos_ll_dev_ops {
 	int (*tx_disable)(void *priv);
 	int (*tx_enable)(void *priv);
 	int (*ioctl)(void *priv, struct bathos_ioctl_data *data);
+	int (*async_open)(void *priv);
 };
 
 struct bathos_dev_data;
@@ -74,6 +77,26 @@ bathos_dev_init(const struct bathos_ll_dev_ops * PROGMEM ops, void *priv);
  * Returns 0 on success, errno on error.
  */
 int bathos_dev_push_chars(struct bathos_dev *dev, const char *buf, int len);
+
+#ifdef CONFIG_PIPE_ASYNC_INTERFACE
+
+/* Get pointer to buffer queue */
+struct bathos_bqueue *bathos_dev_get_bqueue(struct bathos_pipe *pipe);
+
+void *bathos_bqueue_to_ll_priv(struct bathos_bqueue *q);
+
+#else /* !CONFIG_PIPE_ASYNC_INTERFACE */
+
+static inline struct bathos_bqueue *bathos_dev_get_bqueue(struct bathos_pipe *p)
+{
+	return NULL;
+}
+
+static inline void *bathos_bqueue_to_ll_priv(struct bathos_bqueue *q)
+{
+	return NULL;
+}
+#endif /* !CONFIG_PIPE_ASYNC_INTERFACE */
 
 /*
  * The following functions can be used as device methods for a generic device
