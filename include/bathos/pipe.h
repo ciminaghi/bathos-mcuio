@@ -46,6 +46,8 @@ struct bathos_pipe {
 	void *data;
 	const struct event *input_ready_event;
 	const struct event *output_ready_event;
+	const struct event *buffer_available_event;
+	const struct event *buffer_processed_event;
 	struct bathos_dev *dev;
 	/* list of pipes related to the same device */
 	struct list_head list;
@@ -90,10 +92,26 @@ static inline void pipe_remap_output_ready_event(struct bathos_pipe *pipe,
 	pipe->output_ready_event = e;
 }
 
+static inline void
+pipe_remap_buffer_available_event(struct bathos_pipe *pipe,
+				  const struct event * PROGMEM e)
+{
+	pipe->buffer_available_event = e;
+}
+
+static inline void
+pipe_remap_buffer_processed_event(struct bathos_pipe *pipe,
+				  const struct event * PROGMEM e)
+{
+	pipe->buffer_processed_event = e;
+}
+
 declare_extern_event(input_pipe_opened);
 declare_extern_event(output_pipe_opened);
 declare_extern_event(pipe_input_ready);
 declare_extern_event(pipe_output_ready);
 declare_extern_event(pipe_error);
+declare_extern_event(pipe_buffer_available);
+declare_extern_event(pipe_buffer_processed);
 
 #endif /* __PIPE_H__ */
