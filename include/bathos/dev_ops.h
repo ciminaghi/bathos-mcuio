@@ -34,19 +34,6 @@ struct dev_ioc_set_bqueue_data {
 };
 
 /*
- * struct dev_ioc_set_rx_sync_seq_data
- *
- * Data for DEV_IOC_SET_RX_SYNC_SEQ
- *
- * @seq: pointer to sequence
- * @seqsize: size of sequence in bytes
- */
-struct dev_ioc_set_rx_sync_seq_data {
-	const char *seq;
-	int seqsize;
-};
-
-/*
  * ioctl codes
  */
 /* set rx high watermark */
