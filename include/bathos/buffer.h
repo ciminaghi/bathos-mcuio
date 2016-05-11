@@ -39,6 +39,40 @@ struct bathos_bdescr {
 	struct list_head		list;
 };
 
+enum bathos_buffer_op_type {
+	NONE = 0,
+	SEND = 1,
+	RECV = 2,
+};
+
+enum bathos_buffer_op_address_type {
+	/* local copy, for instance DMA, fixed destination or source */
+	LOCAL_MEMORY_NOINC = 1,
+	/* local copy, for instance DMA, src or dst address to be incremented */
+	LOCAL_MEMORY_INC = 2,
+	/* send to/recv from remote mac address */
+	REMOTE_MAC = 3,
+};
+
+struct bathos_buffer_op_address {
+	enum bathos_buffer_op_address_type type;
+	unsigned int length;
+	unsigned char val[8];
+};
+
+/*
+ * This describes an operation on a bathos buffer. Note that the buffer is
+ * part of the structure, so we can derive a pointer to the operation given
+ * the address of its operand (via container_of).
+ */
+struct bathos_buffer_op {
+	enum bathos_buffer_op_type type;
+	struct bathos_buffer_op_address addr;
+	struct bathos_bdescr operand;
+};
+
+#define to_operation(b) container_of(b, struct bathos_buffer_op, operand)
+
 static inline int bdescr_error(struct bathos_bdescr *b)
 {
 	return b->error;
