@@ -7,8 +7,10 @@
 #include <bathos/bathos.h>
 #include <bathos/errno.h>
 #include <bathos/pipe.h>
+#include <bathos/buffer_queue.h>
 #include <bathos/string.h>
 #include <bathos/allocator.h>
+#include <bathos/dev_ops.h>
 
 extern struct bathos_dev bathos_devices_start[], bathos_devices_end[];
 
@@ -198,6 +200,28 @@ int pipe_ioctl(struct bathos_pipe *pipe, struct bathos_ioctl_data *data)
 	bathos_errno = stat < 0 ? -stat : 0;
 	return stat;
 }
+
+#ifdef CONFIG_PIPE_ASYNC_INTERFACE
+
+struct bathos_bdescr *pipe_async_get_buf(struct bathos_pipe *pipe)
+{
+	return bathos_bqueue_get_buf(bathos_dev_get_bqueue(pipe));
+}
+
+int pipe_async_start(struct bathos_pipe *pipe)
+{
+	int stat;
+	struct bathos_bqueue *q = bathos_dev_get_bqueue(pipe);
+
+	/* Init client side of buffer queue and start queue */
+	stat = bathos_bqueue_client_init(q, pipe->buffer_available_event,
+					 pipe->buffer_processed_event);
+	if (stat < 0)
+		return stat;
+	return bathos_bqueue_start(q);
+}
+
+#endif /* CONFIG_PIPE_ASYNC_INTERFACE */
 
 static void do_free_pipe(struct event_handler_data *data)
 {
