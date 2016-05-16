@@ -56,6 +56,12 @@ config INTERRUPT_EVENTS
        default y if ARCH_ARM
        default n
 
+config PIPE_ASYNC_INTERFACE
+       bool "Async interface for pipes"
+       default y if ARCH_ARM
+       default y if ARCH_XTENSA
+       default n
+
 config HAVE_RELOCATE_INTERRUPT_TABLE
        bool
        default n
