@@ -55,14 +55,14 @@ all: check_src_dir do_all
 external_tree:
 	cp Makefile Makefile.kconfig $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)/tasks
-	for d in lib drivers pp_printf $(wildcard arch-*) mcuio ; do \
+	for d in lib drivers pp_printf $(wildcard arch-*) mcuio lininoio ; do \
 		for dd in $$(find $$d -type d) ; do  \
 			mkdir -p $(BUILD_DIR)/$$dd ; \
 		done ; \
 		cp $$d/Makefile $(BUILD_DIR)/$$d ; \
 	done
 	cp Kconfig $(BUILD_DIR)/
-	for d in lib drivers pp_printf $(wildcard arch-*) tasks mcuio ; do \
+	for d in lib drivers pp_printf $(wildcard arch-*) tasks mcuio lininoio ; do \
 		for f in $$(find $$d -name Kconfig\* -or -name \*.lds) ; do \
 			echo cp $$f $(BUILD_DIR)/$$f ; \
 			cp $$f $(BUILD_DIR)/$$f ; \
@@ -149,6 +149,9 @@ include lib/Makefile
 # Include mcuio stuff
 include mcuio/Makefile
 
+# Include lininoio stuff
+include lininoio/Makefile
+
 # As the system goes larger, we need libgcc to resolve missing symbols
 LDFLAGS += $(shell $(CC) $(CFLAGS) --print-libgcc-file-name)
 
@@ -188,7 +191,7 @@ bathos.o: silentoldconfig $(obj-y) $(ARCH_EXTRA) events.lds
 
 events.lds:
 	$(SCRIPTS)/evt_ldsgen $@ $(SRC_DIR) $(SRC_DIR)/lib/ $(SRC_DIR)/$(ADIR) \
-	$(SRC_DIR)/$(MACH_DIR) $(SRC_DIR)/tasks $(SRC_DIR)/tasks-$(ARCH) $(SRC_DIR)/drivers/ $(SRC_DIR)/mcuio
+	$(SRC_DIR)/$(MACH_DIR) $(SRC_DIR)/tasks $(SRC_DIR)/tasks-$(ARCH) $(SRC_DIR)/drivers/ $(SRC_DIR)/mcuio $(SRC_DIR)/lininoio
 
 version_data.o:
 	export SCRIPTS=$(SCRIPTS) CC=$(CC) OBJDUMP=$(OBJDUMP) \

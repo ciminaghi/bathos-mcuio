@@ -49,6 +49,9 @@ SECTIONS
 		mcuio_functions_start = .;
 		*(.mcuio_functions);
 		mcuio_functions_end = .;
+		lininoio_channels_start = .;
+		*(.lininoio_channels);
+		lininoio_channels_end = .;
 
 		INCLUDE events.lds
 	}

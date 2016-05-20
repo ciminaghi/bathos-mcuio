@@ -255,3 +255,5 @@ config HZ
    source "tasks/Kconfig"
 
    source "mcuio/Kconfig"
+
+   source "lininoio/Kconfig"

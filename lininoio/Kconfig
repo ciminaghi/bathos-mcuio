@@ -1,0 +1,38 @@
+menu "LININOIO protocol"
+
+config TASK_LININOIO
+       prompt "Lininoio protocol implementation"
+       depends on PIPE_ASYNC_INTERFACE
+       bool
+       help
+	 Enable LININOIO protocol implementation. This is a transport level
+	 protocol, typically used on network devices. It can multiplex
+	 multiple mcuio connections, binary data channels and more stuff.
+
+config LININOIO_PIPE_PATH
+       prompt "Path of input pipe for lininoio protocol"
+       depends on TASK_LININOIO
+       string
+       default "wlan0" if ARCH=xtensa
+       default "eth0"
+       help
+         Path of I/O path for lininoIO (must have an async interface)
+
+config LININOIO_SLAVE_NAME
+       prompt "Name of lininoio slave node"
+       depends on TASK_LININOIO
+       string
+       default "lininoio-slave"
+       help
+         Name of lininoio slave node"
+
+config LININOIO_RX_BUFFERS
+       prompt "Number of lininoio outstanding rx buffers"
+       depends on TASK_LININOIO
+       int
+       default 2
+       help
+	 Number of buffers in rx queue
+
+endmenu
+
