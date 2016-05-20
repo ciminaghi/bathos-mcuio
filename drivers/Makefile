@@ -48,6 +48,10 @@ ifeq ($(CONFIG_ESP8266_DRIVERS), y)
   DRV_OBJS += drivers/esp8266-uart.o
 endif
 
+ifeq ($(CONFIG_LININOIO_DRIVERS), y)
+  DRV_OBJS += drivers/lininoio-dev.o
+endif
+
 DRV_OBJS += drivers/radio-bridge-master.o
 DRV_OBJS += drivers/radio-bridge-slave.o
 
