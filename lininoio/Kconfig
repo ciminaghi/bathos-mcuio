@@ -3,6 +3,7 @@ menu "LININOIO protocol"
 config TASK_LININOIO
        prompt "Lininoio protocol implementation"
        depends on PIPE_ASYNC_INTERFACE
+       select LININOIO_DRIVERS
        bool
        help
 	 Enable LININOIO protocol implementation. This is a transport level
