@@ -41,3 +41,5 @@ config USB_CONFIG_FILE
 config NRF5X_DRIVERS
        bool
 
+config LININOIO_DRIVERS
+       bool
