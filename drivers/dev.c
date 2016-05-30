@@ -62,6 +62,13 @@ struct bathos_bqueue *bathos_dev_get_bqueue(struct bathos_pipe *pipe)
 
 	return &data->bqueue;
 }
+
+void *bathos_bqueue_to_ll_priv(struct bathos_bqueue *q)
+{
+	struct bathos_dev_data *data =
+		container_of(q, struct bathos_dev_data, bqueue);
+	return data->ll_priv;
+}
 #endif
 
 struct bathos_dev_data *
@@ -126,13 +133,21 @@ int bathos_dev_open(struct bathos_pipe *pipe)
 	struct bathos_ll_dev_ops __ops;
 	int stat;
 
-	if (!data->d.cb.buf) {
-		stat = __allocate_internal_buf(data);
-		if (stat < 0)
+	ops = __get_ops(data, &__ops);
+	if (!pipe_mode_is_async(pipe)) {
+		if (!data->d.cb.buf) {
+			stat = __allocate_internal_buf(data);
+			if (stat < 0)
+				return stat;
+		}
+		data->d.cb.head = data->d.cb.tail = 0;
+	} else {
+		if (!ops->async_open)
+			return -EINVAL;
+		stat = ops->async_open(data->ll_priv);
+		if (stat)
 			return stat;
 	}
-	data->d.cb.head = data->d.cb.tail = 0;
-	ops = __get_ops(data, &__ops);
 	if (pipe->mode & BATHOS_MODE_INPUT) {
 		stat = ops->rx_enable(data->ll_priv);
 		if (stat)
