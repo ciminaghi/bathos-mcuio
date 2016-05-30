@@ -9,6 +9,7 @@
 #include <bathos/init.h>
 #include <bathos/event.h>
 #include <bathos/esp8266-uart.h>
+#include <bathos/esp8266-wlan.h>
 #include <bathos/dev_ops.h>
 #include <bathos/pipe.h>
 
@@ -40,3 +41,14 @@ void console_putc(int c)
 }
 #endif
 
+const struct esp8266_wlan_platform_data wlan0_pdata = {
+	.nbufs = 4,
+	.bufsize = 64,
+};
+
+static struct bathos_dev __wdev0
+__attribute__((section(".bathos_devices"), aligned(4), used)) = {
+	.name = "wlan0",
+	.ops = &esp8266_wlan_dev_ops,
+	.platform_data = &wlan0_pdata,
+};
