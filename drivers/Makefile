@@ -46,6 +46,7 @@ endif
 
 ifeq ($(CONFIG_ESP8266_DRIVERS), y)
   DRV_OBJS += drivers/esp8266-uart.o
+  DRV_OBJS += drivers/esp8266-wlan.o
 endif
 
 ifeq ($(CONFIG_LININOIO_DRIVERS), y)
