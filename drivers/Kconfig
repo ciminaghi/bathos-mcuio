@@ -1,3 +1,5 @@
+menu "Drivers configuration"
+
 config DEBUG_BITBANG
        bool "Debug bitbang driver"
        default n
@@ -58,3 +60,5 @@ config NRF5X_DRIVERS
 
 config LININOIO_DRIVERS
        bool
+
+endmenu
