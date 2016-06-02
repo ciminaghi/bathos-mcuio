@@ -9,5 +9,7 @@
 extern int lininoio_dev_input(const struct lininoio_channel *ch,
 			      void *buf, uint16_t len);
 
+declare_extern_event(lininoio_dev_chan_connected);
+
 #endif /* __LININOIO_DEV_H__ */
 

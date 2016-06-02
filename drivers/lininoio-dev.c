@@ -12,6 +12,7 @@
 #include <bathos/allocator.h>
 #include <bathos/lininoio-internal.h>
 #include <bathos/lininoio-dev.h>
+#include <bathos/event.h>
 #include <bathos/dev_ops.h>
 
 struct lininoio_dev_priv {
@@ -106,6 +107,8 @@ static int lininoio_dev_close(struct bathos_pipe *pipe)
 	if (priv->ninstances-- > 1)
 		return 0;
 
+	/* FIXME: stop async pipe ? */
+
 	/* Closing last instance */
 	bathos_free_buffer(priv, sizeof(*priv));
 	return 0;
@@ -128,4 +131,15 @@ int lininoio_dev_input(const struct lininoio_channel *ch,
 		return 0;
 	}
 	return bathos_dev_push_chars(dev, buf, len);
+}
+
+declare_event(lininoio_dev_chan_connected);
+
+int lininoio_dev_setup(const struct lininoio_channel *ch,
+		       struct lininoio_association_data *adata)
+{
+	struct bathos_dev *dev = ch->data->priv;
+
+	pipe_dev_trigger_event(dev, &event_name(lininoio_dev_chan_connected));
+	return 0;
 }
