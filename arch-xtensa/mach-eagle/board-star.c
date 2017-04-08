@@ -12,9 +12,11 @@
 #include <bathos/esp8266-wlan.h>
 #include <bathos/dev_ops.h>
 #include <bathos/pipe.h>
+#ifdef CONFIG_TASK_LININOIO
 #include <lininoio.h>
 #include <bathos/lininoio-internal.h>
 #include <bathos/lininoio-dev.h>
+#endif
 
 #define CONFIG_CONSOLE_UART0 1
 
@@ -56,6 +58,7 @@ __attribute__((section(".bathos_devices"), aligned(4), used)) = {
 	.platform_data = &wlan0_pdata,
 };
 
+#ifdef CONFIG_TASK_LININOIO
 /*
  * LininoIO raw channel
  */
@@ -71,3 +74,4 @@ static const struct lininoio_channel_ops cops = {
 static struct lininoio_channel_data cdata;
 
 declare_lininoio_channel(lininoio0, &cdescr, &cops, &cdata);
+#endif /* CONFIG_TASK_LININOIO */
