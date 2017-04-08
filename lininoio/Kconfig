@@ -35,5 +35,13 @@ config LININOIO_RX_BUFFERS
        help
 	 Number of buffers in rx queue
 
+config LININOIO_EXT_PACKAGE
+       prompt "Path of lininoio userspace source package"
+       depends on TASK_LININOIO
+       string
+       default "UNKNOWN-LININOIO-PATH"
+       help
+         Path of lininoio userspace source package"
+
 endmenu
 
