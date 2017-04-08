@@ -86,6 +86,13 @@ check_src_dir:
 	fi
 endif
 
+# LDFLAGS for generation of final relocatable (before final link)
+# This stuff may be overridden by arch Makefile
+BATHOS_FINAL_RELOCATABLE_LDFLAGS = -nostartfiles -nodefaultlibs
+BATHOS_LIBS = -L$(BUILD_DIR) -L$(BUILD_DIR)/lib/ -L$(BUILD_DIR)/$(ADIR) \
+-L$(BUILD_DIR)/drivers -Wl,--start-group -lbathos -larch -ldrivers \
+-Wl,--end-group
+
 ADIR = arch-$(ARCH)
 include $(ADIR)/Makefile
 
