@@ -13,7 +13,6 @@ HZ ?= $(patsubst "%",%,$(CONFIG_HZ))
 THOS_QUARTZ ?= $(patsubst "%",%,$(CONFIG_THOS_QUARTZ))
 SRC_DIR ?= $(shell pwd)
 BATHOS_GIT=$(shell export SRC_DIR=$(SRC_DIR) ; $(SCRIPTS)/get_version)
-EXTERNAL = n
 
 SCRIPTS:=$(SRC_DIR)/scripts
 
@@ -43,47 +42,10 @@ endif
 
 
 # First: the target. After that, we can include the arch Makefile
-ifeq ($(EXTERNAL),n)
 ifeq ($(CONFIG_RELOCATABLE_ONLY),y)
 all: bathos.o
 else # CONFIG_RELOCATABLE_ONLY
 all: bathos.bin bathos.hex
-endif
-else
-all: check_src_dir do_all
-
-external_tree:
-	cp Makefile Makefile.kconfig $(BUILD_DIR)
-	mkdir -p $(BUILD_DIR)/tasks
-	for d in lib drivers pp_printf $(wildcard arch-*) mcuio lininoio ; do \
-		for dd in $$(find $$d -type d) ; do  \
-			mkdir -p $(BUILD_DIR)/$$dd ; \
-		done ; \
-		cp $$d/Makefile $(BUILD_DIR)/$$d ; \
-	done
-	cp Kconfig $(BUILD_DIR)/
-	for d in lib drivers pp_printf $(wildcard arch-*) tasks mcuio lininoio ; do \
-		for f in $$(find $$d -name Kconfig\* -or -name \*.lds) ; do \
-			echo cp $$f $(BUILD_DIR)/$$f ; \
-			cp $$f $(BUILD_DIR)/$$f ; \
-		done ; \
-	done
-	rm -f $(BUILD_DIR)/scripts $(BUILD_DIR)/configs
-	ln -s $(SRC_DIR)/scripts $(BUILD_DIR)
-	ln -s $(SRC_DIR)/configs $(BUILD_DIR)
-
-do_all: external_tree
-	make -C $(BUILD_DIR) VPATH=$(SRC_DIR) EXTERNAL=n
-
-check_src_dir:
-	if [ -f $(SRC_DIR)/.config ] || \
-	[ -f $(SRC_DIR)/include/generated/autoconf.h ] || \
-	[ -n "$(find $(SRC_DIR) -name \*.o)" ] ; then \
-		{ echo Please clean src dir before building from external dir ;\
-		  exit 1 ; } \
-	else \
-		exit 0 ; \
-	fi
 endif
 
 # LDFLAGS for generation of final relocatable (before final link)
@@ -229,7 +191,6 @@ distclean: clean
 	rm -f .config include/generated/autoconf.h
 
 # following targets from Makefile.kconfig
-ifeq ($(EXTERNAL),n)
 silentoldconfig:
 	@mkdir -p include/config
 	$(MAKE) -f Makefile.kconfig $@
@@ -244,14 +205,6 @@ defconfig:
 	@echo "Using yun_defconfig"
 	@test -f $(BUILD_DIR)/.config || touch $(BUILD_DIR)/.config
 	@$(MAKE) -f Makefile.kconfig yun_defconfig
-else
-silentoldconfig scripts_basic config defconfig: check_src_dir external_tree
-	$(MAKE) -C $(BUILD_DIR) EXTERNAL=n $@
-
-%config: check_src_dir external_tree
-	$(MAKE) -C $(BUILD_DIR) EXTERNAL=n $@
-endif
-
 
 
 export CFLAGS LDFLAGS CROSS_COMPILE AS LD CPP AR NM STRIP OBJCOPY OBJDUMP \
