@@ -11,7 +11,6 @@ CROSS_COMPILE ?= $(patsubst "%",%,$(CONFIG_CROSS_COMPILE))
 MODE ?= $(patsubst "%",%,$(CONFIG_MEMORY_MODE))
 HZ ?= $(patsubst "%",%,$(CONFIG_HZ))
 THOS_QUARTZ ?= $(patsubst "%",%,$(CONFIG_THOS_QUARTZ))
-SRC_DIR ?= $(shell pwd)
 BATHOS_GIT=$(shell export SRC_DIR=$(SRC_DIR) ; $(SCRIPTS)/get_version)
 
 SCRIPTS:=$(SRC_DIR)/scripts
