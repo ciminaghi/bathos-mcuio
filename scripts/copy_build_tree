@@ -1,0 +1,31 @@
+#!/bin/sh
+#set -x
+# copy_build_tree: copies build tree to build dir
+# $1 -> src_dir
+# $2 -> build_dir
+
+[ $# -ge 2 ] || { echo "Use $0 <src_dir> <build_dir>" ; exit 127 ; }
+
+src_dir=$1
+build_dir=$2
+
+mkdir -p $build_dir
+
+first_level_subdirs="lib drivers pp_printf $(ls -d arch-* | tr '\n' ' ') mcuio lininoio tasks"
+src_subdirs=$(for d in $first_level_subdirs ; do find $src_dir/$d -type d ; done)
+src_subdirs_files=$(find $src_subdirs -name Makefile -or -name Kconfig\* \
+			 -or -name \*.lds)
+
+for d in $src_subdirs ; do
+    mkdir -p $build_dir/${d##$src_dir}
+done
+
+for f in $src_subdirs_files ; do
+    d=$(dirname $f)
+    cp $f $build_dir/${d##$src_dir}
+done
+
+cp $src_dir/Makefile.do_build $build_dir/Makefile
+cp $src_dir/Makefile.kconfig $build_dir/
+cp $src_dir/Kconfig* $src_dir/*.lds $build_dir/
+cp -a $src_dir/scripts $build_dir
