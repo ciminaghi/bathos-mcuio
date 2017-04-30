@@ -128,7 +128,9 @@ LDFLAGS += $(shell $(CC) $(CFLAGS) --print-libgcc-file-name)
 # live in tasks-$(ARCH), to allow similar but different implementations
 TOBJ := $(patsubst %, tasks/%, $(TASK-y))
 TOBJ := $(patsubst tasks/arch/%, tasks-$(ARCH)/%, $(TOBJ))
-VPATH := $(SRC_DIR)/lib:$(SRC_DIR)/tasks-$(ARCH)
+
+# Calculate VPATH now
+VPATH := $(SRC_DIR):$(SRC_DIR)/lib:$(SRC_DIR)/tasks-$(ARCH):$(USER_SRC_DIR)
 
 # Generic flags
 GENERIC_CFLAGS := -I$(SRC_DIR)/include -I$(BUILD_DIR)/include -I$(SRC_DIR)/$(ADIR) -g -Wall -ffreestanding -Os
