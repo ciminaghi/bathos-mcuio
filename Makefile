@@ -1,7 +1,6 @@
 # Main Makefile, sets up a build directory and uses it
 BUILD_DIR ?= $(shell pwd)/build
 SRC_DIR = $(shell pwd)
-USER_CONFIG_METHOD ?= menuconfig
 VPATH = $(SRC_DIR)
 SCRIPTS = $(SRC_DIR)/scripts
 
