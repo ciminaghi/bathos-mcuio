@@ -161,7 +161,7 @@ bathos.o: silentoldconfig $(obj-y) $(ARCH_EXTRA) $(BUILD_DIR)/events.lds
 
 $(BUILD_DIR)/events.lds: FORCE
 	$(SCRIPTS)/evt_ldsgen $@ $(SRC_DIR) $(SRC_DIR)/lib/ $(SRC_DIR)/$(ADIR) \
-	$(SRC_DIR)/$(MACH_DIR) $(SRC_DIR)/tasks $(SRC_DIR)/tasks-$(ARCH) $(SRC_DIR)/drivers/ $(SRC_DIR)/mcuio $(SRC_DIR)/lininoio
+	$(SRC_DIR)/$(MACH_DIR) $(SRC_DIR)/tasks $(SRC_DIR)/tasks-$(ARCH) $(SRC_DIR)/drivers/ $(SRC_DIR)/mcuio $(SRC_DIR)/lininoio $(USER_SRC_DIR)
 
 version_data.o:
 	export SCRIPTS=$(SCRIPTS) CC=$(CC) OBJDUMP=$(OBJDUMP) \
