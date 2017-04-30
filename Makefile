@@ -5,7 +5,11 @@ USER_CONFIG_METHOD ?= menuconfig
 VPATH = $(SRC_DIR)
 SCRIPTS = $(SRC_DIR)/scripts
 
-export VPATH SRC_DIR BUILD_DIR
+ifneq ($(USER_SRC_DIR),)
+VPATH += $(USER_SRC_DIR)
+endif
+
+export VPATH SRC_DIR BUILD_DIR obj-y USER_SRC_DIR
 
 ifeq ($(BUILD_DIR), $(shell pwd))
 error "BUILD_DIR MUST NOT BE THE SOURCE DIRECTORY"
