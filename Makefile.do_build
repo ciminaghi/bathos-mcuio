@@ -49,7 +49,6 @@ endif
 
 # LDFLAGS for generation of final relocatable (before final link)
 # This stuff may be overridden by arch Makefile
-BATHOS_FINAL_RELOCATABLE_LDFLAGS = -nostartfiles -nodefaultlibs
 BATHOS_LIBS = -L$(BUILD_DIR) -L$(BUILD_DIR)/lib/ -L$(BUILD_DIR)/$(ADIR) \
 -L$(BUILD_DIR)/drivers -Wl,--start-group -lbathos -larch -ldrivers \
 -Wl,--end-group
@@ -209,13 +208,6 @@ defconfig:
 	@test -f $(BUILD_DIR)/.config || touch $(BUILD_DIR)/.config
 	@$(MAKE) -f Makefile.kconfig yun_defconfig
 
-
-export CFLAGS LDFLAGS CROSS_COMPILE AS LD CPP AR NM STRIP OBJCOPY OBJDUMP \
-BATHOS_LIBS BATHOS_FINAL_RELOCATABLE_LDFLAGS
-
-# This is for external build
-$(BUILD_DIR)/bathos-ext.mk: external_tree
-	./scripts/gen_bathos_ext > $@
 
 .config: silentoldconfig
 
