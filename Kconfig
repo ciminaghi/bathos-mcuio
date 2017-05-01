@@ -46,10 +46,6 @@ config CROSS_COMPILE
        default "xtensa-lx106-elf-" if ARCH_XTENSA
        default ""
 
-config RELOCATABLE_ONLY
-       bool
-       default n
-
 config INTERRUPT_EVENTS
        bool
        default y if ARCH_ARM
