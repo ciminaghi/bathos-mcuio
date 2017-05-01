@@ -110,7 +110,7 @@ include mcuio/Makefile
 include lininoio/Makefile
 
 # As the system goes larger, we need libgcc to resolve missing symbols
-LDFLAGS += $(shell $(CC) $(CFLAGS) --print-libgcc-file-name)
+LIBGCC += $(shell $(CC) $(CFLAGS) --print-libgcc-file-name)
 
 
 # Task object files. All objects are placed in tasks/ but the source may
@@ -131,7 +131,7 @@ bathos.bin: bathos
 	$(OBJCOPY) -O binary $^ $@
 
 bathos: bathos.o
-	$(CC) bathos.o $(LDFLAGS) -o $@
+	$(CC) bathos.o $(LDFLAGS) -Wl,--start-group $(LIBARCH) $(LIBS) $(ARCH_EXTRA_LIBS) $(LIBGCC) -Wl,--end-group -o $@
 
 %.hex: %
 	$(OBJCOPY) -O ihex $^ $@
