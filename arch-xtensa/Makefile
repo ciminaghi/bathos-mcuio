@@ -1,6 +1,8 @@
 
 ARCH_CFLAGS = -Os -g -O2 -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals -D__ets__
 
+ARCH_LDFLAGS = -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static
+
 MACH_DIR = $(ADIR)/mach-$(shell echo $(CONFIG_MACH))
 
 ARCH_CFLAGS += -I$(SRC_DIR)/$(MACH_DIR) -DARCH_HAS_BUILTIN_FFS
