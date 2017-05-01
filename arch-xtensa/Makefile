@@ -15,6 +15,8 @@ IO_OBJ =
 LIBARCH = $(BUILD_DIR)/$(ADIR)/libarch.a
 LIBARCH_OBJS = $(ADIR)/init.o $(ADIR)/jiffies.o
 
+ARCH_EXTRA_LIBS = -lhal -lpp -lphy -lnet80211 -llwip -lwpa -lmain
+
 ifeq ($(CONFIG_BOARD_STAR_8266),y)
 LIBARCH_OBJS += $(MACH_DIR)/board-star.o
 endif

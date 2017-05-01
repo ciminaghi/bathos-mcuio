@@ -22,4 +22,4 @@ $(ADIR)/libarch.a: $(LIBARCH_OBJS)
 	$(AR) r $@ $(LIBARCH_OBJS)
 
 # We need librt for clock_gettime. Bah.
-LDFLAGS += -lrt -lpthread -lc
+ARCH_EXTRA_LIBS = -lrt -lpthread -lc
